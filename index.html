@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>업무분장 자동배정 | 초등학교 전용</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+<style>
+:root {
+  --primary:#1d4ed8; --primary-light:#dbeafe; --primary-dark:#1e3a8a;
+  --success:#15803d; --danger:#dc2626; --warning:#d97706;
+  --bg:#eef2f7; --card:#fff; --border:#dde3ea;
+  --text:#1a2332; --muted:#5a6a7a; --radius:14px;
+  --fs-xs:14px; --fs-sm:16px; --fs-md:18px; --fs-lg:21px; --fs-xl:26px; --fs-2xl:32px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;font-size:var(--fs-sm);
+  line-height:1.65;-webkit-font-smoothing:antialiased;
+}
+.app-header{
+  background:var(--primary-dark);color:#fff;
+  padding:16px 22px;display:flex;align-items:center;gap:12px;
+  box-shadow:0 2px 12px rgba(30,58,138,.35);
+}
+.app-header h1{font-size:var(--fs-md);font-weight:700;flex:1;letter-spacing:-.3px;}
+.app-header .sub{font-size:var(--fs-xs);opacity:.65;margin-top:1px;}
+.container{max-width:960px;margin:0 auto;padding:22px 18px;}
+.screen{display:none;} .screen.active{display:block;}
+.card{
+  background:var(--card);border-radius:var(--radius);
+  box-shadow:0 2px 10px rgba(0,0,0,.07);
+  padding:24px;margin-bottom:18px;
+}
+.card-title{font-size:var(--fs-md);font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:12px 20px;border:none;border-radius:10px;
+  font-size:var(--fs-sm);font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.btn:hover{filter:brightness(.92);}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-success{background:var(--success);color:#fff;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-warning{background:var(--warning);color:#fff;}
+.btn-ghost{background:#f0f4f8;color:var(--text);border:1.5px solid var(--border);}
+.btn-sm{padding:8px 14px;font-size:var(--fs-xs);border-radius:8px;}
+.btn-full{width:100%;justify-content:center;margin-bottom:10px;}
+input[type=text],input[type=password],select,textarea{
+  width:100%;padding:13px 15px;
+  border:1.5px solid var(--border);border-radius:10px;
+  font-size:var(--fs-sm);font-family:inherit;
+  background:#fff;margin-bottom:12px;transition:border-color .2s;
+}
+input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(29,78,216,.1);}
+label{font-size:var(--fs-xs);font-weight:700;color:var(--muted);display:block;margin-bottom:5px;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:var(--fs-xs);font-weight:700;}
+.badge-blue{background:#dbeafe;color:#1d4ed8;}
+.badge-green{background:#dcfce7;color:#15803d;}
+.badge-orange{background:#ffedd5;color:#c2410c;}
+.badge-red{background:#fee2e2;color:#b91c1c;}
+.badge-gray{background:#f0f4f8;color:#475569;}
+.badge-purple{background:#ede9fe;color:#6d28d9;}
+.badge-yellow{background:#fef9c3;color:#92400e;}
+.flex-row{display:flex;gap:10px;align-items:flex-start;} .flex-row>*{flex:1;}
+hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
+.sec-label{
+  font-size:var(--fs-xs);font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.6px;
+  margin:16px 0 9px;display:flex;align-items:center;gap:7px;
+}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.steps{display:flex;gap:4px;margin-bottom:20px;overflow-x:auto;padding-bottom:2px;}
+.step{
+  flex:1;min-width:64px;text-align:center;
+  font-size:var(--fs-xs);font-weight:700;
+  padding:9px 4px;border-radius:8px;
+  background:#e4e9f0;color:var(--muted);white-space:nowrap;
+}
+.step.active{background:var(--primary);color:#fff;}
+.step.done{background:#dcfce7;color:#15803d;}
+.group-item{
+  display:flex;align-items:center;gap:10px;
+  padding:13px 15px;border:1.5px solid var(--border);
+  border-radius:10px;margin-bottom:9px;background:#fff;
+}
+.group-color-dot{width:18px;height:18px;border-radius:50%;flex-shrink:0;}
+.group-info{flex:1;}
+.group-name{font-weight:700;font-size:var(--fs-sm);}
+.group-meta{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
+.color-picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.color-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s;}
+.color-swatch.sel{border-color:#1e293b;transform:scale(1.2);}
+.member-item{
+  display:flex;align-items:center;gap:10px;
+  padding:13px 15px;background:#f8fafc;
+  border-radius:10px;border:1.5px solid var(--border);margin-bottom:8px;
+}
+.member-avatar{
+  width:42px;height:42px;border-radius:50%;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:var(--fs-md);flex-shrink:0;
+}
+.member-info{flex:1;}
+.member-name{font-weight:700;font-size:var(--fs-sm);}
+.member-meta{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
+.load-bar-wrap{height:4px;background:#e2e8f0;border-radius:2px;margin-top:4px;}
+.load-bar{height:4px;border-radius:2px;background:var(--primary);transition:width .3s;}
+.load-bar.over{background:var(--danger);}
+.task-pool{
+  display:flex;flex-wrap:wrap;gap:7px;min-height:55px;
+  padding:12px;background:#f8fafc;border-radius:10px;
+  border:2px dashed var(--border);transition:border-color .2s;
+}
+.task-pool.drag-over{border-color:var(--primary);background:var(--primary-light);}
+.task-pool.fixed-pool{background:#faf5ff;border-color:#c4b5fd;}
+.task-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 13px;border-radius:20px;font-size:var(--fs-xs);
+  font-weight:700;cursor:grab;user-select:none;
+  border:1.5px solid transparent;transition:all .15s;
+  background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1);
+}
+.task-tag:active{cursor:grabbing;opacity:.6;}
+.task-tag.w1{border-color:#86efac;color:#15803d;}
+.task-tag.w2{border-color:#93c5fd;color:#1d4ed8;}
+.task-tag.w3{border-color:#fcd34d;color:#92400e;}
+.task-tag.w4{border-color:#fb923c;color:#c2410c;}
+.task-tag.w5{border-color:#f87171;color:#b91c1c;background:#fff1f2;}
+.task-tag.fixed-task{border-style:dashed!important;opacity:.85;}
+.task-tag .del-btn{font-size:16px;line-height:1;opacity:.35;cursor:pointer;}
+.task-tag .del-btn:hover{opacity:1;}
+.assign-grid{display:grid;gap:14px;}
+.assign-card{
+  background:#fff;border:2px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;transition:border-color .2s;
+}
+.assign-card.drag-over{border-color:var(--primary);}
+.assign-card-header{
+  padding:12px 15px;border-bottom:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.assign-card-body{padding:11px 13px;min-height:52px;display:flex;flex-wrap:wrap;gap:6px;}
+.result-table{width:100%;border-collapse:collapse;font-size:var(--fs-xs);}
+.result-table th{
+  background:var(--primary);color:#fff;
+  padding:11px 13px;text-align:left;font-size:var(--fs-sm);
+}
+.result-table td{padding:11px 13px;border-bottom:1px solid var(--border);vertical-align:top;}
+.result-table tr:hover td{background:#f8fafc;}
+.task-chips{display:flex;flex-wrap:wrap;gap:4px;}
+.task-chip{
+  display:inline-block;padding:3px 9px;border-radius:10px;
+  font-size:var(--fs-xs);background:var(--primary-light);
+  color:var(--primary);font-weight:700;
+}
+.task-chip.primary-chip{background:#dcfce7;color:#15803d;}
+.task-chip.fixed-chip{background:#ede9fe;color:#6d28d9;}
+.affinity-item{border:1.5px solid var(--border);border-radius:12px;padding:15px;margin-bottom:10px;background:#fff;}
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.cat-chip{
+  padding:6px 13px;border-radius:18px;font-size:var(--fs-xs);
+  font-weight:700;cursor:pointer;border:2px solid var(--border);
+  background:#f8fafc;color:var(--muted);transition:all .15s;user-select:none;
+}
+.cat-chip.sel{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
+.role-tag{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 10px;
+  border-radius:10px;background:#dbeafe;color:#1d4ed8;
+  font-size:var(--fs-xs);font-weight:700;
+}
+.role-tag .rm{cursor:pointer;opacity:.6;font-size:15px;}
+.role-tag .rm:hover{opacity:1;}
+.cat-map-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 11px;border-bottom:1px solid var(--border);font-size:var(--fs-sm);
+}
+.cat-map-row:last-child{border-bottom:none;}
+.cat-map-row select{flex:1;margin-bottom:0;padding:7px 10px;font-size:var(--fs-xs);}
+.warn-box{
+  background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;
+  padding:12px 15px;font-size:var(--fs-sm);color:#92400e;
+  margin-bottom:12px;display:none;
+}
+.warn-box.show{display:block;}
+.weight-sel{display:flex;gap:6px;margin-bottom:10px;}
+.w-btn{
+  flex:1;padding:9px 4px;border:2px solid var(--border);
+  border-radius:8px;background:#fff;font-size:var(--fs-xs);
+  font-weight:700;font-family:inherit;cursor:pointer;text-align:center;transition:all .15s;
+}
+.w-btn[data-w="1"]{color:#15803d;} .w-btn[data-w="1"].sel{background:#dcfce7;border-color:#86efac;}
+.w-btn[data-w="2"]{color:#1d4ed8;} .w-btn[data-w="2"].sel{background:#dbeafe;border-color:#93c5fd;}
+.w-btn[data-w="3"]{color:#92400e;} .w-btn[data-w="3"].sel{background:#fef9c3;border-color:#fcd34d;}
+.w-btn[data-w="4"]{color:#c2410c;} .w-btn[data-w="4"].sel{background:#ffedd5;border-color:#fb923c;}
+.w-btn[data-w="5"]{color:#b91c1c;} .w-btn[data-w="5"].sel{background:#fee2e2;border-color:#f87171;}
+.type-toggle{
+  display:flex;border:1.5px solid var(--border);
+  border-radius:10px;overflow:hidden;margin-bottom:10px;
+}
+.type-toggle button{
+  flex:1;padding:10px;border:none;background:#f8fafc;
+  font-size:var(--fs-xs);font-weight:700;font-family:inherit;
+  cursor:pointer;color:var(--muted);transition:all .15s;
+}
+.type-toggle button.act-auto{background:var(--primary);color:#fff;}
+.type-toggle button.act-fixed{background:#7c3aed;color:#fff;}
+.p-badge{font-size:12px;padding:2px 8px;border-radius:8px;font-weight:700;}
+.p1{background:#fee2e2;color:#b91c1c;} .p2{background:#ffedd5;color:#c2410c;}
+.p3{background:#fef9c3;color:#92400e;} .p4{background:#dcfce7;color:#15803d;}
+.p5{background:#f0f4f8;color:#64748b;}
+#toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#1a2332;color:#fff;
+  padding:13px 24px;border-radius:28px;
+  font-size:var(--fs-sm);font-weight:700;
+  opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.watermark{
+  position:fixed;bottom:10px;right:14px;font-size:10px;
+  color:transparent;text-shadow:0 0 0 #dde3ea;
+  user-select:none;cursor:default;z-index:1000;
+}
+
+/* ══════════════════════
+   홈 전용 디자인
+══════════════════════ */
+.home-wrap{padding-top:4px;}
+
+.hero-section{
+  background:#1a2332;
+  border-radius:22px;padding:34px 28px 28px;
+  margin-bottom:22px;color:#fff;
+  position:relative;overflow:hidden;
+}
+.hero-section::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:36px 36px;pointer-events:none;
+}
+.hero-section::after{
+  content:'';position:absolute;top:-70px;right:-70px;
+  width:240px;height:240px;border-radius:50%;
+  background:radial-gradient(circle,rgba(29,78,216,.45),transparent 68%);
+  pointer-events:none;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:22px;padding:6px 16px;
+  font-size:var(--fs-xs);font-weight:700;
+  margin-bottom:18px;letter-spacing:.3px;position:relative;
+}
+.hero-badge-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#4ade80;box-shadow:0 0 7px #4ade80;
+  animation:blink 2s infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.hero-title{
+  font-size:var(--fs-2xl);font-weight:900;
+  line-height:1.2;margin-bottom:14px;
+  letter-spacing:-1.2px;position:relative;
+}
+.hero-title em{
+  font-style:normal;
+  background:linear-gradient(90deg,#60a5fa,#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-desc{
+  font-size:var(--fs-sm);opacity:.72;
+  line-height:1.8;margin-bottom:22px;position:relative;
+}
+.hero-features{display:flex;gap:9px;flex-wrap:wrap;position:relative;}
+.hero-feat{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:22px;padding:7px 16px;
+  font-size:var(--fs-xs);font-weight:700;
+  transition:background .2s;
+}
+.hero-feat:hover{background:rgba(255,255,255,.14);}
+.hero-credit{
+  margin-top:20px;padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.07);
+  font-size:11px;color:rgba(255,255,255,.18);
+  text-align:right;letter-spacing:.4px;position:relative;
+}
+
+.role-section{margin-bottom:22px;}
+.role-label{
+  font-size:var(--fs-sm);font-weight:700;color:var(--muted);
+  text-align:center;margin-bottom:14px;
+}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.role-card{
+  border:none;border-radius:18px;padding:0;cursor:pointer;
+  text-align:left;transition:all .22s;
+  box-shadow:0 4px 16px rgba(0,0,0,.1);
+}
+.role-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(0,0,0,.15);}
+.role-card:active{transform:translateY(-1px);}
+.role-card-inner{padding:24px 20px;border-radius:18px;height:100%;}
+.role-admin .role-card-inner{
+  background:linear-gradient(150deg,#1e3a8a 0%,#1d4ed8 100%);
+  color:#fff;
+}
+.role-viewer .role-card-inner{
+  background:#fff;border:2px solid var(--border);color:var(--text);
+}
+.role-viewer:hover .role-card-inner{border-color:var(--primary);}
+.role-icon{font-size:36px;margin-bottom:12px;line-height:1;}
+.role-title{font-size:var(--fs-lg);font-weight:900;margin-bottom:6px;letter-spacing:-.3px;}
+.role-desc{font-size:var(--fs-xs);line-height:1.65;margin-bottom:14px;opacity:.72;}
+.role-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.role-admin .role-tags span{
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);
+  border-radius:10px;padding:4px 10px;font-size:12px;font-weight:700;
+}
+.role-viewer .role-tags span{
+  background:#f0f4f8;border:1px solid var(--border);
+  border-radius:10px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--muted);
+}
+.role-cta{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:var(--fs-xs);font-weight:700;
+}
+.role-admin .role-cta{color:rgba(255,255,255,.65);}
+.role-viewer .role-cta{color:var(--primary);}
+.role-cta-arrow{font-size:20px;font-weight:900;}
+
+.guide-section{
+  background:#fff;border-radius:16px;
+  border:1.5px solid var(--border);
+  padding:20px 22px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+.guide-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.guide-header-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--primary-light);color:var(--primary);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.guide-header-text{font-size:var(--fs-md);font-weight:700;}
+.guide-header-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:1px;}
+.guide-steps{display:flex;align-items:stretch;overflow-x:auto;}
+.guide-step{
+  flex:1;min-width:84px;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:10px 8px;position:relative;
+}
+.guide-step:not(:last-child)::after{
+  content:'›';position:absolute;right:-6px;top:14px;
+  font-size:22px;color:var(--border);font-weight:900;
+}
+.guide-num{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--primary);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:var(--fs-xs);font-weight:900;
+  margin-bottom:8px;flex-shrink:0;
+  box-shadow:0 3px 10px rgba(29,78,216,.3);
+}
+.guide-text{font-size:13px;line-height:1.45;color:var(--muted);}
+.guide-text strong{color:var(--primary);display:block;font-size:var(--fs-xs);font-weight:700;}
+
+@media(min-width:600px){
+  .assign-grid{grid-template-columns:1fr 1fr;}
+  .hero-title{font-size:38px;}
+}
+@media(max-width:479px){
+  .role-grid{grid-template-columns:1fr;}
+  .hero-title{font-size:var(--fs-xl);}
+  .guide-step{min-width:72px;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header" id="main-header" style="display:none;">
+  <span style="font-size:22px;">📋</span>
+  <div><h1 id="app-title">업무분장 자동배정</h1><div class="sub">학교 업무분장 관리 시스템</div></div>
+  <button class="btn btn-ghost btn-sm" id="header-back" onclick="goHome()" style="display:none;">← 홈</button>
+</div>
+
+<div class="container">
+
+<!-- 홈 -->
+<div id="screen-home" class="screen active">
+<div class="home-wrap">
+
+  <!-- 히어로 -->
+  <div class="hero-section">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      🏫 초등학교 업무분장 전용
+    </div>
+    <h2 class="hero-title">업무분장,<br><em>이제 자동으로</em><br>공평하게</h2>
+    <p class="hero-desc">
+      담당자 그룹·가중치·친화도를 설정하면<br>
+      관련 업무를 자동으로 균등 배정합니다.
+    </p>
+    <div class="hero-features">
+      <div class="hero-feat"><span>⚡</span><span>자동 배정</span></div>
+      <div class="hero-feat"><span>🎯</span><span>친화도 매핑</span></div>
+      <div class="hero-feat"><span>⚖️</span><span>가중치 균형</span></div>
+      <div class="hero-feat"><span>📥</span><span>엑셀 출력</span></div>
+      <div class="hero-feat"><span>🔗</span><span>결과 공유</span></div>
+    </div>
+    <div class="hero-credit">2026 최창훈</div>
+  </div>
+
+  <!-- 역할 선택 -->
+  <div class="role-section">
+    <div class="role-label">어떤 역할로 접속하시나요?</div>
+    <div class="role-grid">
+      <button class="role-card role-admin" onclick="showScreen('screen-host-menu')">
+        <div class="role-card-inner">
+          <div class="role-icon">👑</div>
+          <div class="role-title">관리자</div>
+          <div class="role-desc">업무분장을 직접<br>설정하고 배정합니다</div>
+          <div class="role-tags">
+            <span>그룹 생성</span><span>자동 배정</span><span>엑셀 저장</span>
+          </div>
+          <div class="role-cta">
+            <span>시작하기</span>
+            <span class="role-cta-arrow">→</span>
+          </div>
+        </div>
+      </button>
+      <button class="role-card role-viewer" onclick="showScreen('screen-user-login')">
+        <div class="role-card-inner">
+          <div class="role-icon">👀</div>
+          <div class="role-title">교직원</div>
+          <div class="role-desc">배정된 업무분장<br>결과를 확인합니다</div>
+          <div class="role-tags">
+            <span>코드로 열람</span><span>링크로 접속</span>
+          </div>
+          <div class="role-cta">
+            <span>결과 보기</span>
+            <span class="role-cta-arrow">→</span>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- 처음 사용 안내 -->
+  <div class="guide-section">
+    <div class="guide-header">
+      <div class="guide-header-icon">📌</div>
+      <div>
+        <div class="guide-header-text">처음 사용하시나요?</div>
+        <div class="guide-header-sub">아래 4단계로 업무분장을 완성하세요</div>
+      </div>
+    </div>
+    <div class="guide-steps">
+      <div class="guide-step">
+        <div class="guide-num">1</div>
+        <div class="guide-text"><strong>관리자 접속</strong>그룹 생성 후 로그인</div>
+      </div>
+      <div class="guide-step">
+        <div class="guide-num">2</div>
+        <div class="guide-text"><strong>설정</strong>담당자·업무·친화도</div>
+      </div>
+      <div class="guide-step">
+        <div class="guide-num">3</div>
+        <div class="guide-text"><strong>자동배정</strong>실행 후 조정</div>
+      </div>
+      <div class="guide-step">
+        <div class="guide-num">4</div>
+        <div class="guide-text"><strong>완료</strong>엑셀 저장 후 공유</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- 관리자 메뉴 -->
+<div id="screen-host-menu" class="screen">
+  <div class="card">
+    <div class="card-title">👑 관리자 메뉴</div>
+    <button class="btn btn-primary btn-full" onclick="showScreen('screen-host-create')">✨ 새 업무분장 그룹 만들기</button>
+    <button class="btn btn-ghost btn-full" onclick="showScreen('screen-host-login')">🔒 기존 그룹 관리 (로그인)</button>
+    <button class="btn btn-ghost btn-full" onclick="goHome()">← 처음으로</button>
+  </div>
+</div>
+
+<!-- 그룹 생성 -->
+<div id="screen-host-create" class="screen">
+  <div class="card">
+    <div class="card-title">✨ 새 그룹 생성</div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:12px;color:#1e40af;margin-bottom:12px;">
+      ℹ️ 생성 시 <strong>6자리 고유 코드</strong>가 자동 발급됩니다. 같은 학교명이 있어도 코드가 달라 충돌이 없습니다.
+    </div>
+    <label>학교명 (표시용)</label>
+    <input type="text" id="create-group-name" placeholder="예: 운남초등학교_2026">
+    <label>관리자 비밀번호</label>
+    <input type="password" id="create-password" placeholder="비밀번호 설정">
+    <button class="btn btn-success btn-full" onclick="createGroup()">그룹 생성하기</button>
+    <button class="btn btn-ghost btn-full" onclick="showScreen('screen-host-menu')">뒤로가기</button>
+  </div>
+  <!-- 생성 완료 후 코드 표시 -->
+  <div id="create-result-box" style="display:none;">
+    <div class="card" style="border:2px solid var(--success);">
+      <div class="card-title" style="color:var(--success);">✅ 그룹이 생성되었습니다!</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">아래 <strong>그룹 접속 코드</strong>를 반드시 저장해 두세요. 이 코드로 로그인합니다.</p>
+      <div style="background:#f0fdf4;border:2px solid var(--success);border-radius:10px;padding:14px;text-align:center;margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">그룹 접속 코드</div>
+        <div id="created-code" style="font-size:26px;font-weight:900;letter-spacing:4px;color:var(--success);font-family:monospace;"></div>
+        <div id="created-name" style="font-size:12px;color:var(--muted);margin-top:4px;"></div>
+      </div>
+      <button class="btn btn-success btn-full" onclick="copyCreatedCode()">📋 코드 복사하기</button>
+      <p style="font-size:11px;color:var(--danger);text-align:center;margin-top:6px;">⚠️ 코드를 잃어버리면 그룹에 접속할 수 없습니다!</p>
+      <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="goToLoginWithCode()">바로 관리 모드로 접속 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 관리자 로그인 -->
+<div id="screen-host-login" class="screen">
+  <div class="card">
+    <div class="card-title">🔒 관리자 로그인</div>
+    <label>그룹 접속 코드 (6자리)</label>
+    <input type="text" id="login-group-code" placeholder="예: AB1234" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-weight:700;font-size:16px;">
+    <label>비밀번호</label>
+    <input type="password" id="login-password" placeholder="비밀번호">
+    <button class="btn btn-primary btn-full" onclick="loginAdmin()">관리 모드 접속</button>
+    <hr>
+    <p style="font-size:11px;color:var(--muted);text-align:center;">코드를 모르시나요? <a href="#" onclick="showScreen('screen-host-create');return false;" style="color:var(--primary);">새 그룹 생성하기</a></p>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="showScreen('screen-host-menu')">뒤로가기</button>
+  </div>
+</div>
+
+<!-- 관리자 대시보드 -->
+<div id="screen-admin-dashboard" class="screen">
+  <div class="steps">
+    <div class="step active" id="step1">① 그룹설정</div>
+    <div class="step" id="step2">② 담당자</div>
+    <div class="step" id="step3">③ 업무</div>
+    <div class="step" id="step4">④ 친화도</div>
+    <div class="step" id="step5">⑤ 배정</div>
+    <div class="step" id="step6">⑥ 결과</div>
+  </div>
+
+  <!-- 탭1: 그룹 설정 -->
+  <div id="tab-groups" class="tab-content">
+    <div class="card">
+      <div class="card-title">🏷️ 담당자 그룹 추가</div>
+      <div class="flex-row">
+        <div><label>그룹명</label><input type="text" id="ng-name" placeholder="예: 업무지원팀"></div>
+        <div><label>배정 우선순위 (1=최우선)</label><input type="text" id="ng-priority" value="2" placeholder="1~9"></div>
+      </div>
+      <div class="flex-row">
+        <div><label>최소 부담(minLoad)</label><input type="text" id="ng-min" value="0" placeholder="0"></div>
+        <div><label>최대 부담(maxLoad)</label><input type="text" id="ng-max" value="10" placeholder="10"></div>
+      </div>
+      <label>색상</label>
+      <div class="color-picker" id="ng-color-picker"></div>
+      <label>자동배정 여부</label>
+      <div class="type-toggle" id="ng-auto-toggle">
+        <button class="act-auto" onclick="setNgAuto(true)">🔄 자동배정 포함</button>
+        <button onclick="setNgAuto(false)">📌 고정전담 (제외)</button>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="addMemberGroup()">+ 그룹 추가</button>
+      <hr>
+      <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="loadDefaultGroups()">운남초 기본 그룹 불러오기</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 그룹 목록 <span id="mgroup-count" class="badge badge-blue">0개</span></div>
+      <div id="mgroup-list"></div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="goToTab('members')" id="next-to-members" style="display:none;">다음: 담당자 설정 →</button>
+  </div>
+
+  <!-- 탭2: 담당자 -->
+  <div id="tab-members" class="tab-content" style="display:none;">
+    <div class="card">
+      <div class="card-title">👤 담당자 추가</div>
+      <div class="flex-row">
+        <div><label>이름</label><input type="text" id="new-member-name" placeholder="예: 김진성"></div>
+        <div><label>역할/직위</label><input type="text" id="new-member-role" placeholder="예: 교무부장"></div>
+      </div>
+      <label>담당자 그룹</label>
+      <select id="new-member-group" onchange="onMemberGroupChange()"></select>
+      <div class="flex-row">
+        <div><label>최소 부담</label><input type="text" id="new-member-min" value="0" placeholder="0"></div>
+        <div><label>최대 부담</label><input type="text" id="new-member-max" value="10" placeholder="10"></div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="addMember()">+ 담당자 추가</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 담당자 목록 <span id="member-count" class="badge badge-blue">0명</span></div>
+      <div id="member-list"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="goToTab('groups')" style="flex:1;">← 그룹설정</button>
+      <button class="btn btn-primary" onclick="goToTab('tasks')" style="flex:1;" id="next-to-tasks">다음: 업무 →</button>
+    </div>
+  </div>
+
+  <!-- 탭3: 업무 -->
+  <div id="tab-tasks" class="tab-content" style="display:none;">
+    <div class="card">
+      <div class="card-title">🏷️ 업무 추가</div>
+      <div class="flex-row">
+        <div><label>업무명</label><input type="text" id="new-task-name" placeholder="예: 학교폭력전담기구"></div>
+        <div><label>카테고리</label><input type="text" id="new-task-cat" placeholder="예: 생활"></div>
+      </div>
+      <label>업무 유형</label>
+      <div class="type-toggle" id="task-type-toggle">
+        <button class="act-auto" onclick="setTaskType('auto')">🔄 자동배정</button>
+        <button onclick="setTaskType('fixed')">📌 고정 전용</button>
+      </div>
+      <label>난이도/가중치</label>
+      <div class="weight-sel" id="weight-sel">
+        <button class="w-btn sel" data-w="1" onclick="selWeight(1)">★1<br><span style="font-weight:400;font-size:9px;">단순</span></button>
+        <button class="w-btn" data-w="2" onclick="selWeight(2)">★2<br><span style="font-weight:400;font-size:9px;">보통</span></button>
+        <button class="w-btn" data-w="3" onclick="selWeight(3)">★3<br><span style="font-weight:400;font-size:9px;">중간</span></button>
+        <button class="w-btn" data-w="4" onclick="selWeight(4)">★4<br><span style="font-weight:400;font-size:9px;">어려움</span></button>
+        <button class="w-btn" data-w="5" onclick="selWeight(5)">★5<br><span style="font-weight:400;font-size:9px;">기피</span></button>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="addTask()">+ 업무 추가</button>
+      <hr>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="loadDefaultTasks()" style="flex:1;">운남초 기본값 불러오기</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearAllTasks()" style="flex:1;">전체 초기화</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📦 업무 풀 <span id="task-count" class="badge badge-blue">0개</span></div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;">가중치:
+        <span class="badge" style="background:#dcfce7;color:#15803d;">★1단순</span>
+        <span class="badge" style="background:#dbeafe;color:#1d4ed8;">★2보통</span>
+        <span class="badge" style="background:#fef9c3;color:#92400e;">★3중간</span>
+        <span class="badge" style="background:#ffedd5;color:#c2410c;">★4어려움</span>
+        <span class="badge" style="background:#fee2e2;color:#b91c1c;">★5기피</span>
+      </div>
+      <div class="sec-label">🔄 자동배정 업무</div>
+      <div id="task-pool" class="task-pool"></div>
+      <div class="sec-label" style="color:#6d28d9;margin-top:12px;">📌 고정 전용 업무</div>
+      <div id="task-pool-fixed" class="task-pool fixed-pool"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="goToTab('members')" style="flex:1;">← 담당자</button>
+      <button class="btn btn-primary" onclick="goToTab('affinity')" style="flex:1;">다음: 친화도 →</button>
+    </div>
+  </div>
+
+  <!-- 탭4: 친화도 -->
+  <div id="tab-affinity" class="tab-content" style="display:none;">
+    <div class="card">
+      <div class="card-title">🔗 친화도 설정</div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:11px;color:#1e40af;margin-bottom:12px;">
+        💡 <b>역할 태그</b>가 업무 카테고리와 일치하면 최우선 배정 → <b>주담당 카테고리</b> 선택 업무 우선 배정 → 나머지 균등 보완
+      </div>
+      <div id="affinity-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗂️ 카테고리 → 담당자 매핑</div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">카테고리별 주담당자를 직접 지정합니다. 미지정 시 균등 배분.</p>
+      <div id="category-mapping-list"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="goToTab('tasks')" style="flex:1;">← 업무</button>
+      <button class="btn btn-primary" onclick="goToTab('assign')" style="flex:1;">다음: 자동배정 →</button>
+    </div>
+  </div>
+
+  <!-- 탭5: 배정 -->
+  <div id="tab-assign" class="tab-content" style="display:none;">
+    <div class="card">
+      <div class="card-title">⚡ 자동 배정</div>
+      <label>배정 방식</label>
+      <select id="assign-mode">
+        <option value="affinity">친화도 우선 + 그룹별 균등</option>
+        <option value="balanced">그룹별 균등 (친화도 무시)</option>
+        <option value="random">랜덤 배정</option>
+      </select>
+      <button class="btn btn-warning btn-full" onclick="autoAssign()">⚡ 자동 배정 실행</button>
+      <button class="btn btn-ghost btn-full" onclick="clearAssignment()">🗑️ 배정 초기화</button>
+    </div>
+    <div class="warn-box" id="unassigned-warning">⚠️ 미배정 자동 업무가 있습니다. 드래그하여 직접 배정해주세요.</div>
+    <div class="card">
+      <div class="card-title">📦 미배정 업무 <span id="unassigned-count" class="badge badge-orange">0</span></div>
+      <div id="unassigned-pool" class="task-pool" data-member="__unassigned__"></div>
+    </div>
+    <div id="assign-grid" class="assign-grid"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn btn-ghost" onclick="goToTab('affinity')" style="flex:1;">← 친화도</button>
+      <button class="btn btn-success" onclick="saveAndShowResult()" style="flex:1;">💾 저장 & 결과보기</button>
+    </div>
+  </div>
+
+  <!-- 탭6: 결과 -->
+  <div id="tab-result" class="tab-content" style="display:none;">
+    <!-- 완료 안내 배너 -->
+    <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid var(--success);border-radius:12px;padding:16px;margin-bottom:14px;text-align:center;">
+      <div style="font-size:22px;margin-bottom:4px;">🎉</div>
+      <div style="font-weight:700;font-size:15px;color:#065f46;margin-bottom:6px;">업무분장이 완료되었습니다!</div>
+      <div style="font-size:12px;color:#047857;line-height:1.6;">
+        📥 <strong>엑셀 다운로드</strong>로 데이터를 반드시 저장하세요.<br>
+        🔗 <strong>공유 링크</strong>로 교직원들이 결과를 확인할 수 있습니다.<br>
+        🗑️ 확인이 끝나면 <strong>개인정보 보호를 위해 그룹을 삭제</strong>해주세요.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">✅ 업무분장 결과</div>
+      <div id="result-summary" style="font-size:11px;color:var(--muted);margin-bottom:10px;"></div>
+      <div style="overflow-x:auto;"><table class="result-table"><thead><tr><th>담당자</th><th>그룹/역할</th><th>배정 업무</th><th>부담</th></tr></thead><tbody id="result-tbody"></tbody></table></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="goToTab('assign')" style="flex:1;">← 배정 수정</button>
+      <button class="btn btn-success" onclick="exportExcel()" style="flex:1;">📥 엑셀 다운로드</button>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <div class="card-title">🔗 공유 링크 (열람용)</div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">교직원들이 이 링크로 결과를 확인할 수 있습니다. (수정 불가)</p>
+      <div id="share-link-box" style="background:#f8fafc;padding:8px;border-radius:8px;font-size:11px;word-break:break-all;border:1px solid var(--border);"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:7px;" onclick="copyShareLink()">📋 링크 복사</button>
+    </div>
+    <!-- 삭제 안내 강화 -->
+    <div class="card" style="border:2px solid var(--danger);margin-top:4px;">
+      <div class="card-title" style="color:var(--danger);">🗑️ 그룹 삭제 (작업 완료 후 권장)</div>
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#92400e;line-height:1.6;">
+        ⚠️ <strong>개인정보 보호를 위해</strong> 업무분장 확인이 끝나면 그룹을 삭제해주세요.<br>
+        삭제 전 반드시 <strong>엑셀 파일을 다운로드</strong>해 데이터를 보관하세요.<br>
+        삭제된 데이터는 <strong>복구할 수 없습니다.</strong>
+      </div>
+      <input type="password" id="delete-confirm-password" placeholder="관리자 비밀번호 재입력">
+      <button class="btn btn-danger btn-full" onclick="deleteCurrentGroup()">이 그룹 영구 삭제</button>
+    </div>
+    <button class="btn btn-ghost btn-full" onclick="logout()" style="margin-top:6px;">로그아웃</button>
+  </div>
+</div>
+
+<!-- 일반 사용자 -->
+<div id="screen-user-login" class="screen">
+  <div class="card">
+    <div class="card-title">👁️ 업무분장 보기</div>
+    <label>그룹 접속 코드 (6자리)</label>
+    <input type="text" id="user-group-name" placeholder="예: AB1234" maxlength="8" style="text-transform:uppercase;letter-spacing:3px;font-weight:700;font-size:16px;">
+    <button class="btn btn-primary btn-full" onclick="viewGroup()">결과 보기</button>
+    <button class="btn btn-ghost btn-full" onclick="goHome()">← 처음으로</button>
+  </div>
+</div>
+
+<div id="screen-user-result" class="screen">
+  <div class="card">
+    <div class="card-title">📋 <span id="view-group-title" style="color:var(--primary);"></span> 업무분장</div>
+    <div id="view-updated" style="font-size:11px;color:var(--muted);margin-bottom:10px;"></div>
+    <div style="overflow-x:auto;"><table class="result-table"><thead><tr><th>담당자</th><th>그룹/역할</th><th>배정 업무</th><th>부담</th></tr></thead><tbody id="view-result-tbody"></tbody></table></div>
+  </div>
+  <button class="btn btn-ghost btn-full" onclick="showScreen('screen-user-login')">← 다른 그룹 조회</button>
+</div>
+
+<!-- 총괄 관리자 -->
+<div id="screen-superadmin" class="screen">
+  <div class="card">
+    <div class="card-title" style="color:var(--danger);">⚠️ 총괄 관리자 대시보드</div>
+    <div id="superadmin-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <input type="text" id="sa-search" placeholder="학교명 또는 코드 검색" style="margin-bottom:0;flex:1;" oninput="filterSuperAdmin()">
+      <select id="sa-sort" style="margin-bottom:0;width:110px;" onchange="filterSuperAdmin()">
+        <option value="date-desc">최신순</option>
+        <option value="date-asc">오래된순</option>
+        <option value="name">이름순</option>
+      </select>
+    </div>
+    <div id="superadmin-list" style="max-height:460px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn btn-warning" onclick="loadSuperAdmin()" style="flex:1;">🔄 새로고침</button>
+      <button class="btn btn-ghost" onclick="logout()" style="flex:1;">종료</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<div id="toast"></div>
+<div class="watermark" id="easter-egg-btn">만든이 2026 최창훈</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"YOUR_API_KEY", authDomain:"YOUR_PROJECT_ID.firebaseapp.com",
+  projectId:"YOUR_PROJECT_ID", storageBucket:"YOUR_PROJECT_ID.firebasestorage.app",
+  messagingSenderId:"YOUR_SENDER_ID", appId:"YOUR_APP_ID"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── 상태 ──
+let currentGroup = "", currentAdminPwd = "";
+let memberGroups = [];  // [{id,name,color,minLoad,maxLoad,autoAssign,priority}]
+let members = [];       // [{id,name,role,memberGroupId,minLoad,maxLoad}]
+let tasks = [];         // [{id,name,category,weight,fixed}]
+let assignments = {};   // {memberId:[taskId,...], __unassigned__:[...]}
+let affinityData = {};  // {memberId:{roleTags:[],primaryCats:[]}}
+let categoryMapping = {}; // {category:memberId}
+let selectedWeight = 1, newTaskFixed = false, newGroupAuto = true;
+
+// ── 색상 팔레트 ──
+const COLORS = ['#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#be185d','#475569'];
+const COLOR_NAMES = {
+  '#2563eb':'파랑','#16a34a':'초록','#d97706':'주황','#dc2626':'빨강',
+  '#7c3aed':'보라','#0891b2':'청록','#be185d':'분홍','#475569':'회색'
+};
+let selectedColor = COLORS[0];
+
+// ── 탭 순서 ──
+const TAB_ORDER = ['groups','members','tasks','affinity','assign','result'];
+
+// ══════════════════════════════════════
+// UI 유틸
+// ══════════════════════════════════════
+window.showScreen = id => {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  const isHome = id==='screen-home';
+  document.getElementById('header-back').style.display = isHome?'none':'block';
+  document.getElementById('main-header').style.display = isHome?'none':'flex';
+};
+window.goHome = () => {
+  currentGroup=""; memberGroups=[]; members=[]; tasks=[]; assignments={}; affinityData={}; categoryMapping={};
+  document.getElementById('app-title').textContent='업무분장 자동배정';
+  document.getElementById('app-subtitle').textContent='학교 업무분장 관리 시스템';
+  showScreen('screen-home');
+};
+window.logout = () => goHome();
+
+function toast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+
+window.goToTab = tab => {
+  TAB_ORDER.forEach((t,i)=>{
+    const el=document.getElementById(`tab-${t}`);
+    if(el) el.style.display = t===tab?'block':'none';
+    const s=document.getElementById(`step${i+1}`);
+    if(s) s.className='step'+(t===tab?' active':(i<TAB_ORDER.indexOf(tab)?' done':''));
+  });
+  if(tab==='groups') renderMGroupList();
+  if(tab==='members') { refreshMemberGroupSelect(); renderMemberList(); }
+  if(tab==='affinity') renderAffinityTab();
+  if(tab==='assign') renderAssignArea();
+  if(tab==='result') renderResult();
+};
+
+// ── 색상 선택기 초기화 ──
+function initColorPicker(containerId){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = COLORS.map(c=>`<div class="color-swatch${c===selectedColor?' sel':''}" style="background:${c};" onclick="pickColor('${c}','${containerId}')"></div>`).join('');
+}
+window.pickColor = (c, cid) => { selectedColor=c; initColorPicker(cid); };
+initColorPicker('ng-color-picker');
+
+// ── 6자리 고유 코드 생성 ──
+function genCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 혼동 문자 제외(0,O,1,I)
+  let code='';
+  for(let i=0;i<6;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+  return code;
+}
+
+let createdGroupId='', createdGroupPwd='';
+
+// ══════════════════════════════════════
+// 그룹 생성/로그인
+// ══════════════════════════════════════
+window.createGroup = async () => {
+  const displayName = document.getElementById('create-group-name').value.trim();
+  const pwd = document.getElementById('create-password').value;
+  if(!displayName||!pwd) return toast('학교명과 비밀번호를 입력해주세요.');
+  const today = new Date().toISOString().split('T')[0];
+  if(localStorage.getItem('lastGroupCreatedDate')===today) return toast('기기당 하루 1개의 그룹만 생성 가능합니다.');
+  try {
+    // 고유 코드 생성 (중복 시 재시도)
+    let code, tries=0;
+    do {
+      code=genCode();
+      const snap=await getDoc(doc(db,'groups',code));
+      if(!snap.exists()) break;
+      tries++;
+    } while(tries<10);
+
+    await setDoc(doc(db,'groups',code),{
+      displayName, password:pwd,
+      createdAt:new Date().toISOString(),
+      memberGroups:[],members:[],tasks:[],
+      assignments:{},affinityData:{},categoryMapping:{}
+    });
+    localStorage.setItem('lastGroupCreatedDate',today);
+    createdGroupId=code; createdGroupPwd=pwd;
+
+    // 결과 박스 표시
+    document.getElementById('create-result-box').style.display='block';
+    document.getElementById('created-code').textContent=code;
+    document.getElementById('created-name').textContent=displayName;
+    document.querySelector('#screen-host-create .card').style.display='none';
+    window.scrollTo(0,0);
+  } catch(e){toast('오류: '+e.message);}
+};
+
+window.copyCreatedCode = async () => {
+  try{ await navigator.clipboard.writeText(createdGroupId); toast('코드 복사됨: '+createdGroupId); }
+  catch{ toast('복사 실패. 코드: '+createdGroupId); }
+};
+
+window.goToLoginWithCode = async () => {
+  // 방금 만든 그룹으로 바로 로그인
+  currentGroup=createdGroupId; currentAdminPwd=createdGroupPwd;
+  const snap=await getDoc(doc(db,'groups',createdGroupId));
+  const d=snap.data();
+  memberGroups=d.memberGroups||[]; members=d.members||[]; tasks=d.tasks||[];
+  assignments=d.assignments||{}; affinityData=d.affinityData||{}; categoryMapping=d.categoryMapping||{};
+  if(!assignments.__unassigned__) assignments.__unassigned__=[];
+  // 화면 초기화 (다음 번 열릴 때 대비)
+  document.getElementById('create-result-box').style.display='none';
+  document.querySelector('#screen-host-create .card').style.display='block';
+  document.getElementById('create-group-name').value='';
+  document.getElementById('create-password').value='';
+  showScreen('screen-admin-dashboard');
+  goToTab('groups');
+  toast(`그룹 ${createdGroupId} (${d.displayName}) 로그인됨`);
+};
+
+window.loginAdmin = async () => {
+  const code = (document.getElementById('login-group-code').value||'').trim().toUpperCase();
+  const pwd = document.getElementById('login-password').value;
+  if(!code||!pwd) return toast('코드와 비밀번호를 입력해주세요.');
+  try {
+    const snap = await getDoc(doc(db,'groups',code));
+    if(snap.exists() && snap.data().password===pwd){
+      currentGroup=code; currentAdminPwd=pwd;
+      const d=snap.data();
+      memberGroups=d.memberGroups||[]; members=d.members||[]; tasks=d.tasks||[];
+      assignments=d.assignments||{}; affinityData=d.affinityData||{}; categoryMapping=d.categoryMapping||{};
+      if(!assignments.__unassigned__) assignments.__unassigned__=tasks.map(t=>t.id).filter(id=>!Object.values(assignments).flat().includes(id));
+      // 헤더에 학교명 표시
+      const dName=d.displayName||code;
+      document.getElementById('app-title').textContent=dName;
+      document.getElementById('app-subtitle').textContent=`코드: ${code} | 관리자 모드`;
+      showScreen('screen-admin-dashboard');
+      goToTab('groups');
+      toast(`${dName} 로그인됨`);
+    } else toast('코드 또는 비밀번호가 다릅니다.');
+  } catch(e){toast('오류: '+e.message);}
+};
+
+// ══════════════════════════════════════
+// 담당자 그룹 관리
+// ══════════════════════════════════════
+window.setNgAuto = v => {
+  newGroupAuto=v;
+  const btns = document.querySelectorAll('#ng-auto-toggle button');
+  btns[0].className = v?'act-auto':''; btns[1].className = v?'':'act-fixed';
+};
+
+window.addMemberGroup = () => {
+  const name = document.getElementById('ng-name').value.trim();
+  if(!name) return toast('그룹명을 입력해주세요.');
+  if(memberGroups.find(g=>g.name===name)) return toast('이미 존재하는 그룹명입니다.');
+  const minLoad = parseInt(document.getElementById('ng-min').value)||0;
+  const maxLoad = parseInt(document.getElementById('ng-max').value)||10;
+  const priority = parseInt(document.getElementById('ng-priority').value)||2;
+  memberGroups.push({id:'g_'+Date.now(),name,color:selectedColor,minLoad,maxLoad,autoAssign:newGroupAuto,priority});
+  memberGroups.sort((a,b)=>a.priority-b.priority);
+  document.getElementById('ng-name').value='';
+  renderMGroupList();
+  toast(`'${name}' 그룹 추가됨`);
+};
+
+window.removeMemberGroup = id => {
+  const g = memberGroups.find(g=>g.id===id);
+  if(members.some(m=>m.memberGroupId===id)) return toast(`'${g.name}' 그룹에 담당자가 있습니다. 먼저 담당자를 삭제해주세요.`);
+  if(!confirm(`'${g.name}' 그룹을 삭제할까요?`)) return;
+  memberGroups = memberGroups.filter(g=>g.id!==id);
+  renderMGroupList();
+};
+
+window.loadDefaultGroups = () => {
+  if(memberGroups.length && !confirm('기존 그룹을 초기화하고 기본값을 불러올까요?')) return;
+  memberGroups = [
+    {id:'g_sup',   name:'교감',       color:'#dc2626', minLoad:5,  maxLoad:12, autoAssign:true, priority:1},
+    {id:'g_team',  name:'업무지원팀', color:'#2563eb', minLoad:15, maxLoad:25, autoAssign:true, priority:2},
+    {id:'g_paid',  name:'수당부장',   color:'#16a34a', minLoad:8,  maxLoad:15, autoAssign:true, priority:3},
+    {id:'g_vol',   name:'봉사부장',   color:'#d97706', minLoad:3,  maxLoad:8,  autoAssign:true, priority:4},
+    {id:'g_fixed', name:'고정전담',   color:'#7c3aed', minLoad:0,  maxLoad:0,  autoAssign:false,priority:9},
+  ];
+  renderMGroupList();
+  toast('운남초 기본 그룹 5개 불러옴');
+};
+
+function renderMGroupList(){
+  const list = document.getElementById('mgroup-list');
+  document.getElementById('mgroup-count').textContent = memberGroups.length+'개';
+  if(!memberGroups.length){list.innerHTML='<p style="font-size:12px;color:var(--muted);text-align:center;padding:14px;">그룹을 추가해주세요.</p>';document.getElementById('next-to-members').style.display='none';return;}
+  document.getElementById('next-to-members').style.display='flex';
+  list.innerHTML = memberGroups.map(g=>`
+    <div class="group-item">
+      <div class="group-color-dot" style="background:${g.color};"></div>
+      <div class="group-info">
+        <div class="group-name">${g.name} <span class="p-badge p${Math.min(g.priority,5)}">${g.autoAssign?'🔄 자동':'📌 고정'} · 우선순위 ${g.priority}</span></div>
+        <div class="group-meta">부담 ${g.minLoad}~${g.maxLoad} · ${COLOR_NAMES[g.color]||g.color}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeMemberGroup('${g.id}')">삭제</button>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// 담당자 관리
+// ══════════════════════════════════════
+function refreshMemberGroupSelect(){
+  const sel = document.getElementById('new-member-group');
+  sel.innerHTML = memberGroups.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
+  onMemberGroupChange();
+}
+
+window.onMemberGroupChange = () => {
+  const gid = document.getElementById('new-member-group').value;
+  const g = memberGroups.find(g=>g.id===gid);
+  if(g){
+    document.getElementById('new-member-min').value = g.minLoad;
+    document.getElementById('new-member-max').value = g.maxLoad;
+  }
+};
+
+window.addMember = () => {
+  const name = document.getElementById('new-member-name').value.trim();
+  const role = document.getElementById('new-member-role').value.trim();
+  const gid  = document.getElementById('new-member-group').value;
+  const minLoad = parseInt(document.getElementById('new-member-min').value)||0;
+  const maxLoad = parseInt(document.getElementById('new-member-max').value)||10;
+  if(!name) return toast('이름을 입력해주세요.');
+  if(!gid)  return toast('그룹을 먼저 만들어주세요.');
+  const g = memberGroups.find(g=>g.id===gid);
+  const id = 'm_'+Date.now();
+  members.push({id,name,role,memberGroupId:gid,minLoad,maxLoad});
+  assignments[id]=[];
+  document.getElementById('new-member-name').value='';
+  document.getElementById('new-member-role').value='';
+  renderMemberList();
+  toast(`${name} (${g?.name}) 추가됨`);
+};
+
+window.removeMember = id => {
+  const m = members.find(m=>m.id===id);
+  if(!confirm(`'${m.name}'을(를) 삭제할까요?`)) return;
+  const tasksOf = assignments[id]||[];
+  assignments.__unassigned__ = [...(assignments.__unassigned__||[]),...tasksOf];
+  delete assignments[id]; delete affinityData[id];
+  members = members.filter(m=>m.id!==id);
+  renderMemberList();
+};
+
+function getLoad(mid){ return (assignments[mid]||[]).reduce((s,tid)=>{const t=tasks.find(t=>t.id===tid);return s+(t?t.weight:0);},0);}
+
+function renderMemberList(){
+  const list = document.getElementById('member-list');
+  document.getElementById('member-count').textContent = members.length+'명';
+  if(!members.length){list.innerHTML='<p style="font-size:12px;color:var(--muted);text-align:center;padding:14px;">담당자를 추가해주세요.</p>';return;}
+  // 그룹별 묶기
+  let html='';
+  memberGroups.forEach(g=>{
+    const arr = members.filter(m=>m.memberGroupId===g.id);
+    if(!arr.length) return;
+    html+=`<div class="sec-label" style="color:${g.color};">▪ ${g.name} (${arr.length}명)</div>`;
+    html+=arr.map(m=>{
+      const load=getLoad(m.id), pct=Math.min(100,Math.round(load/m.maxLoad*100));
+      return `<div class="member-item">
+        <div class="member-avatar" style="background:${g.color};">${m.name[0]}</div>
+        <div class="member-info">
+          <div class="member-name">${m.name} <span style="font-size:10px;color:var(--muted);">${m.role||''}</span></div>
+          <div class="member-meta">부담 ${m.minLoad}~${m.maxLoad} · 현재 ${load}</div>
+          <div class="load-bar-wrap"><div class="load-bar${load>m.maxLoad?' over':''}" style="width:${pct}%;background:${g.color};"></div></div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="removeMember('${m.id}')">삭제</button>
+      </div>`;
+    }).join('');
+  });
+  // 그룹 없는 담당자
+  const ungrouped = members.filter(m=>!memberGroups.find(g=>g.id===m.memberGroupId));
+  if(ungrouped.length){
+    html+=`<div class="sec-label">▪ 미분류</div>`;
+    html+=ungrouped.map(m=>`<div class="member-item"><div class="member-avatar" style="background:#888;">${m.name[0]}</div><div class="member-info"><div class="member-name">${m.name}</div></div><button class="btn btn-danger btn-sm" onclick="removeMember('${m.id}')">삭제</button></div>`).join('');
+  }
+  list.innerHTML=html;
+}
+
+// ══════════════════════════════════════
+// 업무 관리
+// ══════════════════════════════════════
+window.selWeight = w => {
+  selectedWeight=w;
+  document.querySelectorAll('#weight-sel .w-btn').forEach(b=>b.classList.toggle('sel',parseInt(b.dataset.w)===w));
+};
+window.setTaskType = t => {
+  newTaskFixed = t==='fixed';
+  const btns=document.querySelectorAll('#task-type-toggle button');
+  btns[0].className=newTaskFixed?'':'act-auto'; btns[1].className=newTaskFixed?'act-fixed':'';
+};
+
+window.addTask = () => {
+  const name=document.getElementById('new-task-name').value.trim();
+  const cat=document.getElementById('new-task-cat').value.trim();
+  if(!name) return toast('업무명을 입력해주세요.');
+  if(tasks.find(t=>t.name===name)) return toast('이미 존재하는 업무입니다.');
+  const id='t_'+Date.now();
+  tasks.push({id,name,category:cat||'기타',weight:selectedWeight,fixed:newTaskFixed});
+  assignments.__unassigned__=[...(assignments.__unassigned__||[]),id];
+  document.getElementById('new-task-name').value='';
+  renderTaskPool();
+  toast(`'${name}' 추가됨`);
+};
+
+window.removeTask = id => {
+  tasks=tasks.filter(t=>t.id!==id);
+  Object.keys(assignments).forEach(k=>{assignments[k]=assignments[k].filter(tid=>tid!==id);});
+  renderTaskPool();
+};
+
+window.clearAllTasks = () => {
+  if(!confirm('모든 업무를 삭제할까요?')) return;
+  tasks=[]; Object.keys(assignments).forEach(k=>{assignments[k]=[];});
+  renderTaskPool();
+};
+
+function renderTaskPool(){
+  document.getElementById('task-count').textContent=tasks.length+'개';
+  const auto=tasks.filter(t=>!t.fixed), fixed=tasks.filter(t=>t.fixed);
+  const pool=document.getElementById('task-pool'), fpool=document.getElementById('task-pool-fixed');
+  pool.innerHTML=auto.length?auto.map(t=>taskTagHTML(t,'pool')).join(''):'<span style="font-size:12px;color:var(--muted);">업무를 추가해주세요.</span>';
+  fpool.innerHTML=fixed.length?fixed.map(t=>taskTagHTML(t,'pool')).join(''):'<span style="font-size:12px;color:var(--muted);">고정 전용 업무를 추가해주세요.</span>';
+}
+
+function taskTagHTML(t,ctx){
+  return `<div class="task-tag w${t.weight}${t.fixed?' fixed-task':''}" draggable="true" data-id="${t.id}" data-context="${ctx}"
+    ondragstart="onDragStart(event)" title="${t.category} / 가중치 ${t.weight}${t.fixed?' / 고정':''}">
+    ${t.fixed?'📌 ':''}${t.name}${ctx==='pool'?`<span class="del-btn" onclick="removeTask('${t.id}')">×</span>`:''}
+  </div>`;
+}
+
+// ── 운남초 기본 업무 데이터 ──
+window.loadDefaultTasks = () => {
+  if(tasks.length && !confirm('기존 업무를 초기화하고 기본값을 불러올까요?')) return;
+  const auto = [
+    // 교무부
+    {n:'학사일정',c:'교무',w:3},{n:'주간·월간교육계획',c:'교무',w:2},{n:'학교일지',c:'교무',w:2},
+    {n:'보결업무',c:'교무',w:2},{n:'취학업무',c:'교무',w:2},{n:'학급편성',c:'교무',w:3},
+    {n:'개별체험학습',c:'교무',w:2},{n:'학교시정',c:'교무',w:2},{n:'새학년준비기',c:'교무',w:2},
+    {n:'운남축제',c:'행사',w:3},{n:'어울림마당',c:'행사',w:2},{n:'학교설명회',c:'행사',w:2},
+    {n:'각종행사지원',c:'행사',w:2},{n:'학부모회운영',c:'교무',w:2},{n:'교직원회운영',c:'교무',w:2},
+    {n:'학교규칙',c:'교무',w:2},{n:'계기교육',c:'교육',w:1},{n:'다문화교육',c:'교육',w:2},
+    {n:'경제교육',c:'교육',w:1},{n:'통일교육',c:'교육',w:1},
+    {n:'마을교육공동체',c:'교육',w:3},{n:'장학생·장학금',c:'복지',w:2},{n:'국제교류',c:'교육',w:2},
+    // 연구부
+    {n:'학교교육과정편성운영',c:'연구',w:4},{n:'전체시간표관리',c:'연구',w:3},
+    {n:'교육과정돌아보기',c:'연구',w:2},{n:'전문적학습공동체',c:'연구',w:3},
+    {n:'기초학력향상(두드림)',c:'연구',w:3},{n:'학생동아리조직운영',c:'연구',w:2},
+    {n:'수학교육',c:'교육',w:2},{n:'융합교육',c:'교육',w:2},{n:'독서교육(교원)',c:'교육',w:1},
+    {n:'e학습터',c:'정보',w:2},{n:'디지털교과서',c:'정보',w:2},{n:'민주인권평화동아리',c:'교육',w:2},
+    // 생활혁신부
+    {n:'학교폭력전담기구',c:'생활',w:5},{n:'학생자치회',c:'생활',w:2},
+    {n:'학생생활규정',c:'생활',w:3},{n:'선도위원회',c:'생활',w:4},
+    {n:'위기관리위원회',c:'생활',w:3},{n:'학생대피훈련',c:'생활',w:2},
+    {n:'안전교육',c:'생활',w:2},{n:'배움터지킴이',c:'생활',w:2},{n:'교통봉사관리',c:'생활',w:1},
+    {n:'혁신학교운영',c:'혁신',w:3},{n:'공간혁신',c:'혁신',w:2},
+    {n:'양성평등',c:'교육',w:1},{n:'학생봉사',c:'생활',w:1},{n:'인성교육',c:'교육',w:1},
+    {n:'사회정서교육',c:'생활',w:2},
+    // 정보부
+    {n:'NEIS운영',c:'정보',w:3},{n:'학교생활기록부',c:'정보',w:4},
+    {n:'학교정보공시',c:'정보',w:3},{n:'개인정보보호',c:'정보',w:3},
+    {n:'통지표',c:'정보',w:2},{n:'학업성적관리위원회',c:'정보',w:3},
+    {n:'시청각기자재관리',c:'정보',w:2},{n:'정보화기자재관리',c:'정보',w:2},
+    {n:'네트워크관리',c:'정보',w:3},{n:'SW교육',c:'정보',w:2},
+    {n:'학교홈페이지',c:'정보',w:2},{n:'학교방송',c:'정보',w:1},
+    {n:'영재업무',c:'교육',w:2},{n:'진로교육',c:'교육',w:2},{n:'저작권교육',c:'교육',w:1},
+    // 체육/현장/환경/복지/문화
+    {n:'PAPS',c:'체육',w:2},{n:'학교스포츠클럽',c:'체육',w:2},
+    {n:'생존수영',c:'체육',w:2},{n:'신나는주말체육',c:'체육',w:2},
+    {n:'현장체험학습',c:'현장',w:3},{n:'환경교육',c:'환경',w:2},
+    {n:'텃밭운영',c:'환경',w:1},{n:'교육급여',c:'복지',w:2},
+    {n:'학생맞춤통합지원',c:'복지',w:3},{n:'문화예술강사수업',c:'문화',w:2},
+  ];
+  const fixed = [
+    // 6학년(진학)
+    {n:'졸업앨범',c:'6학년',w:2},{n:'수학여행',c:'6학년',w:3},
+    {n:'중학교입학배정',c:'6학년',w:2},{n:'졸업식',c:'6학년',w:2},
+    // 특수교육
+    {n:'특수교육계획수립',c:'특수',w:3},{n:'개별화교육계획',c:'특수',w:4},
+    {n:'특수교육대상자입급',c:'특수',w:3},{n:'통합교육운영',c:'특수',w:3},
+    {n:'장애이해교육',c:'특수',w:2},{n:'특수학급자료확충',c:'특수',w:2},
+    // 보건
+    {n:'보건교육',c:'보건',w:2},{n:'학생건강관리',c:'보건',w:3},
+    {n:'감염병예방교육',c:'보건',w:2},{n:'성교육',c:'보건',w:2},
+    {n:'약물오남용예방',c:'보건',w:1},{n:'건강기록부관리',c:'보건',w:2},
+    // 영양
+    {n:'학교급식업무',c:'영양',w:3},{n:'급식봉사단운영',c:'영양',w:2},
+    {n:'조리종사원관리',c:'영양',w:2},{n:'우유검수관리',c:'영양',w:1},
+    // 상담
+    {n:'학생상담활동',c:'상담',w:3},{n:'정서행동발달검사',c:'상담',w:3},
+    {n:'학업중단예방',c:'상담',w:3},{n:'어울림프로그램',c:'상담',w:2},
+    {n:'또래상담',c:'상담',w:2},{n:'대안교실',c:'상담',w:2},
+    // 교무실무사
+    {n:'학생전출입(NEIS)',c:'교무실무',w:2},{n:'공문처리·배부',c:'교무실무',w:2},
+    {n:'가정통신문발송',c:'교무실무',w:1},{n:'교무실용품관리',c:'교무실무',w:1},
+    {n:'비상연락망관리',c:'교무실무',w:1},{n:'우편물관리',c:'교무실무',w:1},
+    {n:'수상대장관리',c:'교무실무',w:1},{n:'홈페이지교육활동탑재',c:'교무실무',w:1},
+    // 사서
+    {n:'도서관운영관리',c:'사서',w:3},{n:'도서관행사운영',c:'사서',w:2},
+    {n:'학급권장도서선정',c:'사서',w:2},{n:'교과서주문·배부',c:'사서',w:2},
+    {n:'학부모독서회운영',c:'사서',w:2},{n:'장학자료관리',c:'사서',w:1},
+    // 과학실무사
+    {n:'과학준비실관리',c:'과학실무',w:2},{n:'실험실안전점검',c:'과학실무',w:2},
+    {n:'과학교구·소모품관리',c:'과학실무',w:2},{n:'폐수·유독물관리',c:'과학실무',w:3},
+    {n:'사전실험및수업준비',c:'과학실무',w:2},
+    // 병설유치원
+    {n:'유치원교육과정운영',c:'유치원',w:3},{n:'유아모집',c:'유치원',w:2},
+    {n:'유치원입학·졸업',c:'유치원',w:2},{n:'방과후과정관리',c:'유치원',w:3},
+    {n:'유치원예산운영',c:'유치원',w:3},{n:'유아학비업무',c:'유치원',w:2},
+    {n:'유치원정보공시',c:'유치원',w:2},{n:'빛고을놀이샘',c:'유치원',w:2},
+    // 늘봄학교
+    {n:'늘봄학교운영계획',c:'늘봄',w:3},{n:'늘봄강사채용·관리',c:'늘봄',w:3},
+    {n:'늘봄돌봄교실운영',c:'늘봄',w:3},{n:'늘봄수강권지원',c:'늘봄',w:2},
+    {n:'늘봄학교민원관리',c:'늘봄',w:2},
+    // 행정실
+    {n:'학교회계예산편성',c:'행정',w:4},{n:'학교회계결산',c:'행정',w:4},
+    {n:'계약및지출업무',c:'행정',w:3},{n:'급여관리',c:'행정',w:3},
+    {n:'시설·전기·소방업무',c:'행정',w:3},{n:'재산업무',c:'행정',w:2},
+    {n:'법인카드관리',c:'행정',w:2},{n:'물품업무',c:'행정',w:2},
+    {n:'보안업무',c:'행정',w:2},{n:'기록물관리',c:'행정',w:2},
+    {n:'학교운영위원회',c:'행정',w:3},{n:'산업재해예방',c:'행정',w:2},
+  ];
+  tasks=[]; assignments.__unassigned__=[];
+  Object.keys(assignments).filter(k=>k!=='__unassigned__').forEach(k=>assignments[k]=[]);
+  [...auto.map(d=>({...d,fixed:false})),...fixed.map(d=>({...d,fixed:true}))].forEach(d=>{
+    const id='t_'+Date.now()+Math.random().toString(36).slice(2,5);
+    tasks.push({id,name:d.n,category:d.c,weight:d.w,fixed:d.fixed});
+    assignments.__unassigned__.push(id);
+  });
+  renderTaskPool();
+  toast(`기본 업무 불러옴 (자동 ${auto.length}개 / 고정 ${fixed.length}개)`);
+};
+
+// ══════════════════════════════════════
+// 친화도 탭
+// ══════════════════════════════════════
+function renderAffinityTab(){
+  const autoMembers = members.filter(m=>{ const g=memberGroups.find(g=>g.id===m.memberGroupId); return g&&g.autoAssign; });
+  const allCats = [...new Set(tasks.filter(t=>!t.fixed).map(t=>t.category))].sort();
+
+  // 담당자별 카드 (그룹별 묶기)
+  let html='';
+  memberGroups.filter(g=>g.autoAssign).forEach(g=>{
+    const arr=autoMembers.filter(m=>m.memberGroupId===g.id);
+    if(!arr.length) return;
+    html+=`<div class="sec-label" style="color:${g.color};">▪ ${g.name}</div>`;
+    html+=arr.map(m=>{
+      if(!affinityData[m.id]) affinityData[m.id]={roleTags:[],primaryCats:[]};
+      const aff=affinityData[m.id];
+      const chips=allCats.map(cat=>`<span class="cat-chip${aff.primaryCats.includes(cat)?' sel':''}" onclick="togglePCat('${m.id}','${cat}')">${cat}</span>`).join('');
+      const tags=(aff.roleTags||[]).map(tag=>`<span class="role-tag">${tag}<span class="rm" onclick="removeRTag('${m.id}','${tag}')">×</span></span>`).join('');
+      return `<div class="affinity-item">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div class="member-avatar" style="background:${g.color};width:30px;height:30px;font-size:12px;">${m.name[0]}</div>
+          <div><div style="font-weight:700;font-size:13px;">${m.name}</div><div style="font-size:11px;color:var(--muted);">${m.role||''} · ${g.name}</div></div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <label>🏷️ 역할 태그 (카테고리명과 일치 시 최우선)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="rtag-${m.id}" placeholder="예: 교무, 생활" style="margin-bottom:0;" onkeydown="if(event.key==='Enter')addRTag('${m.id}')">
+            <button class="btn btn-ghost btn-sm" onclick="addRTag('${m.id}')">추가</button>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;" id="rtags-${m.id}">${tags||'<span style="font-size:10px;color:var(--muted);">없음</span>'}</div>
+        </div>
+        <div>
+          <label>📂 주담당 카테고리 (클릭 선택)</label>
+          <div class="cat-chips">${chips||'<span style="font-size:11px;color:var(--muted);">업무를 먼저 추가해주세요.</span>'}</div>
+        </div>
+      </div>`;
+    }).join('');
+  });
+  document.getElementById('affinity-list').innerHTML=html||'<p style="font-size:12px;color:var(--muted);">자동배정 담당자가 없습니다.</p>';
+
+  // 카테고리 매핑 테이블
+  const mapList = document.getElementById('category-mapping-list');
+  if(!allCats.length){mapList.innerHTML='<p style="font-size:12px;color:var(--muted);">자동배정 업무 카테고리가 없습니다.</p>';return;}
+  mapList.innerHTML=allCats.map(cat=>{
+    const suggested=autoMembers.find(m=>(affinityData[m.id]?.roleTags||[]).some(tag=>tag===cat||cat.includes(tag)||tag.includes(cat)));
+    const opts=[`<option value="">-- 자동(균등) --</option>`,...autoMembers.map(m=>{const g=memberGroups.find(g=>g.id===m.memberGroupId);return `<option value="${m.id}" ${categoryMapping[cat]===m.id?'selected':''}>${m.name}${g?' ('+g.name+')':''}</option>`;})].join('');
+    return `<div class="cat-map-row">
+      <span style="min-width:80px;font-weight:600;" class="badge badge-gray">${cat}</span>
+      ${suggested&&!categoryMapping[cat]?`<span style="font-size:10px;color:var(--success);">💡${suggested.name}</span>`:''}
+      <select onchange="setCatMap('${cat}',this.value)">${opts}</select>
+    </div>`;
+  }).join('');
+}
+
+window.togglePCat = (mid,cat)=>{
+  if(!affinityData[mid]) affinityData[mid]={roleTags:[],primaryCats:[]};
+  const arr=affinityData[mid].primaryCats, idx=arr.indexOf(cat);
+  if(idx>=0) arr.splice(idx,1); else arr.push(cat);
+  renderAffinityTab();
+};
+window.addRTag = mid=>{
+  const inp=document.getElementById(`rtag-${mid}`), val=inp.value.trim();
+  if(!val) return;
+  if(!affinityData[mid]) affinityData[mid]={roleTags:[],primaryCats:[]};
+  val.split(/[,，\s]+/).map(t=>t.trim()).filter(Boolean).forEach(tag=>{
+    if(!affinityData[mid].roleTags.includes(tag)) affinityData[mid].roleTags.push(tag);
+  });
+  inp.value=''; renderAffinityTab();
+};
+window.removeRTag = (mid,tag)=>{
+  if(affinityData[mid]) affinityData[mid].roleTags=affinityData[mid].roleTags.filter(t=>t!==tag);
+  renderAffinityTab();
+};
+window.setCatMap = (cat,mid)=>{
+  categoryMapping[cat]=mid||'';
+  if(mid){
+    if(!affinityData[mid]) affinityData[mid]={roleTags:[],primaryCats:[]};
+    if(!affinityData[mid].primaryCats.includes(cat)) affinityData[mid].primaryCats.push(cat);
+  }
+};
+
+// ══════════════════════════════════════
+// 자동 배정 (그룹 우선순위 + 친화도)
+// ══════════════════════════════════════
+window.autoAssign = () => {
+  if(!members.length) return toast('담당자를 먼저 추가해주세요.');
+  if(!tasks.length) return toast('업무를 먼저 추가해주세요.');
+
+  const autoGroups = memberGroups.filter(g=>g.autoAssign).sort((a,b)=>a.priority-b.priority);
+  const autoMembers = members.filter(m=>{ const g=memberGroups.find(g=>g.id===m.memberGroupId); return g&&g.autoAssign; });
+  const fixedMembers = members.filter(m=>{ const g=memberGroups.find(g=>g.id===m.memberGroupId); return g&&!g.autoAssign; });
+  const autoTasks = tasks.filter(t=>!t.fixed);
+
+  if(!autoMembers.length) return toast('자동배정 그룹에 담당자가 없습니다.');
+
+  autoMembers.forEach(m=>assignments[m.id]=[]);
+  const remaining = new Set(autoTasks.map(t=>t.id));
+  const mode = document.getElementById('assign-mode').value;
+
+  if(mode==='affinity'){
+    // ── 1단계: 역할 태그 매칭 (그룹 우선순위 순) ──
+    autoGroups.forEach(g=>{
+      const gMembers=autoMembers.filter(m=>m.memberGroupId===g.id);
+      gMembers.forEach(m=>{
+        const tags=affinityData[m.id]?.roleTags||[];
+        if(!tags.length) return;
+        autoTasks.filter(t=>remaining.has(t.id)&&tags.some(tag=>t.category===tag||t.category.includes(tag)||tag.includes(t.category)))
+          .sort((a,b)=>b.weight-a.weight)
+          .forEach(t=>{
+            if(getLoad(m.id)+t.weight<=m.maxLoad*1.1){
+              assignments[m.id].push(t.id); remaining.delete(t.id);
+            }
+          });
+      });
+    });
+
+    // ── 2단계: 카테고리 매핑 ──
+    [...remaining].forEach(tid=>{
+      const t=autoTasks.find(t=>t.id===tid); if(!t) return;
+      const mid=categoryMapping[t.category];
+      if(mid&&assignments[mid]!==undefined&&getLoad(mid)+t.weight<=members.find(m=>m.id===mid)?.maxLoad*1.1){
+        assignments[mid].push(t.id); remaining.delete(t.id);
+      }
+    });
+
+    // ── 3단계: 주담당 카테고리 ──
+    [...remaining].forEach(tid=>{
+      const t=autoTasks.find(t=>t.id===tid); if(!t) return;
+      // 우선순위 낮은 그룹 순으로 preferred 담당자 찾기
+      let placed=false;
+      for(const g of autoGroups){
+        const pref=autoMembers.filter(m=>m.memberGroupId===g.id&&(affinityData[m.id]?.primaryCats||[]).includes(t.category));
+        if(pref.length){
+          const m=pref.reduce((mn,m)=>getLoad(m.id)<getLoad(mn.id)?m:mn,pref[0]);
+          if(getLoad(m.id)+t.weight<=m.maxLoad*1.1){assignments[m.id].push(t.id);remaining.delete(t.id);placed=true;break;}
+        }
+      }
+    });
+  }
+
+  // ── 4단계: minLoad 채우기 (그룹 우선순위 순) ──
+  autoGroups.forEach(g=>{
+    const gMembers=autoMembers.filter(m=>m.memberGroupId===g.id);
+    gMembers.forEach(m=>{
+      if(getLoad(m.id)>=m.minLoad) return;
+      // 아직 남은 업무 중 가중치 큰 순으로 채우기
+      [...remaining].map(id=>autoTasks.find(t=>t.id===id)).filter(Boolean)
+        .sort((a,b)=>b.weight-a.weight)
+        .forEach(t=>{
+          if(getLoad(m.id)<m.minLoad&&getLoad(m.id)+t.weight<=m.maxLoad){
+            assignments[m.id].push(t.id); remaining.delete(t.id);
+          }
+        });
+    });
+  });
+
+  // ── 5단계: 나머지 균등 배분 (여유 큰 순) ──
+  [...remaining].map(id=>autoTasks.find(t=>t.id===id)).filter(Boolean)
+    .sort((a,b)=>b.weight-a.weight)
+    .forEach(t=>{
+      // maxLoad 여유 가장 큰 담당자
+      const m=autoMembers.filter(m=>getLoad(m.id)<m.maxLoad)
+        .sort((a,b)=>(a.maxLoad-getLoad(a.id))-(b.maxLoad-getLoad(b.id)))[0]
+        || autoMembers.reduce((mn,m)=>getLoad(m.id)<getLoad(mn.id)?m:mn,autoMembers[0]);
+      assignments[m.id].push(t.id); remaining.delete(t.id);
+    });
+
+  // 미배정: 고정업무 중 고정담당자 미배정분
+  const fIds=fixedMembers.map(m=>m.id);
+  const assignedFixed=fIds.flatMap(id=>assignments[id]||[]);
+  assignments.__unassigned__=tasks.filter(t=>t.fixed).map(t=>t.id).filter(id=>!assignedFixed.includes(id));
+
+  renderAssignArea();
+  toast(`배정 완료! (${autoGroups.map(g=>g.name).join('→')} 순 우선배정)`);
+};
+
+window.clearAssignment = () => {
+  members.filter(m=>{const g=memberGroups.find(g=>g.id===m.memberGroupId);return g&&g.autoAssign;}).forEach(m=>assignments[m.id]=[]);
+  const fIds=members.filter(m=>{const g=memberGroups.find(g=>g.id===m.memberGroupId);return g&&!g.autoAssign;}).map(m=>m.id);
+  const af=fIds.flatMap(id=>assignments[id]||[]);
+  assignments.__unassigned__=tasks.filter(t=>!t.fixed).map(t=>t.id).concat(tasks.filter(t=>t.fixed).map(t=>t.id).filter(id=>!af.includes(id)));
+  renderAssignArea();
+};
+
+// ══════════════════════════════════════
+// 드래그 & 드롭
+// ══════════════════════════════════════
+let dragId=null, dragFrom=null;
+window.onDragStart = e=>{dragId=e.target.dataset.id; dragFrom=e.target.closest('[data-member]')?.dataset.member||'__unassigned__'; e.dataTransfer.effectAllowed='move';};
+function makeDrop(el,mid){
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over');});
+  el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
+  el.addEventListener('drop',e=>{
+    e.preventDefault(); el.classList.remove('drag-over');
+    if(!dragId||dragFrom===mid) return;
+    if(mid!=='__unassigned__'&&assignments[mid]?.includes(dragId)){toast('이미 배정된 업무입니다.');return;}
+    assignments[dragFrom]=(assignments[dragFrom]||[]).filter(id=>id!==dragId);
+    assignments[mid]=[...(assignments[mid]||[]),dragId];
+    dragId=null; dragFrom=null;
+    renderAssignArea(); renderMemberList();
+  });
+}
+
+function renderAssignArea(){
+  const unPool=document.getElementById('unassigned-pool');
+  const allUn=assignments.__unassigned__||[];
+  const autoUn=allUn.filter(id=>{const t=tasks.find(t=>t.id===id);return t&&!t.fixed;});
+  const fixedUn=allUn.filter(id=>{const t=tasks.find(t=>t.id===id);return t&&t.fixed;});
+  document.getElementById('unassigned-count').textContent=autoUn.length;
+  document.getElementById('unassigned-warning').classList.toggle('show',autoUn.length>0);
+  unPool.innerHTML=autoUn.length?autoUn.map(tid=>{const t=tasks.find(t=>t.id===tid);return t?taskTagHTML(t,'assign'):'';}).join(''):'<span style="font-size:11px;color:var(--muted);">모든 자동 업무가 배정되었습니다 ✓</span>';
+  makeDrop(unPool,'__unassigned__');
+
+  const grid=document.getElementById('assign-grid');
+  let html='';
+  memberGroups.forEach(g=>{
+    const gm=members.filter(m=>m.memberGroupId===g.id);
+    if(!gm.length) return;
+    html+=`<div style="grid-column:1/-1;" class="sec-label" style="color:${g.color};">▪ ${g.name} ${!g.autoAssign?'(고정전담 - 드래그로 수동배정)':''}</div>`;
+    html+=gm.map(m=>{
+      const load=getLoad(m.id), pct=Math.min(100,Math.round(load/m.maxLoad*100));
+      const tids=assignments[m.id]||[];
+      const overMin=load>=m.minLoad, overMax=load>m.maxLoad;
+      return `<div class="assign-card${!g.autoAssign?' fixed-card':''}" data-member="${m.id}">
+        <div class="assign-card-header">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:${g.color};flex-shrink:0;"></div>
+            <strong style="font-size:12px;">${m.name}</strong>
+            <span class="badge badge-gray" style="font-size:9px;">${m.role||''}</span>
+          </div>
+          <span class="badge ${overMax?'badge-red':overMin?'badge-green':'badge-orange'}" style="font-size:10px;">${load}/${m.maxLoad}${m.minLoad?` (min${m.minLoad})`:''}</span>
+        </div>
+        <div class="load-bar-wrap"><div class="load-bar${overMax?' over':''}" style="width:${pct}%;background:${g.color};"></div></div>
+        <div class="assign-card-body" data-member="${m.id}">
+          ${tids.length?tids.map(tid=>{const t=tasks.find(t=>t.id===tid);return t?taskTagHTML(t,'assign'):'';}).join(''):`<span style="font-size:11px;color:var(--muted);">${g.autoAssign?'드래그하여 배정':'고정 업무를 드래그하여 배정'}</span>`}
+        </div>
+      </div>`;
+    }).join('');
+  });
+
+  // 고정업무 미배정 표시
+  if(fixedUn.length){
+    html+=`<div style="grid-column:1/-1;" class="warn-box show">📌 고정 업무 미배정: ${fixedUn.map(id=>{const t=tasks.find(t=>t.id===id);return t?t.name:'';}).join(', ')}</div>`;
+  }
+  grid.innerHTML=html;
+  grid.querySelectorAll('.assign-card-body').forEach(el=>makeDrop(el,el.dataset.member));
+  grid.querySelectorAll('[draggable]').forEach(el=>el.addEventListener('dragstart',onDragStart));
+  unPool.querySelectorAll('[draggable]').forEach(el=>el.addEventListener('dragstart',onDragStart));
+}
+
+// ══════════════════════════════════════
+// 저장 & 결과
+// ══════════════════════════════════════
+window.saveAndShowResult = async () => {
+  const unLen=(assignments.__unassigned__||[]).filter(id=>{const t=tasks.find(t=>t.id===id);return t&&!t.fixed;}).length;
+  if(unLen>0&&!confirm(`미배정 자동 업무가 ${unLen}개 있습니다. 그래도 저장할까요?`)) return;
+  try {
+    await updateDoc(doc(db,'groups',currentGroup),{memberGroups,members,tasks,assignments,affinityData,categoryMapping,updatedAt:new Date().toISOString()});
+    toast('저장되었습니다.');
+    goToTab('result');
+  } catch(e){toast('저장 실패: '+e.message);}
+};
+
+function renderResult(){
+  const tbody=document.getElementById('result-tbody');
+  let html='';
+  memberGroups.forEach(g=>{
+    const gm=members.filter(m=>m.memberGroupId===g.id);
+    if(!gm.length) return;
+    html+=`<tr><td colspan="4" style="background:${g.color}22;font-size:11px;font-weight:700;color:${g.color};padding:6px 10px;">▪ ${g.name}</td></tr>`;
+    html+=gm.map(m=>{
+      const tids=assignments[m.id]||[];
+      const tobjs=tids.map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
+      const load=tobjs.reduce((s,t)=>s+t.weight,0);
+      const pCats=affinityData[m.id]?.primaryCats||[], rTags=affinityData[m.id]?.roleTags||[];
+      return `<tr>
+        <td><strong>${m.name}</strong></td>
+        <td><span class="badge" style="background:${g.color}22;color:${g.color};">${g.name}</span><br><span style="font-size:10px;color:var(--muted);">${m.role||''}</span></td>
+        <td><div class="task-chips">${tobjs.map(t=>{
+          const isPrim=pCats.includes(t.category)||rTags.some(tag=>t.category===tag||t.category.includes(tag));
+          const isMap=categoryMapping[t.category]===m.id;
+          return `<span class="task-chip${t.fixed?' fixed-chip':isPrim||isMap?' primary-chip':''}" title="${t.category}/★${t.weight}">${isPrim||isMap?'★':''}${t.name}</span>`;
+        }).join('')||'<span style="font-size:10px;color:var(--muted);">미배정</span>'}</div></td>
+        <td><span class="badge ${load>m.maxLoad?'badge-red':load>=m.minLoad?'badge-green':'badge-orange'}">${load}</span></td>
+      </tr>`;
+    }).join('');
+  });
+  tbody.innerHTML=html;
+  const autoG=memberGroups.filter(g=>g.autoAssign), fixedG=memberGroups.filter(g=>!g.autoAssign);
+  const unLen=(assignments.__unassigned__||[]).filter(id=>{const t=tasks.find(t=>t.id===id);return t&&!t.fixed;}).length;
+  document.getElementById('result-summary').innerHTML=`총 ${members.length}명 · 업무 ${tasks.length}개 · 미배정 ${unLen}개 &nbsp;|&nbsp; <span style="color:var(--success);">★ = 주담당 업무</span>`;
+  const url=location.href.split('?')[0]+'?code='+encodeURIComponent(currentGroup);
+  document.getElementById('share-link-box').textContent=url;
+}
+
+window.copyShareLink = async () => {
+  const url=location.href.split('?')[0]+'?code='+encodeURIComponent(currentGroup);
+  try{await navigator.clipboard.writeText(url);toast('링크 복사됨!');}catch{toast('복사 실패');}
+};
+
+// ══════════════════════════════════════
+// 일반 사용자
+// ══════════════════════════════════════
+window.viewGroup = async () => {
+  const gn=document.getElementById('user-group-name').value.trim();
+  if(!gn) return toast('그룹명을 입력해주세요.');
+  await loadGroupView(gn);
+};
+
+async function loadGroupView(gn){
+  try {
+    const snap=await getDoc(doc(db,'groups',gn));
+    if(!snap.exists()) return toast('존재하지 않는 그룹입니다.');
+    const d=snap.data();
+    const mgs=d.memberGroups||[], ms=d.members||[], ts=d.tasks||[], as=d.assignments||{}, af=d.affinityData||{}, cm=d.categoryMapping||{};
+    document.getElementById('view-group-title').textContent=d.displayName||gn;
+    document.getElementById('view-updated').textContent=d.updatedAt?'최종 수정: '+new Date(d.updatedAt).toLocaleString('ko-KR'):'';
+    const tbody=document.getElementById('view-result-tbody');
+    let html='';
+    mgs.forEach(g=>{
+      const gm=ms.filter(m=>m.memberGroupId===g.id);
+      if(!gm.length) return;
+      html+=`<tr><td colspan="4" style="background:${g.color}22;font-size:11px;font-weight:700;color:${g.color};padding:6px 10px;">▪ ${g.name}</td></tr>`;
+      html+=gm.map(m=>{
+        const tids=as[m.id]||[], tobjs=tids.map(id=>ts.find(t=>t.id===id)).filter(Boolean);
+        const load=tobjs.reduce((s,t)=>s+t.weight,0);
+        const pCats=af[m.id]?.primaryCats||[], rTags=af[m.id]?.roleTags||[];
+        return `<tr>
+          <td><strong>${m.name}</strong></td>
+          <td><span class="badge" style="background:${g.color}22;color:${g.color};">${g.name}</span><br><span style="font-size:10px;color:var(--muted);">${m.role||''}</span></td>
+          <td><div class="task-chips">${tobjs.map(t=>{
+            const isPrim=pCats.includes(t.category)||rTags.some(tag=>t.category===tag);
+            const isMap=cm[t.category]===m.id;
+            return `<span class="task-chip${t.fixed?' fixed-chip':isPrim||isMap?' primary-chip':''}">${isPrim||isMap?'★':''}${t.name}</span>`;
+          }).join('')||'<span style="font-size:10px;color:var(--muted);">미배정</span>'}</div></td>
+          <td><span class="badge badge-green">${load}</span></td>
+        </tr>`;
+      }).join('');
+    });
+    tbody.innerHTML=html;
+    showScreen('screen-user-result');
+  } catch(e){toast('오류: '+e.message);}
+}
+
+const urlP=new URLSearchParams(location.search);
+const codeParam=urlP.get('code')||urlP.get('group');
+if(codeParam){
+  document.getElementById('main-header').style.display='flex';
+  document.getElementById('header-back').style.display='block';
+  document.getElementById('user-group-name').value=decodeURIComponent(codeParam);
+  loadGroupView(decodeURIComponent(codeParam));
+}
+
+// ══════════════════════════════════════
+// 엑셀 출력
+// ══════════════════════════════════════
+window.exportExcel = async () => {
+  const wb=new ExcelJS.Workbook();
+  wb.creator='업무분장 자동배정 시스템'; wb.created=new Date();
+  const ws=wb.addWorksheet('업무분장표');
+
+  // 타이틀
+  ws.mergeCells('A1:F1');
+  const t1=ws.getCell('A1'); t1.value=`${currentGroup} 업무분장표`;
+  t1.font={name:'맑은 고딕',size:14,bold:true,color:{argb:'FFFFFFFF'}};
+  t1.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF2563EB'}};
+  t1.alignment={horizontal:'center',vertical:'middle'}; ws.getRow(1).height=32;
+  ws.mergeCells('A2:F2'); ws.getCell('A2').value='작성일: '+new Date().toLocaleDateString('ko-KR');
+  ws.getCell('A2').font={name:'맑은 고딕',size:10,color:{argb:'FF64748B'}};
+  ws.getCell('A2').alignment={horizontal:'right'}; ws.getRow(2).height=18;
+
+  const hRow=ws.addRow(['담당자','그룹/역할','카테고리별 업무','업무 수','가중치합','한도 대비']);
+  hRow.height=22;
+  hRow.eachCell(c=>{c.font={name:'맑은 고딕',size:11,bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1E3A5F'}};c.alignment={horizontal:'center',vertical:'middle'};c.border={top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};});
+
+  memberGroups.forEach(g=>{
+    const gm=members.filter(m=>m.memberGroupId===g.id);
+    if(!gm.length) return;
+    const secR=ws.addRow([`▪ ${g.name}`, '','','','','']);
+    ws.mergeCells(`A${secR.number}:F${secR.number}`);
+    secR.getCell(1).font={name:'맑은 고딕',size:11,bold:true,color:{argb:'FFFFFFFF'}};
+    const hex=g.color.replace('#','FF');
+    secR.getCell(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:hex}};
+    secR.getCell(1).alignment={horizontal:'left',vertical:'middle',indent:1}; secR.height=20;
+
+    gm.forEach((m,idx)=>{
+      const tids=assignments[m.id]||[], tobjs=tids.map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
+      const load=tobjs.reduce((s,t)=>s+t.weight,0);
+      const pct=Math.round(load/m.maxLoad*100);
+      const byCat={};
+      tobjs.forEach(t=>{byCat[t.category]=byCat[t.category]||[];byCat[t.category].push(t.name);});
+      const taskStr=Object.entries(byCat).map(([cat,ns])=>`[${cat}] ${ns.join(', ')}`).join('\n');
+      const row=ws.addRow([m.name, `${g.name}/${m.role||''}`, taskStr, tobjs.length, load, pct+'%']);
+      row.height=Math.max(20,tobjs.length*14);
+      const bg=idx%2===0?'FFFFFFFF':'FFF8FAFC';
+      row.eachCell((c,ci)=>{
+        c.font={name:'맑은 고딕',size:10};
+        c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};
+        c.alignment={vertical:'middle',wrapText:true,horizontal:ci<=2?'center':'left'};
+        c.border={top:{style:'thin',color:{argb:'FFE2E8F0'}},bottom:{style:'thin',color:{argb:'FFE2E8F0'}},left:{style:'thin',color:{argb:'FFE2E8F0'}},right:{style:'thin',color:{argb:'FFE2E8F0'}}};
+      });
+      if(load>m.maxLoad){ws.getCell(`E${row.number}`).font={name:'맑은 고딕',size:10,bold:true,color:{argb:'FFDC2626'}};ws.getCell(`F${row.number}`).font={name:'맑은 고딕',size:10,bold:true,color:{argb:'FFDC2626'}};}
+    });
+  });
+
+  const unF=tasks.filter(t=>!t.fixed).filter(t=>!(Object.values(assignments).flat().includes(t.id)));
+  if(unF.length){
+    const uR=ws.addRow(['【미배정】','',unF.map(t=>t.name).join(', '),unF.length,unF.reduce((s,t)=>s+t.weight,0),'-']);
+    uR.eachCell(c=>{c.font={name:'맑은 고딕',size:10,bold:true,color:{argb:'FFDC2626'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFF7ED'}};c.alignment={vertical:'middle',wrapText:true};});
+  }
+  ws.columns=[{width:12},{width:16},{width:52},{width:10},{width:10},{width:10}];
+
+  // 시트2: 업무 목록
+  const ws2=wb.addWorksheet('업무 키워드 목록');
+  ws2.addRow(['업무명','카테고리','유형','가중치','배정 담당자','그룹']).eachCell(c=>{c.font={name:'맑은 고딕',size:10,bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF2563EB'}};c.alignment={horizontal:'center'};});
+  tasks.forEach((t,i)=>{
+    const m=members.find(m=>(assignments[m.id]||[]).includes(t.id));
+    const g=m?memberGroups.find(g=>g.id===m?.memberGroupId):null;
+    const r=ws2.addRow([t.name,t.category,t.fixed?'📌 고정전용':'🔄 자동배정',t.weight,m?m.name:'미배정',g?g.name:'']);
+    const bg=t.fixed?'FFF5F3FF':(i%2===0?'FFFFFFFF':'FFF8FAFC');
+    r.eachCell(c=>{c.font={name:'맑은 고딕',size:10};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};c.alignment={horizontal:'center'};});
+    if(!m) ws2.getCell(`E${r.number}`).font={name:'맑은 고딕',size:10,color:{argb:'FFDC2626'}};
+  });
+  ws2.columns=[{width:28},{width:12},{width:14},{width:10},{width:14},{width:14}];
+
+  // 시트3: 그룹별 부담 요약
+  const ws3=wb.addWorksheet('그룹 부담 요약');
+  ws3.addRow(['그룹','담당자','역할','배정업무수','가중치합','최소','최대','상태']).eachCell(c=>{c.font={name:'맑은 고딕',size:10,bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1E3A5F'}};c.alignment={horizontal:'center'};});
+  memberGroups.forEach(g=>{
+    members.filter(m=>m.memberGroupId===g.id).forEach((m,i)=>{
+      const load=getLoad(m.id), cnt=(assignments[m.id]||[]).length;
+      const status=load>m.maxLoad?'⚠️ 초과':load>=m.minLoad?'✅ 정상':'🔸 미달';
+      const r=ws3.addRow([g.name,m.name,m.role||'',cnt,load,m.minLoad,m.maxLoad,status]);
+      const bg=i%2===0?'FFFFFFFF':'FFF8FAFC';
+      r.eachCell(c=>{c.font={name:'맑은 고딕',size:10};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};c.alignment={horizontal:'center'};});
+    });
+  });
+  ws3.columns=[{width:14},{width:12},{width:14},{width:10},{width:10},{width:8},{width:8},{width:10}];
+
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`${currentGroup}_업무분장_${new Date().toISOString().split('T')[0]}.xlsx`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('엑셀 파일 다운로드 완료!');
+};
+
+// ══════════════════════════════════════
+// 그룹 삭제
+// ══════════════════════════════════════
+window.deleteCurrentGroup = async () => {
+  const pwd=document.getElementById('delete-confirm-password').value;
+  if(!pwd) return toast('비밀번호를 입력해주세요.');
+  try {
+    const snap=await getDoc(doc(db,'groups',currentGroup));
+    if(!snap.exists()||snap.data().password!==pwd){document.getElementById('delete-confirm-password').value='';return toast('비밀번호가 일치하지 않습니다.');}
+    if(!confirm(`'${currentGroup}' 그룹을 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    await deleteDoc(doc(db,'groups',currentGroup));
+    toast('삭제되었습니다.'); logout();
+  } catch(e){toast('삭제 실패: '+e.message);}
+};
+
+// ══════════════════════════════════════
+// 총괄 관리자 (이스터에그)
+// ══════════════════════════════════════
+let cc=0, ct;
+let allGroupsCache=[];
+document.getElementById('easter-egg-btn').addEventListener('click',()=>{
+  cc++; clearTimeout(ct); ct=setTimeout(()=>cc=0,2000);
+  if(cc>=5){cc=0;const p=prompt('총괄 관리자 코드를 입력하세요.');if(p==='9585703'){loadSuperAdmin();showScreen('screen-superadmin');}else if(p!==null)toast('인증 실패');}
+});
+
+async function loadSuperAdmin(){
+  const list=document.getElementById('superadmin-list');
+  const stats=document.getElementById('superadmin-stats');
+  list.innerHTML='<p style="font-size:12px;color:var(--muted);padding:12px;">불러오는 중...</p>';
+  try {
+    const snap=await getDocs(collection(db,'groups'));
+    if(snap.empty){list.innerHTML='<p style="padding:12px;">생성된 그룹이 없습니다.</p>';return;}
+    allGroupsCache=[];
+    snap.forEach(d=>allGroupsCache.push({id:d.id,...d.data()}));
+
+    // 통계
+    const total=allGroupsCache.length;
+    const now=Date.now(), week=7*24*60*60*1000;
+    const recent=allGroupsCache.filter(g=>g.createdAt&&(now-new Date(g.createdAt).getTime())<week).length;
+    const old=allGroupsCache.filter(g=>g.createdAt&&(now-new Date(g.createdAt).getTime())>365*24*60*60*1000).length;
+    stats.innerHTML=`
+      <div style="background:#eff6ff;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:var(--primary);">${total}</div>
+        <div style="font-size:10px;color:var(--muted);">전체 그룹</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:var(--success);">${recent}</div>
+        <div style="font-size:10px;color:var(--muted);">최근 7일</div>
+      </div>
+      <div style="background:${old>0?'#fff7ed':'#f8fafc'};border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:${old>0?'var(--warning)':'var(--muted)'};">${old}</div>
+        <div style="font-size:10px;color:var(--muted);">1년 이상 (정리 권장)</div>
+      </div>`;
+
+    filterSuperAdmin();
+  } catch(e){list.innerHTML=`<p style="font-size:12px;color:var(--danger);padding:12px;">로드 실패: ${e.message}</p>`;}
+}
+
+window.filterSuperAdmin = () => {
+  const q=(document.getElementById('sa-search')?.value||'').toLowerCase();
+  const sort=document.getElementById('sa-sort')?.value||'date-desc';
+  let filtered=[...allGroupsCache].filter(g=>
+    !q || g.id.toLowerCase().includes(q) || (g.displayName||'').toLowerCase().includes(q)
+  );
+  if(sort==='date-desc') filtered.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  else if(sort==='date-asc') filtered.sort((a,b)=>new Date(a.createdAt||0)-new Date(b.createdAt||0));
+  else filtered.sort((a,b)=>(a.displayName||a.id).localeCompare(b.displayName||b.id,'ko'));
+
+  const now=Date.now(), year=365*24*60*60*1000;
+  const list=document.getElementById('superadmin-list');
+  if(!filtered.length){list.innerHTML='<p style="font-size:12px;color:var(--muted);padding:12px;">검색 결과가 없습니다.</p>';return;}
+  list.innerHTML=filtered.map(g=>{
+    const date=g.createdAt?new Date(g.createdAt).toLocaleDateString('ko-KR'):'-';
+    const updated=g.updatedAt?new Date(g.updatedAt).toLocaleDateString('ko-KR'):'-';
+    const mc=(g.members||[]).length, tc=(g.tasks||[]).length;
+    const isOld=g.createdAt&&(now-new Date(g.createdAt).getTime())>year;
+    const hasResult=g.updatedAt&&g.updatedAt!==g.createdAt;
+    return `<div style="padding:10px 12px;border-bottom:1px solid var(--border);${isOld?'background:#fff7ed;':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:13px;">${g.displayName||'(이름없음)'}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:1px;">
+            코드: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;font-weight:700;">${g.id}</code>
+            ${isOld?'<span class="badge badge-orange" style="font-size:9px;margin-left:4px;">⚠️ 정리권장</span>':''}
+            ${hasResult?'<span class="badge badge-green" style="font-size:9px;margin-left:4px;">✅ 배정완료</span>':''}
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">담당자 ${mc}명 · 업무 ${tc}개 · 생성 ${date} · 수정 ${updated}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="superDel('${g.id}')">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.superDel = async id=>{
+  const g=allGroupsCache.find(g=>g.id===id);
+  if(!confirm(`'${g?.displayName||id}' (코드: ${id}) 그룹을 삭제할까요?`)) return;
+  try{await deleteDoc(doc(db,'groups',id));toast('삭제됨');loadSuperAdmin();}catch(e){toast('실패: '+e.message);}
+};
+</script>
+</body>
+</html>
