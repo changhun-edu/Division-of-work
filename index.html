@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 <style>
 :root {
@@ -30,6 +33,7 @@ body{
 }
 .app-header h1{font-size:var(--fs-md);font-weight:700;flex:1;letter-spacing:-.3px;}
 .app-header .sub{font-size:var(--fs-xs);opacity:.65;margin-top:1px;}
+.app-header [onclick]{transition:opacity .15s;}.app-header [onclick]:hover{opacity:.75;}
 .container{max-width:960px;margin:0 auto;padding:22px 18px;}
 .screen{display:none;} .screen.active{display:block;}
 .card{
@@ -389,14 +393,65 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
   .hero-title{font-size:var(--fs-xl);}
   .guide-step{min-width:72px;}
 }
+
+/* ── 빠른 시작 마법사 ── */
+.wizard-steps{display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid var(--border);}
+.wz-step{flex:1;text-align:center;padding:12px 4px 14px;font-size:var(--fs-xs);font-weight:700;color:var(--muted);position:relative;cursor:default;transition:all .2s;}
+.wz-step.active{color:var(--primary);}
+.wz-step.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:3px;background:var(--primary);border-radius:2px 2px 0 0;}
+.wz-step.done{color:var(--success);}
+.wz-step.done::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:3px;background:var(--success);}
+.wz-num{width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:var(--fs-xs);margin:0 auto 5px;}
+.wz-step.active .wz-num{background:var(--primary);color:#fff;}
+.wz-step.done .wz-num{background:var(--success);color:#fff;}
+
+/* 학급수 계산 */
+.grade-calc-box{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1.5px solid #bfdbfe;border-radius:12px;padding:18px;margin-bottom:14px;}
+.grade-result{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.grade-result-item{background:#fff;border-radius:10px;padding:12px 14px;border:1.5px solid var(--border);}
+.grade-result-item .val{font-size:var(--fs-xl);font-weight:900;color:var(--primary);}
+.grade-result-item .lbl{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
+
+/* 담당자 일괄 입력 */
+.bulk-input-area{width:100%;min-height:120px;padding:13px;border:1.5px solid var(--border);border-radius:10px;font-size:var(--fs-sm);font-family:inherit;background:#fff;resize:vertical;margin-bottom:8px;line-height:1.8;}
+.bulk-input-area:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(29,78,216,.1);}
+
+/* 업무 체크박스 */
+.task-check-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
+.task-search-input{flex:1;min-width:150px;margin-bottom:0;padding:9px 13px;}
+.task-check-grid{display:flex;flex-direction:column;gap:2px;max-height:460px;overflow-y:auto;border:1.5px solid var(--border);border-radius:10px;padding:8px;}
+.task-check-section{margin-bottom:4px;}
+.task-check-section-title{font-size:var(--fs-xs);font-weight:700;color:var(--muted);padding:8px 10px;background:#f0f4f8;border-radius:8px;margin-bottom:3px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.task-check-section-title:hover{background:#e4e9f0;}
+.task-check-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:background .1s;border:1.5px solid transparent;}
+.task-check-item:hover{background:#f8fafc;border-color:var(--border);}
+.task-check-item.checked{background:#eff6ff;border-color:#bfdbfe;}
+.task-check-item.checked.fixed-item{background:#f5f3ff;border-color:#c4b5fd;}
+.task-check-cb{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.task-check-item.checked .task-check-cb{background:var(--primary);border-color:var(--primary);}
+.task-check-item.checked.fixed-item .task-check-cb{background:#7c3aed;border-color:#7c3aed;}
+.task-check-name{flex:1;font-size:var(--fs-sm);}
+.task-check-cat{font-size:12px;color:var(--muted);background:#f0f4f8;padding:2px 8px;border-radius:8px;white-space:nowrap;}
+.task-check-w{font-size:12px;font-weight:700;min-width:28px;text-align:center;}
+.task-count-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;margin-bottom:12px;font-size:var(--fs-sm);font-weight:700;color:#15803d;}
+
+/* 친화도 자동추천 */
+.affinity-auto-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;background:#fff;}
+.affinity-auto-tags{display:flex;flex-wrap:wrap;gap:6px;flex:1;}
+.affinity-auto-tag{padding:5px 12px;border-radius:14px;font-size:var(--fs-xs);font-weight:700;background:#dbeafe;color:#1d4ed8;cursor:pointer;border:2px solid #93c5fd;transition:all .15s;}
+.affinity-auto-tag.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
 </style>
 </head>
 <body>
 
 <div class="app-header" id="main-header" style="display:none;">
-  <span style="font-size:22px;">📋</span>
-  <div><h1 id="app-title">업무분장 자동배정</h1><div class="sub">학교 업무분장 관리 시스템</div></div>
-  <button class="btn btn-ghost btn-sm" id="header-back" onclick="goHome()" style="display:none;">← 홈</button>
+  <span style="font-size:22px;cursor:pointer;" onclick="goHome()" title="홈으로">📋</span>
+  <div style="cursor:pointer;flex:1;" onclick="goHome()" title="홈으로">
+    <h1 id="app-title" style="transition:opacity .15s;">업무분장 자동배정</h1>
+    <div class="sub" id="app-subtitle">초등학교 업무분장 관리 시스템</div>
+  </div>
+  <button class="btn btn-ghost btn-sm" id="header-back" onclick="goHome()">🏠 홈</button>
 </div>
 
 <div class="container">
@@ -529,7 +584,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
       </div>
       <button class="btn btn-success btn-full" onclick="copyCreatedCode()">📋 코드 복사하기</button>
       <p style="font-size:11px;color:var(--danger);text-align:center;margin-top:6px;">⚠️ 코드를 잃어버리면 그룹에 접속할 수 없습니다!</p>
-      <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="goToLoginWithCode()">바로 관리 모드로 접속 →</button>
+      <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="goToLoginWithCode()">🧙 빠른 시작 마법사 시작 →</button>
     </div>
   </div>
 </div>
@@ -550,6 +605,126 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
 </div>
 
 <!-- 관리자 대시보드 -->
+
+<!-- ═══ 빠른 시작 마법사 ═══ -->
+<div id="screen-wizard" class="screen">
+  <div class="wizard-steps">
+    <div class="wz-step active" id="wz1"><div class="wz-num">1</div>학교설정</div>
+    <div class="wz-step" id="wz2"><div class="wz-num">2</div>담당자입력</div>
+    <div class="wz-step" id="wz3"><div class="wz-num">3</div>업무선택</div>
+    <div class="wz-step" id="wz4"><div class="wz-num">4</div>친화도</div>
+  </div>
+
+  <!-- 1단계: 학교 설정 -->
+  <div id="wz-step1">
+    <div class="card">
+      <div class="card-title">🏫 학교 기본 정보</div>
+      <label>학급 수</label>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <input type="number" id="wz-grade-count" placeholder="24" min="1" max="60"
+          style="width:120px;margin-bottom:0;font-size:var(--fs-xl);font-weight:700;text-align:center;"
+          oninput="calcGrade()">
+        <span style="font-size:var(--fs-md);font-weight:700;color:var(--text);">학급</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:16px;">※ 특수학급·한국어학급을 포함한 전체 학급 수를 입력하세요.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:var(--fs-sm);color:var(--text);font-weight:400;">
+          <input type="checkbox" id="wz-has-team" onchange="calcGrade()"
+            style="width:20px;height:20px;margin-bottom:0;flex-shrink:0;accent-color:var(--primary);">
+          업무지원팀(부장교사) 있음
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:var(--fs-sm);color:var(--text);font-weight:400;">
+          <input type="checkbox" id="wz-extra-one" checked onchange="calcGrade()"
+            style="width:20px;height:20px;margin-bottom:0;flex-shrink:0;accent-color:var(--primary);">
+          추가 1인 보직교사 임용
+        </label>
+      </div>
+      <div class="grade-calc-box" id="grade-calc-result" style="display:none;">
+        <div style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);margin-bottom:12px;">📊 보직교사 자동 계산 결과</div>
+        <div class="grade-result">
+          <div class="grade-result-item"><div class="val" id="calc-base">-</div><div class="lbl">기준 보직교사 수</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-total">-</div><div class="lbl">추가 포함 총 보직수</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-team">-</div><div class="lbl">업무지원팀 (제안)</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-paid">-</div><div class="lbl">수당부장 (제안)</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 담당자 그룹 구성</div>
+      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:14px;">학급 수 기반으로 자동 제안됩니다. 그룹명·부담 범위를 수정할 수 있습니다.</p>
+      <div id="wz-group-list"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" onclick="showScreen('screen-host-menu')" style="flex:1;">← 뒤로</button>
+      <button class="btn btn-primary" onclick="goWzStep(2)" style="flex:2;">다음: 담당자 입력 →</button>
+    </div>
+  </div>
+
+  <!-- 2단계: 담당자 일괄 입력 -->
+  <div id="wz-step2" style="display:none;">
+    <div class="card">
+      <div class="card-title">👤 담당자 일괄 입력</div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:var(--fs-xs);color:#1e40af;margin-bottom:16px;">
+        💡 <strong>한 줄에 한 명씩</strong> 입력하세요.<br>
+        형식: <code style="background:#dbeafe;padding:2px 7px;border-radius:4px;">이름, 역할</code>
+        &nbsp; 예) <code style="background:#dbeafe;padding:2px 7px;border-radius:4px;">김진성, 교무부장</code>
+      </div>
+      <div id="wz-bulk-sections"></div>
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-top:12px;font-size:var(--fs-sm);font-weight:700;color:#15803d;">
+        ✅ 총 <strong id="bulk-total-count">0</strong>명 입력됨
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" onclick="goWzStep(1)" style="flex:1;">← 이전</button>
+      <button class="btn btn-primary" onclick="goWzStep(3)" style="flex:2;">다음: 업무 선택 →</button>
+    </div>
+  </div>
+
+  <!-- 3단계: 업무 체크박스 -->
+  <div id="wz-step3" style="display:none;">
+    <div class="card">
+      <div class="card-title">☑️ 업무 선택</div>
+      <div class="task-count-bar">
+        ✅ 선택: <strong id="checked-count">0</strong>개
+        <span style="color:var(--muted);font-weight:400;margin-left:4px;">/ 전체 <span id="total-count">0</span>개</span>
+      </div>
+      <div class="task-check-toolbar">
+        <input type="text" class="task-search-input" placeholder="🔍 업무 검색..." oninput="filterTaskChecks(this.value)">
+        <button class="btn btn-ghost btn-sm" onclick="checkAllTasks(true)">전체선택</button>
+        <button class="btn btn-ghost btn-sm" onclick="checkAllTasks(false)">전체해제</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterByType('auto')">🔄 자동만</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterByType('fixed')">📌 고정만</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterByType('all')">전체</button>
+      </div>
+      <div class="task-check-grid" id="task-check-grid"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" onclick="goWzStep(2)" style="flex:1;">← 이전</button>
+      <button class="btn btn-primary" onclick="goWzStep(4)" style="flex:2;">다음: 친화도 설정 →</button>
+    </div>
+  </div>
+
+  <!-- 4단계: 친화도 자동추천 -->
+  <div id="wz-step4" style="display:none;">
+    <div class="card">
+      <div class="card-title">🎯 친화도 자동 추천</div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:var(--fs-xs);color:#1e40af;margin-bottom:14px;">
+        💡 역할명을 분석해 관련 카테고리를 자동 추천합니다.<br>
+        <strong>파란 태그를 클릭</strong>해 활성화(진파랑)하면 해당 업무가 우선 배정됩니다.
+      </div>
+      <div id="affinity-auto-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗂️ 카테고리 직접 매핑 <span style="font-size:var(--fs-xs);font-weight:400;color:var(--muted);">(선택 사항)</span></div>
+      <div id="wz-cat-map-list"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" onclick="goWzStep(3)" style="flex:1;">← 이전</button>
+      <button class="btn btn-success" onclick="finishWizard()" style="flex:2;">✅ 완료 → 자동배정 실행</button>
+    </div>
+  </div>
+</div>
+
 <div id="screen-admin-dashboard" class="screen">
   <div class="steps">
     <div class="step active" id="step1">① 그룹설정</div>
@@ -837,19 +1012,59 @@ const TAB_ORDER = ['groups','members','tasks','affinity','assign','result'];
 // ══════════════════════════════════════
 // UI 유틸
 // ══════════════════════════════════════
-window.showScreen = id => {
+// UI 유틸
+// ══════════════════════════════════════
+window.showScreen = (id, pushState=true) => {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const el = document.getElementById(id);
+  if(!el){ showScreen('screen-home', false); return; }
+  el.classList.add('active');
   window.scrollTo(0,0);
   const isHome = id==='screen-home';
   document.getElementById('header-back').style.display = isHome?'none':'block';
   document.getElementById('main-header').style.display = isHome?'none':'flex';
+  // History API: 뒤로가기 지원
+  if(pushState){
+    const safe = ['screen-home','screen-host-menu','screen-host-create','screen-host-login','screen-user-login'];
+    if(safe.includes(id)){
+      history.pushState({screen:id}, '', location.pathname + (id==='screen-home'?'':'#'+id));
+    }
+  }
 };
+// 뒤로가기 버튼 처리
+window.addEventListener('popstate', e => {
+  const screen = e.state?.screen || 'screen-home';
+  // 로그인 상태가 필요한 화면이면 홈으로 리다이렉트
+  const needLogin = ['screen-admin-dashboard','screen-wizard'];
+  if(needLogin.includes(screen) && !currentGroup){
+    showScreen('screen-home', false);
+    return;
+  }
+  showScreen(screen, false);
+});
+// 새로고침 시 안전 복귀
+window.addEventListener('DOMContentLoaded', () => {
+  // URL 파라미터 처리는 아래 firebase 로딩 후 처리
+  // hash 기반 복귀 (로그인 불필요한 화면만)
+  const hash = location.hash.replace('#','');
+  const safeScreens = ['screen-home','screen-host-menu','screen-host-create','screen-host-login','screen-user-login'];
+  if(hash && safeScreens.includes(hash)){
+    showScreen(hash, false);
+  } else {
+    showScreen('screen-home', false);
+  }
+  // 초기 상태 기록
+  if(!history.state){
+    history.replaceState({screen:'screen-home'}, '', location.pathname);
+  }
+});
+
 window.goHome = () => {
   currentGroup=""; memberGroups=[]; members=[]; tasks=[]; assignments={}; affinityData={}; categoryMapping={};
   document.getElementById('app-title').textContent='업무분장 자동배정';
-  document.getElementById('app-subtitle').textContent='학교 업무분장 관리 시스템';
+  document.getElementById('app-subtitle').textContent='초등학교 업무분장 관리 시스템';
   showScreen('screen-home');
+  history.replaceState({screen:'screen-home'}, '', location.pathname);
 };
 window.logout = () => goHome();
 
@@ -931,21 +1146,26 @@ window.copyCreatedCode = async () => {
 };
 
 window.goToLoginWithCode = async () => {
-  // 방금 만든 그룹으로 바로 로그인
   currentGroup=createdGroupId; currentAdminPwd=createdGroupPwd;
   const snap=await getDoc(doc(db,'groups',createdGroupId));
   const d=snap.data();
-  memberGroups=d.memberGroups||[]; members=d.members||[]; tasks=d.tasks||[];
-  assignments=d.assignments||{}; affinityData=d.affinityData||{}; categoryMapping=d.categoryMapping||{};
-  if(!assignments.UNASSIGNED) assignments.UNASSIGNED=[];
-  // 화면 초기화 (다음 번 열릴 때 대비)
+  memberGroups=[]; members=[]; tasks=[]; assignments={UNASSIGNED:[]}; affinityData={}; categoryMapping={};
+  // 헤더 업데이트
+  document.getElementById('app-title').textContent=d.displayName||createdGroupId;
+  document.getElementById('app-subtitle').textContent=`코드: ${createdGroupId} | 관리자 모드`;
+  // 그룹 생성 화면 초기화
   document.getElementById('create-result-box').style.display='none';
   document.querySelector('#screen-host-create .card').style.display='block';
   document.getElementById('create-group-name').value='';
   document.getElementById('create-password').value='';
-  showScreen('screen-admin-dashboard');
-  goToTab('groups');
-  toast(`그룹 ${createdGroupId} (${d.displayName}) 로그인됨`);
+  // 마법사 상태 초기화
+  wzGroups=[]; wzCheckedTasks=new Set(ALL_DEFAULT_TASKS.map((_,i)=>i));
+  wzAffinityData={}; wzCatMap={};
+  buildWzGroups(false,0,9);
+  // 마법사 화면으로 이동
+  showScreen('screen-wizard');
+  goWzStep(1);
+  toast(`'${d.displayName||createdGroupId}' 생성 완료! 빠른 시작 마법사를 시작합니다.`);
 };
 
 window.loginAdmin = async () => {
@@ -960,13 +1180,21 @@ window.loginAdmin = async () => {
       memberGroups=d.memberGroups||[]; members=d.members||[]; tasks=d.tasks||[];
       assignments=d.assignments||{}; affinityData=d.affinityData||{}; categoryMapping=d.categoryMapping||{};
       if(!assignments.UNASSIGNED) assignments.UNASSIGNED=tasks.map(t=>t.id).filter(id=>!Object.values(assignments).flat().includes(id));
-      // 헤더에 학교명 표시
       const dName=d.displayName||code;
       document.getElementById('app-title').textContent=dName;
       document.getElementById('app-subtitle').textContent=`코드: ${code} | 관리자 모드`;
-      showScreen('screen-admin-dashboard');
-      goToTab('groups');
-      toast(`${dName} 로그인됨`);
+      const isEmpty=!members.length && !tasks.length;
+      if(isEmpty){
+        wzGroups=[]; wzCheckedTasks=new Set(ALL_DEFAULT_TASKS.map((_,i)=>i));
+        wzAffinityData={}; wzCatMap={};
+        buildWzGroups(false,0,9);
+        showScreen('screen-wizard'); goWzStep(1);
+        toast(`'${dName}' 접속! 빠른 시작 마법사를 시작합니다.`);
+      } else {
+        showScreen('screen-admin-dashboard');
+        goToTab(tasks.length?'assign':'groups');
+        toast(`'${dName}' 이어서 작업합니다.`);
+      }
     } else toast('코드 또는 비밀번호가 다릅니다.');
   } catch(e){toast('오류: '+e.message);}
 };
@@ -1613,10 +1841,13 @@ async function loadGroupView(gn){
 const urlP=new URLSearchParams(location.search);
 const codeParam=urlP.get('code')||urlP.get('group');
 if(codeParam){
+  // 공유 링크 직접 접속: URL 파라미터로 열람 화면 바로 진입
   document.getElementById('main-header').style.display='flex';
   document.getElementById('header-back').style.display='block';
   document.getElementById('user-group-name').value=decodeURIComponent(codeParam);
   loadGroupView(decodeURIComponent(codeParam));
+  // 뒤로가기 시 홈으로
+  history.replaceState({screen:'screen-user-result'}, '', location.href);
 }
 
 // ══════════════════════════════════════
@@ -1812,6 +2043,326 @@ window.superDel = async id=>{
   if(!confirm(`'${g?.displayName||id}' (코드: ${id}) 그룹을 삭제할까요?`)) return;
   try{await deleteDoc(doc(db,'groups',id));toast('삭제됨');loadSuperAdmin();}catch(e){toast('실패: '+e.message);}
 };
+
+// ════════════════════════════════════
+// 빠른 시작 마법사 JS
+// ════════════════════════════════════
+
+// 보직교사 계산
+function calcBojeok(g){
+  if(g<6)return 1; if(g<=11)return 2; if(g<=17)return 4;
+  if(g<=23)return 6; if(g<=29)return 8; if(g<=35)return 10; return 12;
+}
+window.calcGrade=()=>{
+  const g=parseInt(document.getElementById('wz-grade-count').value)||0;
+  const hasTeam=document.getElementById('wz-has-team').checked;
+  const extra=document.getElementById('wz-extra-one').checked;
+  const box=document.getElementById('grade-calc-result');
+  if(!g){box.style.display='none';return;}
+  box.style.display='block';
+  const base=calcBojeok(g), total=extra?base+1:base;
+  const teamCnt=hasTeam?4:0, paidCnt=Math.max(0,total-teamCnt);
+  document.getElementById('calc-base').textContent=base+'명';
+  document.getElementById('calc-total').textContent=total+'명';
+  document.getElementById('calc-team').textContent=hasTeam?teamCnt+'명':'없음';
+  document.getElementById('calc-paid').textContent=paidCnt+'명';
+  buildWzGroups(hasTeam,teamCnt,paidCnt);
+};
+
+let wzGroups=[];
+const DEFAULT_WZ_GROUPS=[
+  {id:'wg_sup',name:'교감',color:'#dc2626',minLoad:5,maxLoad:12,autoAssign:true,priority:1},
+  {id:'wg_team',name:'업무지원팀',color:'#2563eb',minLoad:15,maxLoad:25,autoAssign:true,priority:2},
+  {id:'wg_paid',name:'수당부장',color:'#16a34a',minLoad:8,maxLoad:15,autoAssign:true,priority:3},
+  {id:'wg_vol',name:'봉사부장',color:'#d97706',minLoad:3,maxLoad:8,autoAssign:true,priority:4},
+  {id:'wg_fixed',name:'고정전담',color:'#7c3aed',minLoad:0,maxLoad:0,autoAssign:false,priority:9},
+];
+const COLOR_NAMES_WZ={'#dc2626':'빨강','#2563eb':'파랑','#16a34a':'초록','#d97706':'주황','#7c3aed':'보라','#0891b2':'청록','#475569':'회색'};
+
+function buildWzGroups(hasTeam,teamCnt,paidCnt){
+  wzGroups=DEFAULT_WZ_GROUPS.filter(g=>hasTeam||g.id!=='wg_team').map(g=>({...g}));
+  renderWzGroupList();
+}
+
+function renderWzGroupList(){
+  const list=document.getElementById('wz-group-list');
+  if(!list)return;
+  list.innerHTML=wzGroups.map(g=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid ${g.color}44;border-left:4px solid ${g.color};border-radius:10px;margin-bottom:8px;background:#fff;">
+      <div style="width:16px;height:16px;border-radius:50%;background:${g.color};flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:var(--fs-sm);">${g.name}
+          <span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:8px;background:${g.color}22;color:${g.color};margin-left:6px;">${g.autoAssign?'🔄 자동':'📌 고정'}</span>
+        </div>
+        <div style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px;">부담 ${g.minLoad}~${g.maxLoad} · 우선순위 ${g.priority}</div>
+      </div>
+    </div>`).join('');
+}
+
+// 초기 그룹 렌더링
+buildWzGroups(false,0,9);
+
+// 마법사 단계 이동
+window.goWzStep=step=>{
+  [1,2,3,4].forEach(i=>{
+    const el=document.getElementById('wz-step'+i);
+    if(el) el.style.display=i===step?'block':'none';
+    const wz=document.getElementById('wz'+i);
+    if(wz) wz.className='wz-step'+(i===step?' active':(i<step?' done':''));
+  });
+  if(step===2) renderWzBulkInput();
+  if(step===3) renderTaskChecks();
+  if(step===4) renderAffinityAuto();
+  window.scrollTo(0,0);
+};
+
+// 담당자 일괄 입력
+function renderWzBulkInput(){
+  const sec=document.getElementById('wz-bulk-sections');if(!sec)return;
+  const autoG=wzGroups.filter(g=>g.autoAssign);
+  sec.innerHTML=autoG.map(g=>`
+    <div style="margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:12px;height:12px;border-radius:50%;background:${g.color};"></div>
+        <span style="font-weight:700;font-size:var(--fs-sm);color:${g.color};">${g.name}</span>
+        <span style="font-size:var(--fs-xs);color:var(--muted);">· 이름, 역할 (한 줄에 한 명)</span>
+      </div>
+      <textarea class="bulk-input-area" id="bulk-${g.id}"
+        placeholder="김진성, 교무부장&#10;박선옥, 연구부장"
+        oninput="updateBulkCount()"></textarea>
+    </div>`).join('');
+  updateBulkCount();
+}
+
+window.updateBulkCount=()=>{
+  let total=0;
+  wzGroups.filter(g=>g.autoAssign).forEach(g=>{
+    const el=document.getElementById('bulk-'+g.id);
+    if(el) total+=el.value.split('\n').filter(l=>l.trim()).length;
+  });
+  const el=document.getElementById('bulk-total-count');
+  if(el) el.textContent=total;
+};
+
+function parseBulkMembers(){
+  const result=[];
+  wzGroups.forEach(g=>{
+    const el=document.getElementById('bulk-'+g.id);
+    if(!el)return;
+    el.value.split('\n').forEach(line=>{
+      const parts=line.split(',').map(s=>s.trim());
+      if(!parts[0])return;
+      result.push({id:'m_'+Date.now()+Math.random().toString(36).slice(2,5),
+        name:parts[0],role:parts[1]||'',memberGroupId:g.id,minLoad:g.minLoad,maxLoad:g.maxLoad});
+    });
+  });
+  return result;
+}
+
+// 업무 체크박스
+const ALL_DEFAULT_TASKS=[
+  {n:'학사일정',c:'교무',w:3,f:false},{n:'주간·월간교육계획',c:'교무',w:2,f:false},{n:'학교일지',c:'교무',w:2,f:false},
+  {n:'보결업무',c:'교무',w:2,f:false},{n:'취학업무',c:'교무',w:2,f:false},{n:'학급편성',c:'교무',w:3,f:false},
+  {n:'개별체험학습',c:'교무',w:2,f:false},{n:'학교시정',c:'교무',w:2,f:false},{n:'새학년준비기',c:'교무',w:2,f:false},
+  {n:'운남축제',c:'행사',w:3,f:false},{n:'어울림마당',c:'행사',w:2,f:false},{n:'학교설명회',c:'행사',w:2,f:false},
+  {n:'각종행사지원',c:'행사',w:2,f:false},{n:'학부모회운영',c:'교무',w:2,f:false},{n:'교직원회운영',c:'교무',w:2,f:false},
+  {n:'학교규칙',c:'교무',w:2,f:false},{n:'계기교육',c:'교육',w:1,f:false},{n:'다문화교육',c:'교육',w:2,f:false},
+  {n:'경제교육',c:'교육',w:1,f:false},{n:'통일교육',c:'교육',w:1,f:false},{n:'마을교육공동체',c:'교육',w:3,f:false},
+  {n:'장학생·장학금',c:'복지',w:2,f:false},{n:'국제교류',c:'교육',w:2,f:false},
+  {n:'학교교육과정편성운영',c:'연구',w:4,f:false},{n:'전체시간표관리',c:'연구',w:3,f:false},
+  {n:'교육과정돌아보기',c:'연구',w:2,f:false},{n:'전문적학습공동체',c:'연구',w:3,f:false},
+  {n:'기초학력향상(두드림)',c:'연구',w:3,f:false},{n:'학생동아리조직운영',c:'연구',w:2,f:false},
+  {n:'수학교육',c:'교육',w:2,f:false},{n:'융합교육',c:'교육',w:2,f:false},{n:'독서교육(교원)',c:'교육',w:1,f:false},
+  {n:'e학습터',c:'정보',w:2,f:false},{n:'디지털교과서',c:'정보',w:2,f:false},{n:'민주인권평화동아리',c:'교육',w:2,f:false},
+  {n:'학교폭력전담기구',c:'생활',w:5,f:false},{n:'학생자치회',c:'생활',w:2,f:false},
+  {n:'학생생활규정',c:'생활',w:3,f:false},{n:'선도위원회',c:'생활',w:4,f:false},
+  {n:'위기관리위원회',c:'생활',w:3,f:false},{n:'학생대피훈련',c:'생활',w:2,f:false},
+  {n:'안전교육',c:'생활',w:2,f:false},{n:'배움터지킴이',c:'생활',w:2,f:false},{n:'교통봉사관리',c:'생활',w:1,f:false},
+  {n:'혁신학교운영',c:'혁신',w:3,f:false},{n:'공간혁신',c:'혁신',w:2,f:false},
+  {n:'양성평등',c:'교육',w:1,f:false},{n:'학생봉사',c:'생활',w:1,f:false},{n:'인성교육',c:'교육',w:1,f:false},
+  {n:'사회정서교육',c:'생활',w:2,f:false},
+  {n:'NEIS운영',c:'정보',w:3,f:false},{n:'학교생활기록부',c:'정보',w:4,f:false},
+  {n:'학교정보공시',c:'정보',w:3,f:false},{n:'개인정보보호',c:'정보',w:3,f:false},
+  {n:'통지표',c:'정보',w:2,f:false},{n:'학업성적관리위원회',c:'정보',w:3,f:false},
+  {n:'시청각기자재관리',c:'정보',w:2,f:false},{n:'정보화기자재관리',c:'정보',w:2,f:false},
+  {n:'네트워크관리',c:'정보',w:3,f:false},{n:'SW교육',c:'정보',w:2,f:false},
+  {n:'학교홈페이지',c:'정보',w:2,f:false},{n:'학교방송',c:'정보',w:1,f:false},
+  {n:'영재업무',c:'교육',w:2,f:false},{n:'진로교육',c:'교육',w:2,f:false},{n:'저작권교육',c:'교육',w:1,f:false},
+  {n:'PAPS',c:'체육',w:2,f:false},{n:'학교스포츠클럽',c:'체육',w:2,f:false},
+  {n:'생존수영',c:'체육',w:2,f:false},{n:'신나는주말체육',c:'체육',w:2,f:false},
+  {n:'현장체험학습',c:'현장',w:3,f:false},{n:'환경교육',c:'환경',w:2,f:false},
+  {n:'텃밭운영',c:'환경',w:1,f:false},{n:'교육급여',c:'복지',w:2,f:false},
+  {n:'학생맞춤통합지원',c:'복지',w:3,f:false},{n:'문화예술강사수업',c:'문화',w:2,f:false},
+  // 고정전담
+  {n:'졸업앨범',c:'6학년',w:2,f:true},{n:'수학여행',c:'6학년',w:3,f:true},
+  {n:'중학교입학배정',c:'6학년',w:2,f:true},{n:'졸업식',c:'6학년',w:2,f:true},
+  {n:'특수교육계획수립',c:'특수',w:3,f:true},{n:'개별화교육계획',c:'특수',w:4,f:true},
+  {n:'특수교육대상자입급',c:'특수',w:3,f:true},{n:'통합교육운영',c:'특수',w:3,f:true},
+  {n:'장애이해교육',c:'특수',w:2,f:true},{n:'특수학급자료확충',c:'특수',w:2,f:true},
+  {n:'보건교육',c:'보건',w:2,f:true},{n:'학생건강관리',c:'보건',w:3,f:true},
+  {n:'감염병예방교육',c:'보건',w:2,f:true},{n:'성교육',c:'보건',w:2,f:true},
+  {n:'약물오남용예방',c:'보건',w:1,f:true},{n:'건강기록부관리',c:'보건',w:2,f:true},
+  {n:'학교급식업무',c:'영양',w:3,f:true},{n:'급식봉사단운영',c:'영양',w:2,f:true},
+  {n:'조리종사원관리',c:'영양',w:2,f:true},{n:'우유검수관리',c:'영양',w:1,f:true},
+  {n:'학생상담활동',c:'상담',w:3,f:true},{n:'정서행동발달검사',c:'상담',w:3,f:true},
+  {n:'학업중단예방',c:'상담',w:3,f:true},{n:'어울림프로그램',c:'상담',w:2,f:true},
+  {n:'또래상담',c:'상담',w:2,f:true},{n:'대안교실',c:'상담',w:2,f:true},
+  {n:'학생전출입(NEIS)',c:'교무실무',w:2,f:true},{n:'공문처리·배부',c:'교무실무',w:2,f:true},
+  {n:'가정통신문발송',c:'교무실무',w:1,f:true},{n:'교무실용품관리',c:'교무실무',w:1,f:true},
+  {n:'비상연락망관리',c:'교무실무',w:1,f:true},{n:'우편물관리',c:'교무실무',w:1,f:true},
+  {n:'수상대장관리',c:'교무실무',w:1,f:true},{n:'홈페이지교육활동탑재',c:'교무실무',w:1,f:true},
+  {n:'도서관운영관리',c:'사서',w:3,f:true},{n:'도서관행사운영',c:'사서',w:2,f:true},
+  {n:'학급권장도서선정',c:'사서',w:2,f:true},{n:'교과서주문·배부',c:'사서',w:2,f:true},
+  {n:'학부모독서회운영',c:'사서',w:2,f:true},{n:'장학자료관리',c:'사서',w:1,f:true},
+  {n:'과학준비실관리',c:'과학실무',w:2,f:true},{n:'실험실안전점검',c:'과학실무',w:2,f:true},
+  {n:'과학교구·소모품관리',c:'과학실무',w:2,f:true},{n:'폐수·유독물관리',c:'과학실무',w:3,f:true},
+  {n:'사전실험및수업준비',c:'과학실무',w:2,f:true},
+  {n:'유치원교육과정운영',c:'유치원',w:3,f:true},{n:'유아모집',c:'유치원',w:2,f:true},
+  {n:'유치원입학·졸업',c:'유치원',w:2,f:true},{n:'방과후과정관리',c:'유치원',w:3,f:true},
+  {n:'유치원예산운영',c:'유치원',w:3,f:true},{n:'유아학비업무',c:'유치원',w:2,f:true},
+  {n:'유치원정보공시',c:'유치원',w:2,f:true},{n:'빛고을놀이샘',c:'유치원',w:2,f:true},
+  {n:'늘봄학교운영계획',c:'늘봄',w:3,f:true},{n:'늘봄강사채용·관리',c:'늘봄',w:3,f:true},
+  {n:'늘봄돌봄교실운영',c:'늘봄',w:3,f:true},{n:'늘봄수강권지원',c:'늘봄',w:2,f:true},
+  {n:'늘봄학교민원관리',c:'늘봄',w:2,f:true},
+  {n:'학교회계예산편성',c:'행정',w:4,f:true},{n:'학교회계결산',c:'행정',w:4,f:true},
+  {n:'계약및지출업무',c:'행정',w:3,f:true},{n:'급여관리',c:'행정',w:3,f:true},
+  {n:'시설·전기·소방업무',c:'행정',w:3,f:true},{n:'재산업무',c:'행정',w:2,f:true},
+  {n:'법인카드관리',c:'행정',w:2,f:true},{n:'물품업무',c:'행정',w:2,f:true},
+  {n:'보안업무',c:'행정',w:2,f:true},{n:'기록물관리',c:'행정',w:2,f:true},
+  {n:'학교운영위원회',c:'행정',w:3,f:true},{n:'산업재해예방',c:'행정',w:2,f:true},
+];
+
+let wzCheckedTasks=new Set(ALL_DEFAULT_TASKS.map((_,i)=>i));
+let taskFilterType='all', taskSearchQ='';
+
+function renderTaskChecks(){
+  const grid=document.getElementById('task-check-grid');if(!grid)return;
+  const q=taskSearchQ.toLowerCase();
+  const filtered=ALL_DEFAULT_TASKS.map((t,i)=>({...t,idx:i})).filter(t=>{
+    if(taskFilterType==='auto'&&t.f)return false;
+    if(taskFilterType==='fixed'&&!t.f)return false;
+    if(q&&!t.n.toLowerCase().includes(q)&&!t.c.toLowerCase().includes(q))return false;
+    return true;
+  });
+  const grouped={};
+  filtered.forEach(t=>{if(!grouped[t.c])grouped[t.c]=[];grouped[t.c].push(t);});
+  const wC=['','#15803d','#1d4ed8','#92400e','#c2410c','#b91c1c'];
+  grid.innerHTML=Object.entries(grouped).map(([cat,items])=>`
+    <div class="task-check-section">
+      <div class="task-check-section-title" onclick="toggleCatSec('${cat}')">
+        <span>${cat}</span>
+        <span>${items.filter(t=>wzCheckedTasks.has(t.idx)).length}/${items.length} 선택</span>
+      </div>
+      <div id="csec-${cat}">
+        ${items.map(t=>`
+          <div class="task-check-item${wzCheckedTasks.has(t.idx)?' checked':''}${t.f?' fixed-item':''}" onclick="toggleTaskCheck(${t.idx})">
+            <div class="task-check-cb"><span style="color:#fff;font-size:13px;font-weight:900;">${wzCheckedTasks.has(t.idx)?'✓':''}</span></div>
+            <span class="task-check-name">${t.n}</span>
+            <span class="task-check-cat">${t.c}</span>
+            <span class="task-check-w" style="color:${wC[Math.min(t.w,5)]}">★${t.w}</span>
+            ${t.f?'<span style="font-size:11px;color:#7c3aed;background:#ede9fe;padding:2px 7px;border-radius:8px;">고정</span>':''}
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  const cc=document.getElementById('checked-count'),tc=document.getElementById('total-count');
+  if(cc) cc.textContent=wzCheckedTasks.size;
+  if(tc) tc.textContent=ALL_DEFAULT_TASKS.length;
+}
+window.toggleCatSec=cat=>{const el=document.getElementById('csec-'+cat);if(el)el.style.display=el.style.display==='none'?'block':'none';};
+window.toggleTaskCheck=idx=>{if(wzCheckedTasks.has(idx))wzCheckedTasks.delete(idx);else wzCheckedTasks.add(idx);renderTaskChecks();};
+window.checkAllTasks=v=>{if(v)ALL_DEFAULT_TASKS.forEach((_,i)=>wzCheckedTasks.add(i));else wzCheckedTasks.clear();renderTaskChecks();};
+window.filterTaskChecks=q=>{taskSearchQ=q;renderTaskChecks();};
+window.filterByType=t=>{taskFilterType=t;renderTaskChecks();};
+
+// 친화도 자동추천
+const ROLE_CAT_MAP_WZ={'교무':['교무','행사'],'연구':['연구','교육'],'생활':['생활','혁신'],
+  '정보':['정보'],'체육':['체육','현장'],'환경':['환경'],
+  '복지':['복지'],'문화':['문화'],'교감':['교무','연구','생활','정보']};
+
+let wzAffinityData={}, wzCatMap={};
+
+function guessCategories(role){
+  const cats=[];
+  Object.keys(ROLE_CAT_MAP_WZ).forEach(key=>{if(role.includes(key))cats.push(...ROLE_CAT_MAP_WZ[key]);});
+  return [...new Set(cats)];
+}
+
+function renderAffinityAuto(){
+  const parsedMembers=parseBulkMembers();
+  const selectedTasks=ALL_DEFAULT_TASKS.filter((_,i)=>wzCheckedTasks.has(i));
+  const allCats=[...new Set(selectedTasks.filter(t=>!t.f).map(t=>t.c))].sort();
+  const autoG=wzGroups.filter(g=>g.autoAssign);
+  parsedMembers.forEach(m=>{
+    if(!wzAffinityData[m.id]){
+      const s=guessCategories(m.role||'');
+      wzAffinityData[m.id]={roleTags:s.slice(0,2),primaryCats:[...s],memberId:m.id};
+    }
+  });
+  const list=document.getElementById('affinity-auto-list');if(!list)return;
+  let html='';
+  autoG.forEach(g=>{
+    const gm=parsedMembers.filter(m=>m.memberGroupId===g.id);if(!gm.length)return;
+    html+=`<div style="font-size:var(--fs-xs);font-weight:700;color:${g.color};padding:8px 0 6px;">${g.name}</div>`;
+    html+=gm.map(m=>{
+      const aff=wzAffinityData[m.id]||{primaryCats:[]};
+      const chips=allCats.map(cat=>{
+        const act=aff.primaryCats.includes(cat);
+        return `<span class="affinity-auto-tag${act?' active':''}" onclick="toggleWzAff('${m.id}','${cat}')">${cat}</span>`;
+      }).join('');
+      return `<div class="affinity-auto-item">
+        <div style="min-width:90px;flex-shrink:0;">
+          <div style="font-weight:700;font-size:var(--fs-sm);">${m.name}</div>
+          <div style="font-size:var(--fs-xs);color:${g.color};">${m.role||''}</div>
+        </div>
+        <div class="affinity-auto-tags">${chips||'<span style="font-size:var(--fs-xs);color:var(--muted);">카테고리 없음</span>'}</div>
+      </div>`;
+    }).join('');
+  });
+  list.innerHTML=html||'<p style="font-size:var(--fs-xs);color:var(--muted);">담당자를 입력해주세요.</p>';
+  const mapList=document.getElementById('wz-cat-map-list');if(!mapList)return;
+  const autoM=parsedMembers.filter(m=>{const g=wzGroups.find(g=>g.id===m.memberGroupId);return g&&g.autoAssign;});
+  mapList.innerHTML=allCats.map(cat=>{
+    const opts=[`<option value="">-- 자동(균등) --</option>`,...autoM.map(m=>`<option value="${m.id}" ${wzCatMap[cat]===m.id?'selected':''}>${m.name} (${m.role||''})</option>`)].join('');
+    return `<div class="cat-map-row"><span style="min-width:80px;" class="badge badge-gray">${cat}</span><select onchange="wzCatMap['${cat}']=this.value">${opts}</select></div>`;
+  }).join('');
+}
+window.toggleWzAff=(mid,cat)=>{
+  if(!wzAffinityData[mid])wzAffinityData[mid]={roleTags:[],primaryCats:[]};
+  const arr=wzAffinityData[mid].primaryCats,idx=arr.indexOf(cat);
+  if(idx>=0)arr.splice(idx,1);else arr.push(cat);
+  renderAffinityAuto();
+};
+
+// 마법사 완료
+window.finishWizard=async()=>{
+  const parsedMembers=parseBulkMembers();
+  if(!parsedMembers.length){toast('담당자를 2단계에서 입력해주세요.');goWzStep(2);return;}
+  memberGroups=wzGroups.map(g=>({...g}));
+  members=parsedMembers;
+  tasks=[];
+  assignments={UNASSIGNED:[]};
+  members.forEach(m=>assignments[m.id]=[]);
+  wzCheckedTasks.forEach(idx=>{
+    const t=ALL_DEFAULT_TASKS[idx];
+    const id='t_'+Date.now()+Math.random().toString(36).slice(2,5);
+    tasks.push({id,name:t.n,category:t.c,weight:t.w,fixed:t.f});
+    assignments.UNASSIGNED.push(id);
+  });
+  affinityData={};
+  members.forEach(m=>{affinityData[m.id]=wzAffinityData[m.id]||{roleTags:[],primaryCats:[]};});
+  categoryMapping={...wzCatMap};
+  try{
+    await updateDoc(doc(db,'groups',currentGroup),{
+      memberGroups,members,tasks,assignments,affinityData,categoryMapping,
+      updatedAt:new Date().toISOString()
+    });
+    toast('설정 완료! 자동배정을 실행합니다...');
+    showScreen('screen-admin-dashboard');
+    goToTab('assign');
+    setTimeout(()=>autoAssign(),600);
+  }catch(e){toast('저장 실패: '+e.message);}
+};
+
 </script>
 </body>
 </html>
