@@ -619,40 +619,91 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
   <div id="wz-step1">
     <div class="card">
       <div class="card-title">🏫 학교 기본 정보</div>
+
+      <!-- 학급 수 -->
       <label>학급 수</label>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
         <input type="number" id="wz-grade-count" placeholder="24" min="1" max="60"
           style="width:120px;margin-bottom:0;font-size:var(--fs-xl);font-weight:700;text-align:center;"
           oninput="calcGrade()">
         <span style="font-size:var(--fs-md);font-weight:700;color:var(--text);">학급</span>
       </div>
-      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:16px;">※ 특수학급·한국어학급을 포함한 전체 학급 수를 입력하세요.</p>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:var(--fs-sm);color:var(--text);font-weight:400;">
+      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:20px;">※ 특수학급·한국어학급을 포함한 전체 학급 수를 입력하세요.</p>
+
+      <!-- 교감 수 -->
+      <label>교감 수</label>
+      <div style="display:flex;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 18px;border:2px solid var(--border);border-radius:10px;font-size:var(--fs-sm);font-weight:700;transition:all .15s;" id="sup-btn-0">
+          <input type="radio" name="wz-sup-count" value="0" onchange="calcGrade()" style="width:18px;height:18px;margin-bottom:0;accent-color:var(--primary);">없음
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 18px;border:2px solid var(--primary);border-radius:10px;font-size:var(--fs-sm);font-weight:700;background:var(--primary-light);transition:all .15s;" id="sup-btn-1">
+          <input type="radio" name="wz-sup-count" value="1" checked onchange="calcGrade()" style="width:18px;height:18px;margin-bottom:0;accent-color:var(--primary);">1명
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 18px;border:2px solid var(--border);border-radius:10px;font-size:var(--fs-sm);font-weight:700;transition:all .15s;" id="sup-btn-2">
+          <input type="radio" name="wz-sup-count" value="2" onchange="calcGrade()" style="width:18px;height:18px;margin-bottom:0;accent-color:var(--primary);">2명
+        </label>
+      </div>
+      <div id="sup-notice" style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:20px;padding:8px 12px;background:#f8fafc;border-radius:8px;border-left:3px solid var(--border);">
+        교감 1명: 교무 행정 총괄
+      </div>
+
+      <!-- 업무지원팀 -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:var(--fs-sm);color:var(--text);font-weight:700;min-width:200px;">
           <input type="checkbox" id="wz-has-team" onchange="calcGrade()"
             style="width:20px;height:20px;margin-bottom:0;flex-shrink:0;accent-color:var(--primary);">
           업무지원팀(부장교사) 있음
         </label>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:var(--fs-sm);color:var(--text);font-weight:400;">
-          <input type="checkbox" id="wz-extra-one" checked onchange="calcGrade()"
-            style="width:20px;height:20px;margin-bottom:0;flex-shrink:0;accent-color:var(--primary);">
-          추가 1인 보직교사 임용
-        </label>
-      </div>
-      <div class="grade-calc-box" id="grade-calc-result" style="display:none;">
-        <div style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);margin-bottom:12px;">📊 보직교사 자동 계산 결과</div>
-        <div class="grade-result">
-          <div class="grade-result-item"><div class="val" id="calc-base">-</div><div class="lbl">기준 보직교사 수</div></div>
-          <div class="grade-result-item"><div class="val" id="calc-total">-</div><div class="lbl">추가 포함 총 보직수</div></div>
-          <div class="grade-result-item"><div class="val" id="calc-team">-</div><div class="lbl">업무지원팀 (제안)</div></div>
-          <div class="grade-result-item"><div class="val" id="calc-paid">-</div><div class="lbl">수당부장 (제안)</div></div>
+        <div id="team-count-wrap" style="display:none;align-items:center;gap:8px;">
+          <input type="number" id="wz-team-count" value="4" min="1" max="10"
+            style="width:80px;margin-bottom:0;text-align:center;font-weight:700;" oninput="calcGrade()">
+          <span style="font-size:var(--fs-sm);color:var(--muted);">명</span>
         </div>
       </div>
+      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:20px;">부장교사들이 모여 주요 업무를 분담하는 팀입니다.</p>
+
+      <!-- 보직교사 추가 1인 -->
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:var(--fs-sm);color:var(--text);font-weight:700;margin-bottom:20px;">
+        <input type="checkbox" id="wz-extra-one" checked onchange="calcGrade()"
+          style="width:20px;height:20px;margin-bottom:0;flex-shrink:0;accent-color:var(--primary);">
+        보직교사 추가 1인 임용
+        <span style="font-size:var(--fs-xs);font-weight:400;color:var(--muted);">(학교장 재량)</span>
+      </label>
+
+      <!-- 봉사부장 -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:var(--fs-sm);color:var(--text);font-weight:700;min-width:200px;">
+          <input type="checkbox" id="wz-has-vol" checked onchange="calcGrade()"
+            style="width:20px;height:20px;margin-bottom:0;flex-shrink:0;accent-color:#d97706;">
+          봉사부장 있음
+        </label>
+        <div id="vol-count-wrap" style="display:flex;align-items:center;gap:8px;">
+          <input type="number" id="wz-vol-count" value="3" min="1" max="10"
+            style="width:80px;margin-bottom:0;text-align:center;font-weight:700;" oninput="calcGrade()">
+          <span style="font-size:var(--fs-sm);color:var(--muted);">명</span>
+        </div>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:20px;">방과후·현장학습·안전 등 봉사성 업무를 담당합니다.</p>
+
+      <!-- 자동 계산 결과 -->
+      <div class="grade-calc-box" id="grade-calc-result" style="display:none;">
+        <div style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);margin-bottom:12px;">📊 자동 계산 결과</div>
+        <div class="grade-result">
+          <div class="grade-result-item"><div class="val" id="calc-base">-</div><div class="lbl">기준 보직교사</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-total">-</div><div class="lbl">총 보직 수</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-team">-</div><div class="lbl">업무지원팀</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-paid">-</div><div class="lbl">보직교사</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-vol">-</div><div class="lbl">봉사부장</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-sup">-</div><div class="lbl">교감</div></div>
+        </div>
+        <div id="calc-notice" style="margin-top:12px;font-size:var(--fs-xs);color:#92400e;background:#fff7ed;border-radius:8px;padding:10px 12px;display:none;"></div>
+      </div>
     </div>
+
     <div class="card">
       <div class="card-title">👥 담당자 그룹 구성</div>
-      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:14px;">학급 수 기반으로 자동 제안됩니다. 그룹명·부담 범위를 수정할 수 있습니다.</p>
-      <div id="wz-group-list"></div>
+      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:14px;">위 설정 기반으로 자동 구성됩니다. 학급 수를 먼저 입력하세요.</p>
+      <div id="wz-group-list"><p style="font-size:var(--fs-xs);color:var(--muted);text-align:center;padding:16px;">학급 수를 입력하면 자동으로 구성됩니다.</p></div>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-ghost" onclick="showScreen('screen-host-menu')" style="flex:1;">← 뒤로</button>
@@ -667,7 +718,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:var(--fs-xs);color:#1e40af;margin-bottom:16px;">
         💡 <strong>한 줄에 한 명씩</strong> 입력하세요.<br>
         형식: <code style="background:#dbeafe;padding:2px 7px;border-radius:4px;">이름, 역할</code>
-        &nbsp; 예) <code style="background:#dbeafe;padding:2px 7px;border-radius:4px;">김진성, 교무부장</code>
+        &nbsp; 예) <code style="background:#dbeafe;padding:2px 7px;border-radius:4px;">이순신, 교무부장</code>
       </div>
       <div id="wz-bulk-sections"></div>
       <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-top:12px;font-size:var(--fs-sm);font-weight:700;color:#15803d;">
@@ -770,7 +821,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
     <div class="card">
       <div class="card-title">👤 담당자 추가</div>
       <div class="flex-row">
-        <div><label>이름</label><input type="text" id="new-member-name" placeholder="예: 김진성"></div>
+        <div><label>이름</label><input type="text" id="new-member-name" placeholder="예: 이순신"></div>
         <div><label>역할/직위</label><input type="text" id="new-member-role" placeholder="예: 교무부장"></div>
       </div>
       <label>담당자 그룹</label>
@@ -1234,9 +1285,9 @@ window.removeMemberGroup = id => {
 window.loadDefaultGroups = () => {
   if(memberGroups.length && !confirm('기존 그룹을 초기화하고 기본값을 불러올까요?')) return;
   memberGroups = [
-    {id:'g_sup',   name:'교감',       color:'#dc2626', minLoad:5,  maxLoad:12, autoAssign:true, priority:1},
+    {id:'g_sup',   name:'교감',       color:'#dc2626', minLoad:1,  maxLoad:1,  autoAssign:true, priority:1},
     {id:'g_team',  name:'업무지원팀', color:'#2563eb', minLoad:15, maxLoad:25, autoAssign:true, priority:2},
-    {id:'g_paid',  name:'수당부장',   color:'#16a34a', minLoad:8,  maxLoad:15, autoAssign:true, priority:3},
+    {id:'g_paid',  name:'보직교사',   color:'#16a34a', minLoad:8,  maxLoad:15, autoAssign:true, priority:3},
     {id:'g_vol',   name:'봉사부장',   color:'#d97706', minLoad:3,  maxLoad:8,  autoAssign:true, priority:4},
     {id:'g_fixed', name:'고정전담',   color:'#7c3aed', minLoad:0,  maxLoad:0,  autoAssign:false,priority:9},
   ];
@@ -2081,52 +2132,144 @@ function calcBojeok(g){
 }
 window.calcGrade=()=>{
   const g=parseInt(document.getElementById('wz-grade-count').value)||0;
+  const supCount=parseInt(document.querySelector('input[name="wz-sup-count"]:checked')?.value||'1');
   const hasTeam=document.getElementById('wz-has-team').checked;
+  const teamCntInput=parseInt(document.getElementById('wz-team-count')?.value)||4;
   const extra=document.getElementById('wz-extra-one').checked;
+  const hasVol=document.getElementById('wz-has-vol').checked;
+  const volCnt=hasVol?parseInt(document.getElementById('wz-vol-count')?.value)||3:0;
+
+  // 업무지원팀 인원 입력창 표시/숨김
+  const teamWrap=document.getElementById('team-count-wrap');
+  if(teamWrap) teamWrap.style.display=hasTeam?'flex':'none';
+  // 봉사부장 인원 입력창 표시/숨김
+  const volWrap=document.getElementById('vol-count-wrap');
+  if(volWrap) volWrap.style.display=hasVol?'flex':'none';
+
+  // 교감 라디오 버튼 스타일 동기화
+  [0,1,2].forEach(i=>{
+    const btn=document.getElementById('sup-btn-'+i);
+    if(!btn)return;
+    const sel=supCount===i;
+    btn.style.borderColor=sel?'var(--primary)':'var(--border)';
+    btn.style.background=sel?'var(--primary-light)':'';
+  });
+
+  // 교감 안내 메시지
+  const noticeEl=document.getElementById('sup-notice');
+  if(noticeEl){
+    const msgs={
+      0:'⚠️ 교감이 없는 경우, 교감 업무(교무행정 총괄·복무관리 등)는 미배정 처리 후 수동으로 배분하세요.',
+      1:'교감 1명: 교무행정 총괄 및 복무관리 담당',
+      2:'교감 2명: 각 교감이 3개 학년씩 복무관리를 담당합니다. 담당자 입력 시 학년 범위를 역할로 구분하세요. (예: 교감(1~3학년), 교감(4~6학년))'
+    };
+    noticeEl.textContent=msgs[supCount]||'';
+    noticeEl.style.borderLeftColor=supCount===0?'var(--danger)':supCount===2?'var(--primary)':'var(--border)';
+    noticeEl.style.background=supCount===0?'#fff1f2':supCount===2?'#eff6ff':'#f8fafc';
+    noticeEl.style.color=supCount===0?'#b91c1c':supCount===2?'#1e40af':'var(--muted)';
+  }
+
   const box=document.getElementById('grade-calc-result');
   if(!g){box.style.display='none';return;}
   box.style.display='block';
+
   const base=calcBojeok(g), total=extra?base+1:base;
-  const teamCnt=hasTeam?4:0, paidCnt=Math.max(0,total-teamCnt);
+  const teamCnt=hasTeam?teamCntInput:0;
+  const paidCnt=Math.max(0,total-teamCnt-volCnt);
+
   document.getElementById('calc-base').textContent=base+'명';
   document.getElementById('calc-total').textContent=total+'명';
   document.getElementById('calc-team').textContent=hasTeam?teamCnt+'명':'없음';
-  document.getElementById('calc-paid').textContent=paidCnt+'명';
-  buildWzGroups(hasTeam,teamCnt,paidCnt);
+  document.getElementById('calc-paid').textContent=paidCnt>0?paidCnt+'명':'0명';
+  document.getElementById('calc-vol').textContent=hasVol?volCnt+'명':'없음';
+  document.getElementById('calc-sup').textContent=supCount+'명';
+
+  // 경고 메시지
+  const noticeBox=document.getElementById('calc-notice');
+  const notices=[];
+  if(supCount===0) notices.push('⚠️ 교감이 없습니다. 교감 업무를 수동으로 배분해야 합니다.');
+  if(paidCnt<0) notices.push('⚠️ 업무지원팀+봉사부장 합계가 총 보직 수를 초과합니다. 인원 수를 조정해 주세요.');
+  if(paidCnt===0&&total>0) notices.push('ℹ️ 보직교사 그룹의 인원이 없습니다. 업무지원팀이나 봉사부장이 모든 보직을 담당합니다.');
+  if(noticeBox){
+    noticeBox.style.display=notices.length?'block':'none';
+    noticeBox.innerHTML=notices.join('<br>');
+    noticeBox.style.color=notices.some(n=>n.includes('⚠️'))?'#b91c1c':'#92400e';
+    noticeBox.style.background=notices.some(n=>n.includes('⚠️'))?'#fff1f2':'#fff7ed';
+  }
+
+  buildWzGroups(supCount,hasTeam,teamCnt,paidCnt,hasVol,volCnt);
 };
 
 let wzGroups=[];
 const DEFAULT_WZ_GROUPS=[
-  {id:'wg_sup',name:'교감',color:'#dc2626',minLoad:5,maxLoad:12,autoAssign:true,priority:1},
+  {id:'wg_sup',name:'교감',color:'#dc2626',minLoad:1,maxLoad:1,autoAssign:true,priority:1},
   {id:'wg_team',name:'업무지원팀',color:'#2563eb',minLoad:15,maxLoad:25,autoAssign:true,priority:2},
-  {id:'wg_paid',name:'수당부장',color:'#16a34a',minLoad:8,maxLoad:15,autoAssign:true,priority:3},
+  {id:'wg_paid',name:'보직교사',color:'#16a34a',minLoad:8,maxLoad:15,autoAssign:true,priority:3},
   {id:'wg_vol',name:'봉사부장',color:'#d97706',minLoad:3,maxLoad:8,autoAssign:true,priority:4},
   {id:'wg_fixed',name:'고정전담',color:'#7c3aed',minLoad:0,maxLoad:0,autoAssign:false,priority:9},
 ];
 const COLOR_NAMES_WZ={'#dc2626':'빨강','#2563eb':'파랑','#16a34a':'초록','#d97706':'주황','#7c3aed':'보라','#0891b2':'청록','#475569':'회색'};
 
-function buildWzGroups(hasTeam,teamCnt,paidCnt){
-  wzGroups=DEFAULT_WZ_GROUPS.filter(g=>hasTeam||g.id!=='wg_team').map(g=>({...g}));
+function buildWzGroups(supCount,hasTeam,teamCnt,paidCnt,hasVol,volCnt){
+  wzGroups=[];
+  // 교감 (0명이면 그룹 자체 제거)
+  if(supCount>0){
+    wzGroups.push({id:'wg_sup',name:'교감',color:'#dc2626',
+      minLoad:supCount===2?1:1, maxLoad:supCount===2?1:1,
+      autoAssign:true,priority:1,
+      _count:supCount,
+      _note:supCount===2?'2명 교감: 학년부 3개씩 복무관리':'교무행정 총괄'
+    });
+  }
+  // 업무지원팀
+  if(hasTeam&&teamCnt>0){
+    wzGroups.push({id:'wg_team',name:'업무지원팀',color:'#2563eb',
+      minLoad:12,maxLoad:25,autoAssign:true,priority:2,_count:teamCnt});
+  }
+  // 보직교사
+  if(paidCnt>0){
+    wzGroups.push({id:'wg_paid',name:'보직교사',color:'#16a34a',
+      minLoad:6,maxLoad:15,autoAssign:true,priority:3,_count:paidCnt});
+  }
+  // 봉사부장
+  if(hasVol&&volCnt>0){
+    wzGroups.push({id:'wg_vol',name:'봉사부장',color:'#d97706',
+      minLoad:3,maxLoad:8,autoAssign:true,priority:4,_count:volCnt});
+  }
+  // 고정전담 (항상 포함)
+  wzGroups.push({id:'wg_fixed',name:'고정전담',color:'#7c3aed',
+    minLoad:0,maxLoad:0,autoAssign:false,priority:9,_count:0});
   renderWzGroupList();
 }
 
 function renderWzGroupList(){
   const list=document.getElementById('wz-group-list');
   if(!list)return;
-  list.innerHTML=wzGroups.map(g=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid ${g.color}44;border-left:4px solid ${g.color};border-radius:10px;margin-bottom:8px;background:#fff;">
-      <div style="width:16px;height:16px;border-radius:50%;background:${g.color};flex-shrink:0;"></div>
+  if(!wzGroups.length){
+    list.innerHTML='<p style="font-size:var(--fs-xs);color:var(--muted);text-align:center;padding:16px;">학급 수를 입력하면 자동으로 구성됩니다.</p>';
+    return;
+  }
+  list.innerHTML=wzGroups.map(g=>{
+    const cntLabel=g._count>0?`<span style="font-size:var(--fs-xs);font-weight:700;padding:2px 9px;border-radius:10px;background:${g.color}22;color:${g.color};margin-left:6px;">${g._count}명</span>`:'';
+    const noteLabel=g._note?`<div style="font-size:11px;color:var(--primary);margin-top:3px;">💡 ${g._note}</div>`:'';
+    const warnLabel=g.id==='wg_paid'&&g._count===0?'<div style="font-size:11px;color:#b91c1c;margin-top:3px;">⚠️ 인원 없음 - 업무지원팀 또는 봉사부장이 업무를 담당</div>':'';
+    return `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:13px 15px;border:1.5px solid ${g.color}44;border-left:4px solid ${g.color};border-radius:10px;margin-bottom:8px;background:#fff;">
+      <div style="width:16px;height:16px;border-radius:50%;background:${g.color};flex-shrink:0;margin-top:2px;"></div>
       <div style="flex:1;">
-        <div style="font-weight:700;font-size:var(--fs-sm);">${g.name}
-          <span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:8px;background:${g.color}22;color:${g.color};margin-left:6px;">${g.autoAssign?'🔄 자동':'📌 고정'}</span>
+        <div style="font-weight:700;font-size:var(--fs-sm);display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+          ${g.name}${cntLabel}
+          <span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:8px;background:${g.color}22;color:${g.color};">${g.autoAssign?'🔄 자동배정':'📌 고정전담'}</span>
         </div>
         <div style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px;">부담 ${g.minLoad}~${g.maxLoad} · 우선순위 ${g.priority}</div>
+        ${noteLabel}${warnLabel}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-// 초기 그룹 렌더링
-buildWzGroups(false,0,9);
+// 초기 그룹 렌더링 (학급수 미입력 상태)
+renderWzGroupList(); // 빈 안내 표시
 
 // 마법사 단계 이동
 window.goWzStep=step=>{
@@ -2146,17 +2289,29 @@ window.goWzStep=step=>{
 function renderWzBulkInput(){
   const sec=document.getElementById('wz-bulk-sections');if(!sec)return;
   const autoG=wzGroups.filter(g=>g.autoAssign);
-  sec.innerHTML=autoG.map(g=>`
+  const supCount=parseInt(document.querySelector('input[name="wz-sup-count"]:checked')?.value||'1');
+  const EXAMPLES={
+    'wg_sup': supCount===2?'세종대왕, 교감(1~3학년)\n광개토대왕, 교감(4~6학년)':'세종대왕, 교감',
+    'wg_team': '이순신, 교무부장\n유관순, 연구부장\n장영실, 생활부장\n신사임당, 정보부장',
+    'wg_paid': '강감찬, 체육행사부장\n김유신, 환경부장\n허준, 복지부장\n윤봉길, 문화부장\n안중근, 혁신부장',
+    'wg_vol': '정약용, 방과후부장\n이황, 현장학습부장\n이이, 학생안전부장',
+  };
+  sec.innerHTML=autoG.map(g=>{
+    const ph=EXAMPLES[g.id]||'이름, 역할';
+    const isSuper=g.id==='wg_sup';
+    return `
     <div style="margin-bottom:18px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <div style="width:12px;height:12px;border-radius:50%;background:${g.color};"></div>
         <span style="font-weight:700;font-size:var(--fs-sm);color:${g.color};">${g.name}</span>
-        <span style="font-size:var(--fs-xs);color:var(--muted);">· 이름, 역할 (한 줄에 한 명)</span>
+        <span style="font-size:var(--fs-xs);color:var(--muted);">· 이름, 역할${isSuper?' (보통 1명, 없으면 비워두세요)':' (한 줄에 한 명)'}</span>
       </div>
       <textarea class="bulk-input-area" id="bulk-${g.id}"
-        placeholder="김진성, 교무부장&#10;박선옥, 연구부장"
+        placeholder="${ph}"
+        style="min-height:${isSuper?'60px':'120px'};"
         oninput="updateBulkCount()"></textarea>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   updateBulkCount();
 }
 
