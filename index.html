@@ -441,6 +441,10 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
 .affinity-auto-tag{padding:5px 12px;border-radius:14px;font-size:var(--fs-xs);font-weight:700;background:#dbeafe;color:#1d4ed8;cursor:pointer;border:2px solid #93c5fd;transition:all .15s;}
 .affinity-auto-tag.active{background:var(--primary);color:#fff;border-color:var(--primary);}
 
+
+input[type=number]::placeholder,
+input[type=text]::placeholder{color:#c0cad6;font-weight:400;font-size:var(--fs-sm);}
+#wz-grade-count::placeholder{font-size:var(--fs-md);}
 </style>
 </head>
 <body>
@@ -623,8 +627,8 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
       <!-- 학급 수 -->
       <label>학급 수</label>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
-        <input type="number" id="wz-grade-count" placeholder="24" min="1" max="60"
-          style="width:120px;margin-bottom:0;font-size:var(--fs-xl);font-weight:700;text-align:center;"
+        <input type="number" id="wz-grade-count" placeholder="예) 24" min="1" max="60"
+          style="width:140px;margin-bottom:0;font-size:var(--fs-xl);font-weight:700;text-align:center;color:var(--text);"
           oninput="calcGrade()">
         <span style="font-size:var(--fs-md);font-weight:700;color:var(--text);">학급</span>
       </div>
@@ -652,7 +656,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:var(--fs-sm);color:var(--text);font-weight:700;min-width:200px;">
           <input type="checkbox" id="wz-has-team" onchange="calcGrade()"
             style="width:20px;height:20px;margin-bottom:0;flex-shrink:0;accent-color:var(--primary);">
-          업무지원팀(부장교사) 있음
+          업무지원팀(보직교사) 있음
         </label>
         <div id="team-count-wrap" style="display:none;align-items:center;gap:8px;">
           <input type="number" id="wz-team-count" value="4" min="1" max="10"
@@ -660,7 +664,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
           <span style="font-size:var(--fs-sm);color:var(--muted);">명</span>
         </div>
       </div>
-      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:20px;">부장교사들이 모여 주요 업무를 분담하는 팀입니다.</p>
+      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:20px;">모두 보직교사이며 주요 부서 업무를 분담하는 팀입니다.</p>
 
       <!-- 보직교사 추가 1인 -->
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:var(--fs-sm);color:var(--text);font-weight:700;margin-bottom:20px;">
@@ -688,11 +692,11 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
       <div class="grade-calc-box" id="grade-calc-result" style="display:none;">
         <div style="font-size:var(--fs-xs);font-weight:700;color:var(--muted);margin-bottom:12px;">📊 자동 계산 결과</div>
         <div class="grade-result">
-          <div class="grade-result-item"><div class="val" id="calc-base">-</div><div class="lbl">기준 보직교사</div></div>
-          <div class="grade-result-item"><div class="val" id="calc-total">-</div><div class="lbl">총 보직 수</div></div>
-          <div class="grade-result-item"><div class="val" id="calc-team">-</div><div class="lbl">업무지원팀</div></div>
-          <div class="grade-result-item"><div class="val" id="calc-paid">-</div><div class="lbl">보직교사</div></div>
-          <div class="grade-result-item"><div class="val" id="calc-vol">-</div><div class="lbl">봉사부장</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-base">-</div><div class="lbl">기준 보직교사 수</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-total">-</div><div class="lbl">총 보직교사 수</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-team">-</div><div class="lbl">업무지원팀(보직교사)</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-paid">-</div><div class="lbl">보직교사 수</div></div>
+          <div class="grade-result-item"><div class="val" id="calc-vol">-</div><div class="lbl">봉사부장 수</div></div>
           <div class="grade-result-item"><div class="val" id="calc-sup">-</div><div class="lbl">교감</div></div>
         </div>
         <div id="calc-notice" style="margin-top:12px;font-size:var(--fs-xs);color:#92400e;background:#fff7ed;border-radius:8px;padding:10px 12px;display:none;"></div>
@@ -715,9 +719,10 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
     <div class="card">
       <div class="card-title">👤 담당자 일괄 입력</div>
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:var(--fs-xs);color:#1e40af;margin-bottom:16px;">
-        💡 <strong>한 줄에 한 명씩</strong> 입력하세요.<br>
+        💡 <strong>한 줄에 한 명씩</strong> 입력하세요.
         형식: <code style="background:#dbeafe;padding:2px 7px;border-radius:4px;">이름, 역할</code>
-        &nbsp; 예) <code style="background:#dbeafe;padding:2px 7px;border-radius:4px;">이순신, 교무부장</code>
+        &nbsp; 예) <code style="background:#dbeafe;padding:2px 7px;border-radius:4px;">이순신, 교무부장</code><br>
+        <span style="color:#1d4ed8;">✨ 비워두면 위인 이름으로 자동 채워집니다.</span>
       </div>
       <div id="wz-bulk-sections"></div>
       <!-- 전체 진행률 -->
@@ -2194,8 +2199,8 @@ window.calcGrade=()=>{
   const noticeBox=document.getElementById('calc-notice');
   const notices=[];
   if(supCount===0) notices.push('⚠️ 교감이 없습니다. 교감 업무를 수동으로 배분해야 합니다.');
-  if(paidCnt<0) notices.push('⚠️ 업무지원팀+봉사부장 합계가 총 보직 수를 초과합니다. 인원 수를 조정해 주세요.');
-  if(paidCnt===0&&total>0) notices.push('ℹ️ 보직교사 그룹의 인원이 없습니다. 업무지원팀이나 봉사부장이 모든 보직을 담당합니다.');
+  if(paidCnt<0) notices.push('⚠️ 업무지원팀+봉사부장 합계가 총 보직교사 수를 초과합니다. 인원 수를 조정해 주세요.');
+  if(paidCnt===0&&total>0) notices.push('ℹ️ 보직교사 수가 없습니다. 업무지원팀(보직교사)이나 봉사부장이 모든 보직을 담당합니다.');
   if(noticeBox){
     noticeBox.style.display=notices.length?'block':'none';
     noticeBox.innerHTML=notices.join('<br>');
@@ -2396,16 +2401,61 @@ window.updateBulkCount=()=>{
   }
 };
 
+// 위인 이름 풀 (그룹별)
+const HERO_NAMES={
+  'wg_sup':['세종대왕','광개토대왕','을지문덕'],
+  'wg_team':['이순신','유관순','장영실','신사임당','정약용','율곡이이','퇴계이황','허준'],
+  'wg_paid':['강감찬','김유신','윤봉길','안중근','안창호','김구','홍범도','류성룡','원효','의상'],
+  'wg_vol':['정약용','이황','이이','박지원','김정호','최무선','장보고','이제마'],
+  'default':['김유신','강감찬','장영실','신사임당','허준','정약용','유관순','안중근'],
+};
+const HERO_ROLES={
+  'wg_sup':['교감'],
+  'wg_team':['교무부장','연구부장','생활부장','정보부장','체육행사부장','문화부장','혁신부장','환경부장'],
+  'wg_paid':['체육행사부장','환경부장','복지부장','문화부장','혁신부장','안전부장','독서부장','진로부장','정보부장','상담부장'],
+  'wg_vol':['3학년 부장','4학년 부장','5학년 부장','2학년 부장'],
+};
+
 function parseBulkMembers(){
   const result=[];
+  const supCount=parseInt(document.querySelector('input[name="wz-sup-count"]:checked')?.value||'1');
+
   wzGroups.forEach(g=>{
     const el=document.getElementById('bulk-'+g.id);
-    if(!el)return;
-    el.value.split('\n').forEach(line=>{
+    const target=g._count||0;
+    // 입력된 줄 파싱
+    const inputLines=(el?el.value:'').split('\n').map(l=>l.trim()).filter(Boolean);
+    const parsed=inputLines.map(line=>{
       const parts=line.split(',').map(s=>s.trim());
-      if(!parts[0])return;
-      result.push({id:'m_'+Date.now()+Math.random().toString(36).slice(2,5),
-        name:parts[0],role:parts[1]||'',memberGroupId:g.id,minLoad:g.minLoad,maxLoad:g.maxLoad});
+      return {name:parts[0],role:parts[1]||''};
+    }).filter(p=>p.name);
+
+    // 부족한 인원 위인으로 자동 채우기
+    const heroPool=[...(HERO_NAMES[g.id]||HERO_NAMES['default'])];
+    const rolePool=[...(HERO_ROLES[g.id]||[])];
+    const usedNames=new Set(parsed.map(p=>p.name));
+
+    // 교감 0명이면 건너뜀
+    if(g.id==='wg_sup'&&supCount===0) return;
+
+    const finalList=[...parsed];
+    let heroIdx=0,roleIdx=parsed.length;
+    while(finalList.length<target){
+      // 사용 안 된 위인 찾기
+      while(heroIdx<heroPool.length&&usedNames.has(heroPool[heroIdx])) heroIdx++;
+      const heroName=heroIdx<heroPool.length?heroPool[heroIdx]:`위인${finalList.length+1}`;
+      const heroRole=rolePool[roleIdx%rolePool.length]||'부장';
+      finalList.push({name:heroName,role:heroRole});
+      usedNames.add(heroName);
+      heroIdx++;roleIdx++;
+    }
+
+    finalList.forEach(p=>{
+      result.push({
+        id:'m_'+Date.now()+Math.random().toString(36).slice(2,5),
+        name:p.name, role:p.role,
+        memberGroupId:g.id, minLoad:g.minLoad, maxLoad:g.maxLoad
+      });
     });
   });
   return result;
@@ -2588,7 +2638,7 @@ window.toggleWzAff=(mid,cat)=>{
 // 마법사 완료
 window.finishWizard=async()=>{
   const parsedMembers=parseBulkMembers();
-  if(!parsedMembers.length){toast('담당자를 2단계에서 입력해주세요.');goWzStep(2);return;}
+  if(!parsedMembers.length){toast('1단계에서 학교 설정(학급 수)을 먼저 완료해주세요.');goWzStep(1);return;}
   memberGroups=wzGroups.map(g=>({...g}));
   members=parsedMembers;
   tasks=[];
