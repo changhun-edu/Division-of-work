@@ -683,7 +683,6 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
           <span style="font-size:var(--fs-sm);color:var(--muted);">명</span>
         </div>
       </div>
-      <p style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:20px;">방과후·현장학습·안전 등 봉사성 업무를 담당합니다.</p>
 
       <!-- 자동 계산 결과 -->
       <div class="grade-calc-box" id="grade-calc-result" style="display:none;">
@@ -721,8 +720,15 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
         &nbsp; 예) <code style="background:#dbeafe;padding:2px 7px;border-radius:4px;">이순신, 교무부장</code>
       </div>
       <div id="wz-bulk-sections"></div>
-      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-top:12px;font-size:var(--fs-sm);font-weight:700;color:#15803d;">
-        ✅ 총 <strong id="bulk-total-count">0</strong>명 입력됨
+      <!-- 전체 진행률 -->
+      <div style="margin-top:4px;">
+        <div style="height:8px;background:#e4e9f0;border-radius:4px;overflow:hidden;margin-bottom:8px;">
+          <div id="bulk-progress-bar" style="height:100%;width:0%;border-radius:4px;transition:all .3s;"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;font-size:var(--fs-sm);font-weight:700;color:var(--success);">
+          ✅ 총 <strong id="bulk-total-count">0</strong>명 입력됨
+          <span id="bulk-progress-label" style="font-size:var(--fs-xs);font-weight:400;color:var(--muted);margin-left:4px;"></span>
+        </div>
       </div>
     </div>
     <div style="display:flex;gap:10px;">
@@ -2289,26 +2295,68 @@ window.goWzStep=step=>{
 function renderWzBulkInput(){
   const sec=document.getElementById('wz-bulk-sections');if(!sec)return;
   const autoG=wzGroups.filter(g=>g.autoAssign);
+  if(!autoG.length){
+    sec.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:var(--fs-sm);">1단계에서 학교 설정을 먼저 완료해주세요.</div>';
+    return;
+  }
   const supCount=parseInt(document.querySelector('input[name="wz-sup-count"]:checked')?.value||'1');
-  const EXAMPLES={
-    'wg_sup': supCount===2?'세종대왕, 교감(1~3학년)\n광개토대왕, 교감(4~6학년)':'세종대왕, 교감',
-    'wg_team': '이순신, 교무부장\n유관순, 연구부장\n장영실, 생활부장\n신사임당, 정보부장',
-    'wg_paid': '강감찬, 체육행사부장\n김유신, 환경부장\n허준, 복지부장\n윤봉길, 문화부장\n안중근, 혁신부장',
-    'wg_vol': '정약용, 방과후부장\n이황, 현장학습부장\n이이, 학생안전부장',
+  const volCnt=parseInt(document.getElementById('wz-vol-count')?.value)||3;
+
+  // 그룹별 예시·설명·목표인원
+  const GROUP_INFO={
+    'wg_sup':{
+      ex: supCount===2
+        ? '세종대왕, 교감(1~3학년)\n광개토대왕, 교감(4~6학년)'
+        : '세종대왕, 교감',
+      desc: supCount===0?'⚠️ 교감 없음 - 이 칸은 비워두세요'
+           :supCount===2?'💡 2명: 역할에 담당 학년 범위를 적어주세요'
+           :'교무행정 총괄 담당',
+      target: supCount,
+    },
+    'wg_team':{
+      ex:'이순신, 교무부장\n유관순, 연구부장\n장영실, 생활부장\n신사임당, 정보부장',
+      desc:'주요 부서 업무를 담당하는 부장교사 그룹',
+      target: parseInt(document.getElementById('wz-team-count')?.value)||4,
+    },
+    'wg_paid':{
+      ex:'강감찬, 체육행사부장\n김유신, 환경부장\n허준, 복지부장\n윤봉길, 문화부장\n안중근, 혁신부장',
+      desc:'각 부서 업무를 맡은 보직교사 그룹',
+      target: wzGroups.find(g=>g.id==='wg_paid')?._count||0,
+    },
+    'wg_vol':{
+      ex: volCnt===1
+        ? '정약용, 3학년 부장'
+        : volCnt===2
+        ? '정약용, 3학년 부장\n이황, 4학년 부장'
+        : '정약용, 3학년 부장\n이황, 4학년 부장\n이이, 5학년 부장',
+      desc:'💡 봉사부장은 대개 3·4학년 부장이 맡습니다. 역할에 학년을 적어주세요.',
+      target: volCnt,
+    },
   };
+
   sec.innerHTML=autoG.map(g=>{
-    const ph=EXAMPLES[g.id]||'이름, 역할';
+    const info=GROUP_INFO[g.id]||{ex:'이름, 역할',desc:'',target:0};
+    const target=info.target;
+    const lineH=24; // px per line
+    const minH=Math.max(56, target*lineH+20);
     const isSuper=g.id==='wg_sup';
+    const isVol=g.id==='wg_vol';
+
     return `
-    <div style="margin-bottom:18px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <div style="width:12px;height:12px;border-radius:50%;background:${g.color};"></div>
-        <span style="font-weight:700;font-size:var(--fs-sm);color:${g.color};">${g.name}</span>
-        <span style="font-size:var(--fs-xs);color:var(--muted);">· 이름, 역할${isSuper?' (보통 1명, 없으면 비워두세요)':' (한 줄에 한 명)'}</span>
+    <div style="margin-bottom:20px;">
+      <!-- 그룹 헤더 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div style="width:13px;height:13px;border-radius:50%;background:${g.color};flex-shrink:0;"></div>
+        <span style="font-weight:700;font-size:var(--fs-md);color:${g.color};">${g.name}</span>
+        ${target>0?`<span style="font-size:var(--fs-xs);font-weight:700;padding:2px 9px;border-radius:10px;background:${g.color}22;color:${g.color};">${target}명</span>`:''}
+        <span id="bulk-badge-${g.id}" style="font-size:var(--fs-xs);font-weight:700;padding:2px 9px;border-radius:10px;background:#f0f4f8;color:var(--muted);margin-left:2px;">0명 입력</span>
       </div>
+      <!-- 설명 -->
+      ${info.desc?`<div style="font-size:var(--fs-xs);color:${isVol?'#d97706':isSuper&&supCount===0?'#b91c1c':'var(--muted)'};margin-bottom:8px;padding:6px 10px;background:${isVol?'#fff7ed':isSuper&&supCount===0?'#fff1f2':'#f8fafc'};border-radius:8px;border-left:3px solid ${isVol?'#d97706':isSuper&&supCount===0?'#dc2626':g.color}44;">${info.desc}</div>`:''}
+      <!-- 입력창 -->
       <textarea class="bulk-input-area" id="bulk-${g.id}"
-        placeholder="${ph}"
-        style="min-height:${isSuper?'60px':'120px'};"
+        placeholder="${info.ex}"
+        style="min-height:${minH}px;"
         oninput="updateBulkCount()"></textarea>
     </div>`;
   }).join('');
@@ -2316,13 +2364,36 @@ function renderWzBulkInput(){
 }
 
 window.updateBulkCount=()=>{
-  let total=0;
+  let total=0, totalTarget=0;
   wzGroups.filter(g=>g.autoAssign).forEach(g=>{
     const el=document.getElementById('bulk-'+g.id);
-    if(el) total+=el.value.split('\n').filter(l=>l.trim()).length;
+    const badge=document.getElementById('bulk-badge-'+g.id);
+    if(!el)return;
+    const cnt=el.value.split('\n').filter(l=>l.trim()).length;
+    const target=g._count||0;
+    total+=cnt;
+    totalTarget+=target;
+    if(badge){
+      const over=target>0&&cnt>target, under=target>0&&cnt<target, exact=target>0&&cnt===target;
+      badge.textContent=target>0?`${cnt}/${target}명`:cnt>0?`${cnt}명 입력`:'';
+      badge.style.background=over?'#fee2e2':exact?'#dcfce7':under&&cnt>0?'#fff7ed':'#f0f4f8';
+      badge.style.color=over?'#b91c1c':exact?'#15803d':under&&cnt>0?'#d97706':'var(--muted)';
+    }
   });
   const el=document.getElementById('bulk-total-count');
   if(el) el.textContent=total;
+  // 전체 진행률 표시
+  const bar=document.getElementById('bulk-progress-bar');
+  const label=document.getElementById('bulk-progress-label');
+  if(bar&&totalTarget>0){
+    const pct=Math.min(100,Math.round(total/totalTarget*100));
+    bar.style.width=pct+'%';
+    bar.style.background=total>=totalTarget?'var(--success)':total>0?'var(--primary)':'var(--border)';
+  }
+  if(label&&totalTarget>0){
+    label.textContent=total>=totalTarget?`✅ ${total}명 모두 입력 완료`:`${total}/${totalTarget}명 입력됨`;
+    label.style.color=total>=totalTarget?'var(--success)':'var(--muted)';
+  }
 };
 
 function parseBulkMembers(){
