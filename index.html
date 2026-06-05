@@ -700,7 +700,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:16px 0;}
     <div class="warn-box" id="unassigned-warning">⚠️ 미배정 자동 업무가 있습니다. 드래그하여 직접 배정해주세요.</div>
     <div class="card">
       <div class="card-title">📦 미배정 업무 <span id="unassigned-count" class="badge badge-orange">0</span></div>
-      <div id="unassigned-pool" class="task-pool" data-member="__unassigned__"></div>
+      <div id="unassigned-pool" class="task-pool" data-member="UNASSIGNED"></div>
     </div>
     <div id="assign-grid" class="assign-grid"></div>
     <div style="display:flex;gap:8px;margin-top:10px;">
@@ -818,7 +818,7 @@ let currentGroup = "", currentAdminPwd = "";
 let memberGroups = [];  // [{id,name,color,minLoad,maxLoad,autoAssign,priority}]
 let members = [];       // [{id,name,role,memberGroupId,minLoad,maxLoad}]
 let tasks = [];         // [{id,name,category,weight,fixed}]
-let assignments = {};   // {memberId:[taskId,...], __unassigned__:[...]}
+let assignments = {};   // {memberId:[taskId,...], UNASSIGNED:[...]}
 let affinityData = {};  // {memberId:{roleTags:[],primaryCats:[]}}
 let categoryMapping = {}; // {category:memberId}
 let selectedWeight = 1, newTaskFixed = false, newGroupAuto = true;
@@ -937,7 +937,7 @@ window.goToLoginWithCode = async () => {
   const d=snap.data();
   memberGroups=d.memberGroups||[]; members=d.members||[]; tasks=d.tasks||[];
   assignments=d.assignments||{}; affinityData=d.affinityData||{}; categoryMapping=d.categoryMapping||{};
-  if(!assignments.__unassigned__) assignments.__unassigned__=[];
+  if(!assignments.UNASSIGNED) assignments.UNASSIGNED=[];
   // 화면 초기화 (다음 번 열릴 때 대비)
   document.getElementById('create-result-box').style.display='none';
   document.querySelector('#screen-host-create .card').style.display='block';
@@ -959,7 +959,7 @@ window.loginAdmin = async () => {
       const d=snap.data();
       memberGroups=d.memberGroups||[]; members=d.members||[]; tasks=d.tasks||[];
       assignments=d.assignments||{}; affinityData=d.affinityData||{}; categoryMapping=d.categoryMapping||{};
-      if(!assignments.__unassigned__) assignments.__unassigned__=tasks.map(t=>t.id).filter(id=>!Object.values(assignments).flat().includes(id));
+      if(!assignments.UNASSIGNED) assignments.UNASSIGNED=tasks.map(t=>t.id).filter(id=>!Object.values(assignments).flat().includes(id));
       // 헤더에 학교명 표시
       const dName=d.displayName||code;
       document.getElementById('app-title').textContent=dName;
@@ -1071,7 +1071,7 @@ window.removeMember = id => {
   const m = members.find(m=>m.id===id);
   if(!confirm(`'${m.name}'을(를) 삭제할까요?`)) return;
   const tasksOf = assignments[id]||[];
-  assignments.__unassigned__ = [...(assignments.__unassigned__||[]),...tasksOf];
+  assignments.UNASSIGNED = [...(assignments.UNASSIGNED||[]),...tasksOf];
   delete assignments[id]; delete affinityData[id];
   members = members.filter(m=>m.id!==id);
   renderMemberList();
@@ -1131,7 +1131,7 @@ window.addTask = () => {
   if(tasks.find(t=>t.name===name)) return toast('이미 존재하는 업무입니다.');
   const id='t_'+Date.now();
   tasks.push({id,name,category:cat||'기타',weight:selectedWeight,fixed:newTaskFixed});
-  assignments.__unassigned__=[...(assignments.__unassigned__||[]),id];
+  assignments.UNASSIGNED=[...(assignments.UNASSIGNED||[]),id];
   document.getElementById('new-task-name').value='';
   renderTaskPool();
   toast(`'${name}' 추가됨`);
@@ -1255,12 +1255,12 @@ window.loadDefaultTasks = () => {
     {n:'보안업무',c:'행정',w:2},{n:'기록물관리',c:'행정',w:2},
     {n:'학교운영위원회',c:'행정',w:3},{n:'산업재해예방',c:'행정',w:2},
   ];
-  tasks=[]; assignments.__unassigned__=[];
-  Object.keys(assignments).filter(k=>k!=='__unassigned__').forEach(k=>assignments[k]=[]);
+  tasks=[]; assignments.UNASSIGNED=[];
+  Object.keys(assignments).filter(k=>k!=='UNASSIGNED').forEach(k=>assignments[k]=[]);
   [...auto.map(d=>({...d,fixed:false})),...fixed.map(d=>({...d,fixed:true}))].forEach(d=>{
     const id='t_'+Date.now()+Math.random().toString(36).slice(2,5);
     tasks.push({id,name:d.n,category:d.c,weight:d.w,fixed:d.fixed});
-    assignments.__unassigned__.push(id);
+    assignments.UNASSIGNED.push(id);
   });
   renderTaskPool();
   toast(`기본 업무 불러옴 (자동 ${auto.length}개 / 고정 ${fixed.length}개)`);
@@ -1436,7 +1436,7 @@ window.autoAssign = () => {
   // 미배정: 고정업무 중 고정담당자 미배정분
   const fIds=fixedMembers.map(m=>m.id);
   const assignedFixed=fIds.flatMap(id=>assignments[id]||[]);
-  assignments.__unassigned__=tasks.filter(t=>t.fixed).map(t=>t.id).filter(id=>!assignedFixed.includes(id));
+  assignments.UNASSIGNED=tasks.filter(t=>t.fixed).map(t=>t.id).filter(id=>!assignedFixed.includes(id));
 
   renderAssignArea();
   toast(`배정 완료! (${autoGroups.map(g=>g.name).join('→')} 순 우선배정)`);
@@ -1446,7 +1446,7 @@ window.clearAssignment = () => {
   members.filter(m=>{const g=memberGroups.find(g=>g.id===m.memberGroupId);return g&&g.autoAssign;}).forEach(m=>assignments[m.id]=[]);
   const fIds=members.filter(m=>{const g=memberGroups.find(g=>g.id===m.memberGroupId);return g&&!g.autoAssign;}).map(m=>m.id);
   const af=fIds.flatMap(id=>assignments[id]||[]);
-  assignments.__unassigned__=tasks.filter(t=>!t.fixed).map(t=>t.id).concat(tasks.filter(t=>t.fixed).map(t=>t.id).filter(id=>!af.includes(id)));
+  assignments.UNASSIGNED=tasks.filter(t=>!t.fixed).map(t=>t.id).concat(tasks.filter(t=>t.fixed).map(t=>t.id).filter(id=>!af.includes(id)));
   renderAssignArea();
 };
 
@@ -1454,14 +1454,14 @@ window.clearAssignment = () => {
 // 드래그 & 드롭
 // ══════════════════════════════════════
 let dragId=null, dragFrom=null;
-window.onDragStart = e=>{dragId=e.target.dataset.id; dragFrom=e.target.closest('[data-member]')?.dataset.member||'__unassigned__'; e.dataTransfer.effectAllowed='move';};
+window.onDragStart = e=>{dragId=e.target.dataset.id; dragFrom=e.target.closest('[data-member]')?.dataset.member||'UNASSIGNED'; e.dataTransfer.effectAllowed='move';};
 function makeDrop(el,mid){
   el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over');});
   el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
   el.addEventListener('drop',e=>{
     e.preventDefault(); el.classList.remove('drag-over');
     if(!dragId||dragFrom===mid) return;
-    if(mid!=='__unassigned__'&&assignments[mid]?.includes(dragId)){toast('이미 배정된 업무입니다.');return;}
+    if(mid!=='UNASSIGNED'&&assignments[mid]?.includes(dragId)){toast('이미 배정된 업무입니다.');return;}
     assignments[dragFrom]=(assignments[dragFrom]||[]).filter(id=>id!==dragId);
     assignments[mid]=[...(assignments[mid]||[]),dragId];
     dragId=null; dragFrom=null;
@@ -1471,13 +1471,13 @@ function makeDrop(el,mid){
 
 function renderAssignArea(){
   const unPool=document.getElementById('unassigned-pool');
-  const allUn=assignments.__unassigned__||[];
+  const allUn=assignments.UNASSIGNED||[];
   const autoUn=allUn.filter(id=>{const t=tasks.find(t=>t.id===id);return t&&!t.fixed;});
   const fixedUn=allUn.filter(id=>{const t=tasks.find(t=>t.id===id);return t&&t.fixed;});
   document.getElementById('unassigned-count').textContent=autoUn.length;
   document.getElementById('unassigned-warning').classList.toggle('show',autoUn.length>0);
   unPool.innerHTML=autoUn.length?autoUn.map(tid=>{const t=tasks.find(t=>t.id===tid);return t?taskTagHTML(t,'assign'):'';}).join(''):'<span style="font-size:11px;color:var(--muted);">모든 자동 업무가 배정되었습니다 ✓</span>';
-  makeDrop(unPool,'__unassigned__');
+  makeDrop(unPool,'UNASSIGNED');
 
   const grid=document.getElementById('assign-grid');
   let html='';
@@ -1520,7 +1520,7 @@ function renderAssignArea(){
 // 저장 & 결과
 // ══════════════════════════════════════
 window.saveAndShowResult = async () => {
-  const unLen=(assignments.__unassigned__||[]).filter(id=>{const t=tasks.find(t=>t.id===id);return t&&!t.fixed;}).length;
+  const unLen=(assignments.UNASSIGNED||[]).filter(id=>{const t=tasks.find(t=>t.id===id);return t&&!t.fixed;}).length;
   if(unLen>0&&!confirm(`미배정 자동 업무가 ${unLen}개 있습니다. 그래도 저장할까요?`)) return;
   try {
     await updateDoc(doc(db,'groups',currentGroup),{memberGroups,members,tasks,assignments,affinityData,categoryMapping,updatedAt:new Date().toISOString()});
@@ -1555,7 +1555,7 @@ function renderResult(){
   });
   tbody.innerHTML=html;
   const autoG=memberGroups.filter(g=>g.autoAssign), fixedG=memberGroups.filter(g=>!g.autoAssign);
-  const unLen=(assignments.__unassigned__||[]).filter(id=>{const t=tasks.find(t=>t.id===id);return t&&!t.fixed;}).length;
+  const unLen=(assignments.UNASSIGNED||[]).filter(id=>{const t=tasks.find(t=>t.id===id);return t&&!t.fixed;}).length;
   document.getElementById('result-summary').innerHTML=`총 ${members.length}명 · 업무 ${tasks.length}개 · 미배정 ${unLen}개 &nbsp;|&nbsp; <span style="color:var(--success);">★ = 주담당 업무</span>`;
   const url=location.href.split('?')[0]+'?code='+encodeURIComponent(currentGroup);
   document.getElementById('share-link-box').textContent=url;
