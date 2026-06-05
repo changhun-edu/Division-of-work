@@ -1111,7 +1111,8 @@ window.createGroup = async () => {
   const pwd = document.getElementById('create-password').value;
   if(!displayName||!pwd) return toast('학교명과 비밀번호를 입력해주세요.');
   const today = new Date().toISOString().split('T')[0];
-  if(localStorage.getItem('lastGroupCreatedDate')===today) return toast('기기당 하루 1개의 그룹만 생성 가능합니다.');
+  const todayCount = parseInt(localStorage.getItem('groupCreatedCount_'+today)||'0');
+  if(todayCount >= 30) return toast('기기당 하루 최대 30개의 그룹만 생성 가능합니다.');
   try {
     // 고유 코드 생성 (중복 시 재시도)
     let code, tries=0;
@@ -1128,7 +1129,7 @@ window.createGroup = async () => {
       memberGroups:[],members:[],tasks:[],
       assignments:{},affinityData:{},categoryMapping:{}
     });
-    localStorage.setItem('lastGroupCreatedDate',today);
+    localStorage.setItem('groupCreatedCount_'+today, todayCount+1);
     createdGroupId=code; createdGroupPwd=pwd;
 
     // 결과 박스 표시
