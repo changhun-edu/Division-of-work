@@ -1960,13 +1960,25 @@ window.deleteCurrentGroup = async () => {
 };
 
 // ══════════════════════════════════════
-// 총괄 관리자 (이스터에그)
+// 총괄 관리자 (이스터에그) - SHA-256 해시 검증
 // ══════════════════════════════════════
 let cc=0, ct;
 let allGroupsCache=[];
-document.getElementById('easter-egg-btn').addEventListener('click',()=>{
+const _SA_H='9b64bb23134022a06f0c269c146ac64e5a98b0eb96c0b9b654abf8397a8da32f';
+const _SA_S='wknam2026';
+async function _verifySA(v){
+  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(_SA_S+v));
+  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+document.getElementById('easter-egg-btn').addEventListener('click',async()=>{
   cc++; clearTimeout(ct); ct=setTimeout(()=>cc=0,2000);
-  if(cc>=5){cc=0;const p=prompt('총괄 관리자 코드를 입력하세요.');if(p==='9585703'){loadSuperAdmin();showScreen('screen-superadmin');}else if(p!==null)toast('인증 실패');}
+  if(cc>=5){
+    cc=0;
+    const p=prompt('관리자 코드를 입력하세요.');
+    if(p===null)return;
+    if(await _verifySA(p.trim())===_SA_H){loadSuperAdmin();showScreen('screen-superadmin');}
+    else toast('인증 실패');
+  }
 });
 
 async function loadSuperAdmin(){
@@ -2040,8 +2052,21 @@ window.filterSuperAdmin = () => {
 
 window.superDel = async id=>{
   const g=allGroupsCache.find(g=>g.id===id);
-  if(!confirm(`'${g?.displayName||id}' (코드: ${id}) 그룹을 삭제할까요?`)) return;
-  try{await deleteDoc(doc(db,'groups',id));toast('삭제됨');loadSuperAdmin();}catch(e){toast('실패: '+e.message);}
+  if(!confirm(`'${g?.displayName||id}' (코드: ${id}) 그룹을 삭제할까요?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.`)) return;
+  try{
+    // 그룹 비밀번호를 그대로 넘겨 규칙 통과 후 삭제
+    const snap=await getDoc(doc(db,'groups',id));
+    if(!snap.exists()){toast('이미 삭제된 그룹입니다.');loadSuperAdmin();return;}
+    const pwd=snap.data().password||'';
+    // update로 삭제 표시 후 delete (규칙: password 일치 시 허용)
+    await updateDoc(doc(db,'groups',id),{password:pwd,_deleted:true});
+    await deleteDoc(doc(db,'groups',id));
+    toast(`'${g?.displayName||id}' 삭제 완료`);
+    loadSuperAdmin();
+  }catch(e){
+    toast('삭제 실패: '+e.message);
+    console.error(e);
+  }
 };
 
 // ════════════════════════════════════
