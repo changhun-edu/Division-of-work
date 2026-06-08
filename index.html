@@ -213,6 +213,14 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
 
 /* 총괄 관리자 */
 .sa-item{padding:12px 14px;border-bottom:1px solid var(--border);}
+
+/* 행정실·고정직군 업무 (admin_fixed) */
+.kw-result-item.admin_fixed{border-left:4px solid #7c3aed;background:#faf5ff;}
+.kw-result-item.admin_fixed .kw-result-badge{background:#ede9fe;color:#6d28d9;}
+.admin-fixed-note{font-size:var(--fs-xs);color:#7c3aed;margin-top:4px;font-weight:700;background:#ede9fe;display:inline-block;padding:2px 8px;border-radius:6px;}
+.kw-summary-item.admin_fixed{background:#faf5ff;border:1.5px solid #c4b5fd;}
+.kw-summary-item.admin_fixed .kw-summary-num{color:#7c3aed;}
+.admin-fixed-alert{background:#faf5ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:none;}
 .sa-item:last-child{border-bottom:none;}
 
 /* 반응형 */
@@ -355,7 +363,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
 .kw-result-name{font-weight:700;font-size:var(--fs-sm);flex:1;}
 .kw-result-meta{font-size:var(--fs-xs);color:var(--muted);margin-top:3px;}
 .kw-result-similar-text{font-size:var(--fs-xs);color:#d97706;margin-top:3px;}
-.kw-summary-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.kw-summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
 .kw-summary-item{text-align:center;padding:14px;border-radius:12px;}
 .kw-summary-item.missing{background:#fff1f2;border:1.5px solid #fecaca;}
 .kw-summary-item.similar{background:#fff7ed;border:1.5px solid #fed7aa;}
@@ -379,7 +387,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
   .hero-btns{flex-direction:column;}
   .hero-btn-main,.hero-btn-accent{justify-content:center;}
   .resume-bar{flex-direction:column;}
-  .kw-summary-bar{grid-template-columns:1fr;}
+  .kw-summary-bar{grid-template-columns:repeat(2,1fr);}
   .team-btn{min-width:60px;}
 }
 </style>
@@ -415,7 +423,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
       </div>
       <div class="hero-stats">
         <div class="hero-stat"><div class="hero-stat-num" id="stat-count">0건</div><div class="hero-stat-lbl">등록 사례</div></div>
-        <div class="hero-stat"><div class="hero-stat-num">127개</div><div class="hero-stat-lbl">공문 키워드 DB</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">106개</div><div class="hero-stat-lbl">공문 키워드 DB</div></div>
         <div class="hero-stat"><div class="hero-stat-num">무료</div><div class="hero-stat-lbl">로그인 불필요</div></div>
       </div>
     </div>
@@ -446,7 +454,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
           <div class="entry-title" style="color:var(--purple);">누락 공문 키워드 검사</div>
           <div class="entry-steps">
             <div class="entry-step"><div class="entry-step-num">1</div>기존 업무분장 PDF 업로드 (서버 미전송)</div>
-            <div class="entry-step"><div class="entry-step-num">2</div>공문 키워드 127개와 자동 비교</div>
+            <div class="entry-step"><div class="entry-step-num">2</div>공문 키워드 65개 + 고정직군 41개와 자동 비교</div>
             <div class="entry-step"><div class="entry-step-num">3</div>누락 키워드 확인 → 원클릭 추가</div>
           </div>
           <div class="entry-cta" style="color:var(--purple);"><span>PDF 업로드</span><span style="font-size:20px;">→</span></div>
@@ -476,7 +484,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
       <div class="keyword-preview-box">
         <div class="keyword-preview-title">
           <span>🔴 누락 빈도 높은 키워드 (예시)</span>
-          <span style="color:var(--purple);font-weight:700;">총 127개 키워드 DB</span>
+          <span style="color:var(--purple);font-weight:700;">총 106개 키워드 DB</span>
         </div>
         <div class="kw-list">
           <div class="kw-item high"><div class="kw-dot"></div><span class="kw-name">학교폭력예방 및 대책</span><span class="kw-dept">생활혁신부</span><span class="kw-freq">월평균 3.2건</span></div>
@@ -487,7 +495,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
         </div>
       </div>
       <div class="keyword-cta">
-        <div class="keyword-db-count">🗂️ 현재 DB: 공문 키워드 127개 · 별칭 포함 350개</div>
+        <div class="keyword-db-count">🗂️ 현재 DB: 교원 공문 키워드 65개 · 고정직군 업무 41개 · 별칭 포함 400개</div>
         <br>
         <p style="font-size:var(--fs-sm);color:var(--muted);margin-bottom:16px;">우리 학교 업무분장에는 몇 개나 있을까요?</p>
         <button class="btn btn-primary" style="padding:13px 28px;font-size:var(--fs-md);" onclick="showScreen('screen-pdf-check')">📄 우리 학교 업무분장 확인하기</button>
@@ -896,6 +904,10 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
           <div class="kw-summary-num" id="sum-found">0</div>
           <div class="kw-summary-lbl">✅ 포함</div>
         </div>
+        <div class="kw-summary-item admin_fixed">
+          <div class="kw-summary-num" id="sum-admin">0</div>
+          <div class="kw-summary-lbl">🏛️ 고정직군 감지</div>
+        </div>
       </div>
 
       <!-- 중요 누락 알림 -->
@@ -904,12 +916,20 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
         <div id="high-missing-list" style="font-size:var(--fs-xs);color:#b91c1c;"></div>
       </div>
 
+      <!-- 고정직군 감지 알림 -->
+      <div id="admin-fixed-alert" class="admin-fixed-alert">
+        <div style="font-weight:700;color:#6d28d9;margin-bottom:6px;">🏛️ 행정실·고정직군 업무가 교원 업무분장에서 감지되었습니다</div>
+        <div id="admin-fixed-list" style="font-size:var(--fs-xs);color:#5b21b6;margin-bottom:6px;"></div>
+        <div style="font-size:var(--fs-xs);color:#7c3aed;">위 항목은 <strong>행정실·보건교사·영양교사 등 고정 담당 직군</strong>의 업무입니다. 교원 업무분장에 포함되어 있다면 담당자 배정을 재검토하세요.</div>
+      </div>
+
       <!-- 탭 필터 -->
       <div class="kw-tab-row">
         <button class="kw-tab active" onclick="filterKwResults('all',this)">전체 <span id="tab-all-count"></span></button>
         <button class="kw-tab" onclick="filterKwResults('missing',this)">❌ 누락 <span id="tab-missing-count"></span></button>
         <button class="kw-tab" onclick="filterKwResults('similar',this)">⚠️ 유사 <span id="tab-similar-count"></span></button>
         <button class="kw-tab" onclick="filterKwResults('found',this)">✅ 포함 <span id="tab-found-count"></span></button>
+        <button class="kw-tab" onclick="filterKwResults('admin_fixed',this)">🏛️ 고정직군 <span id="tab-admin-count"></span></button>
       </div>
 
       <!-- 결과 목록 -->
@@ -1824,6 +1844,58 @@ const KEYWORD_DB = [
   {id:'k63',keyword:'학교운영위원회',aliases:['운영위원회','학운위'],category:'행정',importance:'high',freq:2.0,dept:'행정'},
   {id:'k64',keyword:'학교회계',aliases:['학교예산','예산편성','회계'],category:'행정',importance:'high',freq:2.5,dept:'행정'},
   {id:'k65',keyword:'공무직복무관리',aliases:['공무직','교무실무사복무'],category:'교무',importance:'mid',freq:1.2,dept:'교무부'},
+
+  // ── 행정실·고정직군 업무 (admin_fixed) ──
+  // 행정실장
+  {id:'af01',keyword:'학교운영위원회',aliases:['학운위','운영위원회'],category:'행정실',importance:'high',freq:2.0,dept:'행정실장',fixedStaff:'행정실장',fixedLabel:'행정실 업무'},
+  {id:'af02',keyword:'관인관리',aliases:['관인','직인관리'],category:'행정실',importance:'high',freq:1.5,dept:'행정실장',fixedStaff:'행정실장',fixedLabel:'행정실 업무'},
+  {id:'af03',keyword:'지방공무원인사',aliases:['지방공무원복무','행정직인사'],category:'행정실',importance:'high',freq:1.8,dept:'행정실장',fixedStaff:'행정실장',fixedLabel:'행정실 업무'},
+  {id:'af04',keyword:'학교발전기금',aliases:['발전기금'],category:'행정실',importance:'mid',freq:1.1,dept:'행정실장',fixedStaff:'행정실장',fixedLabel:'행정실 업무'},
+  {id:'af05',keyword:'학교회계예산편성',aliases:['예산편성','학교회계편성'],category:'행정실',importance:'high',freq:2.2,dept:'행정실장',fixedStaff:'행정실장',fixedLabel:'행정실 업무'},
+  {id:'af06',keyword:'학교회계결산',aliases:['회계결산','예산결산'],category:'행정실',importance:'high',freq:1.9,dept:'행정실장',fixedStaff:'행정실장',fixedLabel:'행정실 업무'},
+  // 행정실 주무관
+  {id:'af07',keyword:'법인카드관리',aliases:['법인카드'],category:'행정실',importance:'mid',freq:1.3,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af08',keyword:'교직원급여',aliases:['급여관리','맞춤형복지','4대보험'],category:'행정실',importance:'high',freq:2.0,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af09',keyword:'교직원초과근무',aliases:['초과근무','당직관리'],category:'행정실',importance:'mid',freq:1.4,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af10',keyword:'기록물관리',aliases:['기록물','문서관리'],category:'행정실',importance:'mid',freq:1.2,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af11',keyword:'제증명발급',aliases:['증명서발급','전입학'],category:'행정실',importance:'mid',freq:1.5,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af12',keyword:'시설전기소방',aliases:['시설관리','전기안전','소방업무'],category:'행정실',importance:'high',freq:1.8,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af13',keyword:'재산관리',aliases:['학교재산','재산업무'],category:'행정실',importance:'mid',freq:1.2,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af14',keyword:'물품업무',aliases:['물품관리','물품구매'],category:'행정실',importance:'mid',freq:1.6,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af15',keyword:'세입세출외현금',aliases:['세출외현금','세입세출'],category:'행정실',importance:'mid',freq:1.0,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af16',keyword:'공기정화장치',aliases:['실내공기질','공기정화'],category:'행정실',importance:'mid',freq:1.1,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af17',keyword:'급수관저수조청소',aliases:['저수조','급수관청소','수도관청소'],category:'행정실',importance:'mid',freq:0.9,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  {id:'af18',keyword:'스쿨뱅킹',aliases:['수익자부담'],category:'행정실',importance:'low',freq:0.8,dept:'행정실주무관',fixedStaff:'행정실 주무관',fixedLabel:'행정실 업무'},
+  // 보건교사
+  {id:'af19',keyword:'보건교육',aliases:['보건수업'],category:'보건교사',importance:'high',freq:2.5,dept:'보건교사',fixedStaff:'보건교사',fixedLabel:'보건교사 업무'},
+  {id:'af20',keyword:'학생건강기록부',aliases:['건강기록부'],category:'보건교사',importance:'high',freq:2.0,dept:'보건교사',fixedStaff:'보건교사',fixedLabel:'보건교사 업무'},
+  {id:'af21',keyword:'약물오남용예방',aliases:['약물예방','흡연예방'],category:'보건교사',importance:'mid',freq:1.5,dept:'보건교사',fixedStaff:'보건교사',fixedLabel:'보건교사 업무'},
+  {id:'af22',keyword:'수질검사',aliases:['음수대수질','먹는물검사'],category:'보건교사',importance:'mid',freq:1.2,dept:'보건교사',fixedStaff:'보건교사',fixedLabel:'보건교사 업무'},
+  {id:'af23',keyword:'소독',aliases:['학교소독','방역소독'],category:'보건교사',importance:'mid',freq:1.3,dept:'보건교사',fixedStaff:'보건교사',fixedLabel:'보건교사 업무'},
+  {id:'af24',keyword:'미세먼지',aliases:['미세먼지교육'],category:'보건교사',importance:'mid',freq:1.1,dept:'보건교사',fixedStaff:'보건교사',fixedLabel:'보건교사 업무'},
+  // 영양교사
+  {id:'af25',keyword:'학교급식',aliases:['급식운영','급식관리','급식지도'],category:'영양교사',importance:'high',freq:3.0,dept:'영양교사',fixedStaff:'영양교사',fixedLabel:'영양교사 업무'},
+  {id:'af26',keyword:'급식봉사단',aliases:['급식봉사'],category:'영양교사',importance:'low',freq:0.7,dept:'영양교사',fixedStaff:'영양교사',fixedLabel:'영양교사 업무'},
+  {id:'af27',keyword:'우유검수',aliases:['우유관리'],category:'영양교사',importance:'low',freq:0.8,dept:'영양교사',fixedStaff:'영양교사',fixedLabel:'영양교사 업무'},
+  {id:'af28',keyword:'식생활교육',aliases:['영양교육','식생활'],category:'영양교사',importance:'mid',freq:1.4,dept:'영양교사',fixedStaff:'영양교사',fixedLabel:'영양교사 업무'},
+  // 사서교사
+  {id:'af29',keyword:'도서관운영',aliases:['사서','도서관관리','독서교육'],category:'사서교사',importance:'mid',freq:1.5,dept:'사서교사',fixedStaff:'사서교사',fixedLabel:'사서교사 업무'},
+  {id:'af30',keyword:'교과서주문',aliases:['교과서배부','교과서관리'],category:'사서교사',importance:'mid',freq:1.3,dept:'사서교사',fixedStaff:'사서교사',fixedLabel:'사서교사 업무'},
+  {id:'af31',keyword:'학부모독서회',aliases:['독서회'],category:'사서교사',importance:'low',freq:0.6,dept:'사서교사',fixedStaff:'사서교사',fixedLabel:'사서교사 업무'},
+  // 상담교사
+  {id:'af32',keyword:'학생상담',aliases:['상담활동','상담주간'],category:'상담교사',importance:'high',freq:2.3,dept:'상담교사',fixedStaff:'상담교사',fixedLabel:'상담교사 업무'},
+  {id:'af33',keyword:'어울림프로그램',aliases:['또래상담','어울림'],category:'상담교사',importance:'mid',freq:1.4,dept:'상담교사',fixedStaff:'상담교사',fixedLabel:'상담교사 업무'},
+  {id:'af34',keyword:'심리방역',aliases:['심리방역지원단'],category:'상담교사',importance:'mid',freq:1.1,dept:'상담교사',fixedStaff:'상담교사',fixedLabel:'상담교사 업무'},
+  // 특수교사
+  {id:'af35',keyword:'개별화교육계획',aliases:['개별화교육','IEP'],category:'특수교사',importance:'high',freq:2.0,dept:'특수교사',fixedStaff:'특수교사',fixedLabel:'특수교사 업무'},
+  {id:'af36',keyword:'특수교육대상자',aliases:['특수교육입급','특수학급'],category:'특수교사',importance:'high',freq:1.8,dept:'특수교사',fixedStaff:'특수교사',fixedLabel:'특수교사 업무'},
+  {id:'af37',keyword:'장애이해교육',aliases:['장애이해'],category:'특수교사',importance:'mid',freq:1.2,dept:'특수교사',fixedStaff:'특수교사',fixedLabel:'특수교사 업무'},
+  {id:'af38',keyword:'통합교육',aliases:['건강장애통합','통합학급'],category:'특수교사',importance:'mid',freq:1.3,dept:'특수교사',fixedStaff:'특수교사',fixedLabel:'특수교사 업무'},
+  // 늘봄·돌봄
+  {id:'af39',keyword:'늘봄지원실',aliases:['늘봄기획','늘봄인력관리'],category:'늘봄',importance:'high',freq:2.0,dept:'늘봄연구사',fixedStaff:'늘봄지원연구사',fixedLabel:'늘봄 담당 업무'},
+  {id:'af40',keyword:'돌봄교실',aliases:['돌봄전담','돌봄운영'],category:'늘봄',importance:'high',freq:2.3,dept:'돌봄전담사',fixedStaff:'돌봄전담사',fixedLabel:'돌봄전담사 업무'},
+  // 영어회화전문강사
+  {id:'af41',keyword:'원어민강사관리',aliases:['원어민','영어회화강사','영어체험실'],category:'영어',importance:'mid',freq:1.0,dept:'영어회화전문강사',fixedStaff:'영어회화전문강사',fixedLabel:'영어회화전문강사 업무'},
 ];
 
 // ══════════════════════════════════════
@@ -1888,6 +1960,18 @@ function normalize(str){
 function analyzeKeywords(text, filename){
   const normText = normalize(text);
   kwResults = KEYWORD_DB.map(kw=>{
+    // admin_fixed 키워드: PDF에서 '발견'되면 경고 표시
+    if(kw.fixedStaff){
+      const toCheck = [kw.keyword, ...(kw.aliases||[])];
+      const exactMatch = toCheck.some(t=>normText.includes(normalize(t)));
+      if(exactMatch) return {...kw, status:'admin_fixed', matchedBy:kw.keyword};
+      const partialMatch = toCheck.some(t=>{
+        const n=normalize(t);
+        return n.length>=4 && (normText.includes(n.slice(0,5)) || normText.includes(n.slice(-4)));
+      });
+      if(partialMatch) return {...kw, status:'admin_fixed', matchedBy:'부분 일치'};
+      return null; // 발견 안 되면 결과 제외
+    }
     const toCheck = [kw.keyword, ...(kw.aliases||[])];
     // 1단계: 완전 일치
     const exactMatch = toCheck.some(t=>normText.includes(normalize(t)));
@@ -1899,19 +1983,22 @@ function analyzeKeywords(text, filename){
     });
     if(partialMatch) return {...kw, status:'similar', matchedBy:'부분 일치'};
     return {...kw, status:'missing'};
-  });
+  }).filter(Boolean);
 
   const missing = kwResults.filter(k=>k.status==='missing');
   const similar = kwResults.filter(k=>k.status==='similar');
   const found   = kwResults.filter(k=>k.status==='found');
+  const adminFixed = kwResults.filter(k=>k.status==='admin_fixed');
 
   document.getElementById('sum-missing').textContent = missing.length;
   document.getElementById('sum-similar').textContent = similar.length;
   document.getElementById('sum-found').textContent   = found.length;
+  document.getElementById('sum-admin').textContent   = adminFixed.length;
   document.getElementById('tab-all-count').textContent = `(${kwResults.length})`;
   document.getElementById('tab-missing-count').textContent = `(${missing.length})`;
   document.getElementById('tab-similar-count').textContent = `(${similar.length})`;
   document.getElementById('tab-found-count').textContent = `(${found.length})`;
+  document.getElementById('tab-admin-count').textContent = `(${adminFixed.length})`;
   document.getElementById('pdf-filename-label').textContent = filename;
 
   // 중요도 높은 누락
@@ -1921,6 +2008,22 @@ function analyzeKeywords(text, filename){
     alertEl.style.display='block';
     document.getElementById('high-missing-list').textContent = highMissing.map(k=>k.keyword).join(', ');
   }else alertEl.style.display='none';
+
+  // 고정직군 감지 알림
+  const adminAlertEl = document.getElementById('admin-fixed-alert');
+  if(adminFixed.length){
+    adminAlertEl.style.display='block';
+    // 직군별 그룹화
+    const byStaff = {};
+    adminFixed.forEach(k=>{
+      const lbl = k.fixedLabel||k.fixedStaff||'고정직군';
+      if(!byStaff[lbl]) byStaff[lbl]=[];
+      byStaff[lbl].push(k.keyword);
+    });
+    document.getElementById('admin-fixed-list').innerHTML = Object.entries(byStaff)
+      .map(([staff, kws])=>`<span style="font-weight:700;">[${staff}]</span> ${kws.join(', ')}`)
+      .join('<br>');
+  }else adminAlertEl.style.display='none';
 
   // 현재 편집 중인 업무분장이 있으면 추가 버튼 표시
   document.getElementById('add-to-sim-wrap').style.display = simId?'block':'none';
@@ -1936,8 +2039,8 @@ function renderKwResults(filter){
   const list = document.getElementById('kw-result-list');
   let items = kwResults;
   if(filter!=='all') items = kwResults.filter(k=>k.status===filter);
-  // 정렬: missing 중요도 high → mid → low, 그 다음 similar, found
-  const order = {missing:0,similar:1,found:2};
+  // 정렬: admin_fixed 먼저, 그 다음 missing 중요도 high → mid → low, similar, found
+  const order = {admin_fixed:0,missing:1,similar:2,found:3};
   const impOrder = {high:0,mid:1,low:2};
   items = [...items].sort((a,b)=>order[a.status]-order[b.status]||impOrder[a.importance||'low']-impOrder[b.importance||'low']);
 
@@ -1945,18 +2048,23 @@ function renderKwResults(filter){
 
   list.innerHTML = items.map(k=>{
     const impTag = k.importance==='high'?'🔴 중요':k.importance==='mid'?'🟡 보통':'⚪ 낮음';
+    const isAdmin = k.status==='admin_fixed';
     const addBtn = (k.status==='missing'||k.status==='similar')&&simId
       ? `<button class="btn btn-ghost btn-sm" onclick="addKwToSim('${k.keyword}','${k.dept||''}')" style="margin-top:6px;">+ 업무분장에 추가</button>`:'';
+    const adminNote = isAdmin
+      ? `<div class="admin-fixed-note">🏛️ ${k.fixedLabel||'고정직군'} (${k.fixedStaff}) — 교원 업무분장 배정 재검토 필요</div>` : '';
+    const statusLabel = isAdmin ? '🏛️ 고정직군 감지' : k.status==='missing'?'❌ 누락':k.status==='similar'?'⚠️ 유사':'✅ 포함';
     return `<div class="kw-result-item ${k.status}">
       <div style="flex:1;">
         <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-          <span class="kw-result-badge">${k.status==='missing'?'❌ 누락':k.status==='similar'?'⚠️ 유사':'✅ 포함'}</span>
+          <span class="kw-result-badge">${statusLabel}</span>
           <span class="kw-result-name">${k.keyword}</span>
           <span class="badge badge-gray" style="font-size:11px;">${impTag}</span>
         </div>
-        <div class="kw-result-meta">📂 ${k.category||''} · 👥 ${k.dept||''} · 📬 월평균 ${k.freq||0}건</div>
+        <div class="kw-result-meta">📂 ${k.category||''} · 👥 ${k.dept||''} · ${isAdmin ? '🏛️ 고정 담당 직군' : `📬 월평균 ${k.freq||0}건`}</div>
+        ${isAdmin ? adminNote : ''}
         ${k.status==='similar'?`<div class="kw-result-similar-text">⚠️ 유사 표현 감지됨 — 실제로 포함되었는지 원본에서 확인하세요</div>`:''}
-        ${k.aliases&&k.aliases.length?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:3px;">별칭: ${k.aliases.slice(0,3).join(', ')}</div>`:''}
+        ${k.aliases&&k.aliases.length&&!isAdmin?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:3px;">별칭: ${k.aliases.slice(0,3).join(', ')}</div>`:''}
         ${addBtn}
       </div>
     </div>`;
@@ -1986,6 +2094,7 @@ window.resetPdfCheck = () => {
   document.getElementById('pdf-upload-area').style.display='block';
   document.getElementById('pdf-result-area').style.display='none';
   document.getElementById('pdf-file-input').value='';
+  document.getElementById('admin-fixed-alert').style.display='none';
   kwResults=[];
 };
 
