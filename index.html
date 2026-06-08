@@ -601,23 +601,10 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
         <span style="color:var(--muted);font-size:var(--fs-sm);">명</span>
       </div>
 
-      <label>저장 방식</label>
-      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-        <label class="save-mode-label sel" id="save-cloud-btn">
-          <input type="radio" name="save-mode" value="cloud" checked
-            style="width:16px;height:16px;margin-bottom:0;accent-color:var(--primary);">
-          ☁️ 클라우드 저장 (코드 발급)
-        </label>
-        <label class="save-mode-label" id="save-local-btn">
-          <input type="radio" name="save-mode" value="local"
-            style="width:16px;height:16px;margin-bottom:0;accent-color:var(--primary);">
-          💻 이 기기에만 저장
-        </label>
-      </div>
-
-      <div id="setup-pwd-wrap">
-        <label>저장 비밀번호 <span style="font-weight:400;color:var(--muted);">(수정 시 필요)</span></label>
-        <input type="password" id="setup-pwd" placeholder="비밀번호 설정">
+      <label>저장 비밀번호 <span style="font-weight:400;color:var(--muted);">(수정 시 필요)</span></label>
+      <input type="password" id="setup-pwd" placeholder="비밀번호 설정 (4자 이상 권장)">
+      <div style="background:#eff6ff;border-radius:8px;padding:9px 12px;font-size:var(--fs-xs);color:#1d4ed8;margin-bottom:12px;">
+        ☁️ 클라우드에 저장되며 <b>6자리 코드</b>가 발급됩니다. 코드로 어디서든 불러올 수 있습니다.
       </div>
 
       <button class="btn btn-primary btn-full" style="margin-top:4px;padding:14px;font-size:var(--fs-md);" onclick="createSim()">
@@ -699,10 +686,34 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
   </div>
   <!-- 의견 수렴 패널 -->
   <div class="survey-panel" id="survey-panel" style="display:none;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <div style="font-weight:700;font-size:var(--fs-md);">💬 교직원 의견 집계</div>
-      <div style="font-size:var(--fs-xs);color:var(--muted);" id="survey-count">응답 0명</div>
+    <!-- 헤더 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-weight:700;font-size:var(--fs-md);">💬 교직원 의견수렴</div>
+        <div style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px;">공유 링크를 배포하면 교직원이 의견을 남길 수 있습니다</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-size:var(--fs-xs);color:var(--muted);font-weight:700;" id="survey-count">응답 0명</span>
+        <button class="btn btn-ghost btn-sm" onclick="refreshSurvey()">🔄 새로고침</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleSurveyPanel()">✕ 닫기</button>
+      </div>
     </div>
+    <!-- 공유 링크 발급 -->
+    <div id="survey-share-box" style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-weight:700;font-size:var(--fs-sm);color:var(--primary);margin-bottom:8px;">📤 교직원 공유 링크</div>
+      <div id="survey-link-display" style="display:none;">
+        <div style="background:#fff;border:1.5px solid #bfdbfe;border-radius:8px;padding:9px 12px;font-size:var(--fs-xs);word-break:break-all;color:var(--muted);margin-bottom:8px;" id="survey-link-text"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="copySurveyLink()">📋 링크 복사</button>
+          <button class="btn btn-ghost btn-sm" onclick="genSurveyLink()">🔄 링크 재생성</button>
+        </div>
+      </div>
+      <div id="survey-link-gen" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div style="font-size:var(--fs-xs);color:#1e40af;flex:1;">링크를 만들어 카카오톡·문자로 선생님들께 공유하세요</div>
+        <button class="btn btn-primary btn-sm" onclick="genSurveyLink()">링크 생성</button>
+      </div>
+    </div>
+    <!-- 의견 집계 -->
     <div id="survey-results"></div>
   </div>
 </div>
@@ -790,13 +801,18 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
     <input type="text" id="save-name" placeholder="예: A초등학교 2026 업무분장">
     <div id="save-code-result" style="display:none;">
       <div class="share-box">
-        <div style="font-size:var(--fs-xs);color:var(--muted);">저장 코드</div>
+        <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px;">☁️ 클라우드 저장 완료 · 저장 코드</div>
         <div class="share-code" id="modal-code"></div>
-        <div style="font-size:var(--fs-xs);color:var(--danger);margin-top:4px;">⚠️ 코드를 잃어버리면 불러올 수 없습니다</div>
+        <div style="font-size:var(--fs-xs);color:var(--muted);margin-top:6px;">이 코드로 어디서든 불러올 수 있습니다</div>
+        <div style="font-size:var(--fs-xs);color:var(--danger);margin-top:3px;">⚠️ 코드를 메모해두세요. 잃어버리면 불러올 수 없습니다</div>
       </div>
       <button class="btn btn-primary btn-full" onclick="copyCode()">📋 코드 복사</button>
     </div>
     <div id="save-form-area">
+      <div id="save-pwd-area" style="display:none;">
+        <label>비밀번호 설정 <span style="font-weight:400;color:var(--muted);">(수정 시 필요)</span></label>
+        <input type="password" id="save-new-pwd" placeholder="비밀번호 입력">
+      </div>
       <button class="btn btn-success btn-full" onclick="doSave()">저장</button>
     </div>
     <button class="btn btn-ghost btn-full" onclick="closeModal('modal-save')">닫기</button>
@@ -1184,16 +1200,8 @@ window.setupSelectTeam=n=>{
       requestAnimationFrame(()=>{el.style.opacity='1';el.style.transform='translateY(0)';});
     },i*80);
   });
-  // 저장모드 연동
-  const saveMode=document.querySelector('input[name="save-mode"]:checked')?.value;
-  document.getElementById('setup-pwd-wrap').style.display=saveMode==='local'?'none':'block';
 };
-// 저장모드 라디오 동기화
-document.querySelectorAll('input[name="save-mode"]').forEach(r=>r.addEventListener('change',()=>{
-  document.getElementById('setup-pwd-wrap').style.display=r.value==='local'?'none':'block';
-  document.getElementById('save-cloud-btn').classList.toggle('sel',r.value==='cloud');
-  document.getElementById('save-local-btn').classList.toggle('sel',r.value==='local');
-}));
+// 저장모드 라디오 이벤트 제거됨 (클라우드 전용)
 
 // setup 화면 진입 시 초기화
 function initSetupScreen(){
@@ -1219,25 +1227,19 @@ window.setupFilterCases=(filter,btn)=>{
 };
 
 window.createSim=async()=>{
-  const saveMode=document.querySelector('input[name="save-mode"]:checked')?.value||'cloud';
   const pwd=document.getElementById('setup-pwd').value;
   const bojeok=parseInt(document.getElementById('setup-bojeok').value)||9;
-  if(saveMode==='cloud'&&!pwd){toast('비밀번호를 입력해주세요.');return;}
+  if(!pwd){toast('비밀번호를 입력해주세요.');return;}
   const tpl=deepClone(TEMPLATES[setupTeam]||TEMPLATES[3]);
   simData={teamCount:setupTeam,bojeokCount:bojeok,departments:tpl,status:'draft',shareMode:'view',opinions:{},wishes:{},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
-  if(saveMode==='cloud'){
-    simPwd=pwd;
-    let code,tries=0;
-    do{code=genCode();const s=await getDoc(doc(db,'simulations',code));if(!s.exists())break;tries++;}while(tries<10);
-    simId=code;
-    try{
-      await setDoc(doc(db,'simulations',code),{...simData,password:pwd});
-      toast(`저장 완료! 코드: ${code}`);
-    }catch(e){toast('저장 실패: '+e.message);}
-  }else{
-    simId='local_'+Date.now();
-    localStorage.setItem('sim_'+simId,JSON.stringify(simData));
-  }
+  simPwd=pwd;
+  let code,tries=0;
+  do{code=genCode();const s=await getDoc(doc(db,'simulations',code));if(!s.exists())break;tries++;}while(tries<10);
+  simId=code;
+  try{
+    await setDoc(doc(db,'simulations',code),{...simData,password:pwd});
+    toast(`저장 완료! 코드: ${code}`);
+  }catch(e){toast('저장 실패: '+e.message);return;}
   document.getElementById('edit-title').textContent=`업무지원팀 ${setupTeam}명 · 보직교사 ${bojeok}명`;
   renderEditTable();
   showScreen('screen-edit');
@@ -1248,21 +1250,15 @@ window.createSim=async()=>{
 window.loadSim=async()=>{
   const code=document.getElementById('load-code-input').value.trim().toUpperCase();
   if(!code){toast('코드를 입력하세요.');return;}
-  if(code.startsWith('LOCAL_')){
-    const d=localStorage.getItem('sim_'+code);
-    if(!d){toast('저장된 데이터가 없습니다.');return;}
-    simData=JSON.parse(d);simId=code;simPwd='';
-  }else{
-    try{
-      const snap=await getDoc(doc(db,'simulations',code));
-      if(!snap.exists()){toast('존재하지 않는 코드입니다.');return;}
-      simData=snap.data();simId=code;
-      const p=prompt('비밀번호를 입력하세요 (열람은 그냥 확인)');
-      if(p===null)return;
-      if(p&&p!==simData.password){toast('비밀번호가 다릅니다. 열람 모드로 진행합니다.');simPwd='';}
-      else simPwd=p||'';
-    }catch(e){toast('오류: '+e.message);return;}
-  }
+  try{
+    const snap=await getDoc(doc(db,'simulations',code));
+    if(!snap.exists()){toast('존재하지 않는 코드입니다.');return;}
+    simData=snap.data();simId=code;
+    const p=prompt('비밀번호를 입력하세요 (열람만 하려면 그냥 확인)');
+    if(p===null)return;
+    if(p&&p!==simData.password){toast('비밀번호가 다릅니다. 열람 모드로 진행합니다.');simPwd='';}
+    else simPwd=p||'';
+  }catch(e){toast('오류: '+e.message);return;}
   enterEditOrView();
 };
 function enterEditOrView(){
@@ -1446,39 +1442,50 @@ window.doMerge=()=>{
 // ══ 저장 ══
 async function autoSave(){
   simData.updatedAt=new Date().toISOString();
-  if(simId&&!simId.startsWith('local_')){
+  if(simId){
     try{await updateDoc(doc(db,'simulations',simId),{departments:simData.departments,updatedAt:simData.updatedAt});}
     catch{}
-  }else if(simId){
-    localStorage.setItem('sim_'+simId,JSON.stringify(simData));
   }
   saveSession();
 }
 window.showSaveModal=()=>{
   document.getElementById('save-code-result').style.display='none';
   document.getElementById('save-form-area').style.display='block';
-  document.getElementById('save-name').value='';
+  document.getElementById('save-name').value=simData.name||'';
+  // simId 없으면 신규 저장 → 비밀번호 입력 필요
+  document.getElementById('save-pwd-area').style.display=simId?'none':'block';
+  document.getElementById('save-new-pwd').value='';
   openModal('modal-save');
 };
 window.doSave=async()=>{
   const name=document.getElementById('save-name').value.trim();
   if(!name){toast('이름을 입력하세요.');return;}
   simData.name=name;simData.updatedAt=new Date().toISOString();
-  if(simId&&!simId.startsWith('local_')){
+  // simId 없음 = 사례 적용 후 첫 저장
+  if(!simId){
+    const pwd=document.getElementById('save-new-pwd').value;
+    if(!pwd){toast('비밀번호를 입력하세요.');return;}
+    simPwd=pwd;
+    let code,tries=0;
+    do{code=genCode();const s=await getDoc(doc(db,'simulations',code));if(!s.exists())break;tries++;}while(tries<10);
+    simId=code;
     try{
-      await updateDoc(doc(db,'simulations',simId),{name,updatedAt:simData.updatedAt,departments:simData.departments,opinions:simData.opinions||{},wishes:simData.wishes||{}});
+      await setDoc(doc(db,'simulations',code),{...simData,password:pwd});
       document.getElementById('modal-code').textContent=simId;
       document.getElementById('save-code-result').style.display='block';
       document.getElementById('save-form-area').style.display='none';
-      toast('저장 완료!');
+      saveSession();toast('저장 완료! 코드: '+simId);
     }catch(e){toast('저장 실패: '+e.message);}
-  }else{
-    localStorage.setItem('sim_'+simId,JSON.stringify(simData));
+    return;
+  }
+  // 기존 저장
+  try{
+    await updateDoc(doc(db,'simulations',simId),{name,updatedAt:simData.updatedAt,departments:simData.departments,opinions:simData.opinions||{},wishes:simData.wishes||{}});
     document.getElementById('modal-code').textContent=simId;
     document.getElementById('save-code-result').style.display='block';
     document.getElementById('save-form-area').style.display='none';
-    toast('기기에 저장됨');
-  }
+    toast('저장 완료!');
+  }catch(e){toast('저장 실패: '+e.message);}
 };
 window.copyCode=async()=>{
   try{await navigator.clipboard.writeText(simId);toast('코드 복사됨: '+simId);}
@@ -1514,48 +1521,93 @@ window.copyShareLink=async()=>{
 // ══ 의견 수렴 ══
 window.toggleSurveyPanel=()=>{
   const p=document.getElementById('survey-panel');
-  p.style.display=p.style.display==='none'?'block':'none';
-  if(p.style.display==='block')renderSurveyPanel();
+  const isOpen=p.style.display==='block';
+  p.style.display=isOpen?'none':'block';
+  if(!isOpen){
+    renderSurveyPanel();
+    // 기존 링크 있으면 바로 표시
+    if(simId){
+      const url=`${location.origin}${location.pathname}?s=${simId}&m=comment#view`;
+      document.getElementById('survey-link-text').textContent=url;
+      document.getElementById('survey-link-display').style.display='block';
+      document.getElementById('survey-link-gen').style.display='none';
+    }
+  }
+};
+window.genSurveyLink=async()=>{
+  if(!simId){toast('먼저 저장하세요.');return;}
+  try{
+    await updateDoc(doc(db,'simulations',simId),{shareMode:'comment'});
+    simData.shareMode='comment';
+  }catch{}
+  const url=`${location.origin}${location.pathname}?s=${simId}&m=comment#view`;
+  document.getElementById('survey-link-text').textContent=url;
+  document.getElementById('survey-link-display').style.display='block';
+  document.getElementById('survey-link-gen').style.display='none';
+  toast('링크가 생성되었습니다. 복사해서 선생님들께 공유하세요!');
+};
+window.copySurveyLink=async()=>{
+  const url=document.getElementById('survey-link-text').textContent;
+  try{await navigator.clipboard.writeText(url);toast('링크가 복사되었습니다!');}
+  catch{toast('링크: '+url);}
+};
+window.refreshSurvey=async()=>{
+  if(!simId){toast('저장된 업무분장이 없습니다.');return;}
+  try{
+    const snap=await getDoc(doc(db,'simulations',simId));
+    if(snap.exists()){
+      simData.opinions=snap.data().opinions||{};
+      renderSurveyPanel();
+      toast('최신 의견을 불러왔습니다.');
+    }
+  }catch(e){toast('새로고침 실패: '+e.message);}
 };
 function renderSurveyPanel(){
   const opinions=simData.opinions||{};
   const results=document.getElementById('survey-results');
   const depts=simData.departments||[];
+  const allVoters=new Set(Object.values(opinions).map(o=>o.voter));
+  document.getElementById('survey-count').textContent=`응답 ${allVoters.size}명`;
   if(!Object.keys(opinions).length){
-    results.innerHTML='<p style="font-size:var(--fs-xs);color:var(--muted);padding:10px;">아직 의견이 없습니다. 공유 링크로 교직원 의견을 받으세요.</p>';
-    document.getElementById('survey-count').textContent='응답 0명';
+    results.innerHTML=`
+      <div style="text-align:center;padding:24px 16px;background:#f8fafc;border-radius:12px;border:1.5px dashed var(--border);">
+        <div style="font-size:28px;margin-bottom:10px;">📭</div>
+        <div style="font-weight:700;font-size:var(--fs-sm);margin-bottom:6px;">아직 의견이 없습니다</div>
+        <div style="font-size:var(--fs-xs);color:var(--muted);line-height:1.7;">위 링크를 선생님들께 공유하면<br>부서 배정에 대한 의견을 받을 수 있습니다</div>
+      </div>`;
     return;
   }
   // 부서별 집계
-  const allVoters=new Set();
-  const html=depts.map(dept=>{
+  results.innerHTML=depts.map(dept=>{
     const deptOps=Object.values(opinions).filter(o=>o.deptId===dept.id);
-    deptOps.forEach(o=>allVoters.add(o.voter));
+    if(!deptOps.length)return '';
     const agree=deptOps.filter(o=>o.vote==='agree').length;
     const partial=deptOps.filter(o=>o.vote==='partial').length;
     const reject=deptOps.filter(o=>o.vote==='reject').length;
     const total=deptOps.length;
-    if(!total)return '';
     const pct=n=>total?Math.round(n/total*100):0;
-    const moveProps=deptOps.filter(o=>o.moveTask).map(o=>`${o.moveTask}→${depts.find(d=>d.id===o.moveToDept)?.name||'?'}`);
-    const comments=deptOps.filter(o=>o.comment).map(o=>`"${o.comment}"`);
-    return `<div class="opinion-item">
-      <div style="flex:1;">
-        <div style="font-weight:700;font-size:var(--fs-sm);margin-bottom:8px;">${dept.name}</div>
-        <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
-          <span class="badge badge-green">👍 ${agree}</span>
-          <span class="badge badge-orange">🤔 ${partial}</span>
-          <span class="badge badge-red">✋ ${reject}</span>
-          <span class="badge badge-gray">총 ${total}명</span>
+    const moveProps=deptOps.filter(o=>o.moveTask).map(o=>{
+      const toName=depts.find(d=>d.id===o.moveToDept)?.name||'?';
+      return `<span style="background:#fee2e2;color:#b91c1c;border-radius:6px;padding:1px 7px;font-size:11px;">📌 ${o.moveTask} → ${toName}</span>`;
+    });
+    const comments=deptOps.filter(o=>o.comment).map(o=>
+      `<div style="font-size:var(--fs-xs);color:var(--text);padding:6px 10px;background:#f8fafc;border-radius:6px;border-left:3px solid var(--border);">"${o.comment}"</div>`);
+    return `<div class="opinion-item" style="flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+        <span style="font-weight:700;font-size:var(--fs-sm);">${dept.name}</span>
+        <div style="display:flex;gap:5px;">
+          <span class="badge badge-green">👍 ${agree}명 (${pct(agree)}%)</span>
+          <span class="badge badge-orange">🤔 ${partial}명</span>
+          <span class="badge badge-red">✋ ${reject}명</span>
         </div>
-        <div class="vote-bar"><div class="vote-bar-fill" style="width:${pct(agree)}%;background:var(--success);"></div></div>
-        ${moveProps.length?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:6px;">📌 업무 이동 제안: ${moveProps.join(', ')}</div>`:''}
-        ${comments.length?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:4px;">💬 ${comments.slice(0,3).join(' / ')}</div>`:''}
       </div>
+      <div class="vote-bar" style="height:8px;">
+        <div class="vote-bar-fill" style="width:${pct(agree)}%;background:var(--success);"></div>
+      </div>
+      ${moveProps.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;">${moveProps.join('')}</div>`:''}
+      ${comments.length?`<div style="display:flex;flex-direction:column;gap:4px;">${comments.slice(0,5).join('')}</div>`:''}
     </div>`;
-  }).filter(Boolean).join('');
-  results.innerHTML=html||'<p style="font-size:var(--fs-xs);color:var(--muted);">의견 없음</p>';
-  document.getElementById('survey-count').textContent=`응답 ${allVoters.size}명`;
+  }).filter(Boolean).join('')||'<p style="font-size:var(--fs-xs);color:var(--muted);padding:10px;">의견 없음</p>';
 }
 
 // ══ 최종 확정 ══
@@ -1707,11 +1759,10 @@ window.loadCaseAsTemplate=async id=>{
   if(!snap.exists()){toast('사례를 불러올 수 없습니다.');return;}
   const c=snap.data();
   simData={teamCount:c.teamCount,bojeokCount:c.bojeokCount||9,departments:c.departments.map(d=>({...d,person:'',id:genDeptId()})),status:'draft',shareMode:'view',opinions:{},wishes:{},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
-  simId='local_'+Date.now();simPwd='';
-  localStorage.setItem('sim_'+simId,JSON.stringify(simData));
+  simId='';simPwd='';
   document.getElementById('edit-title').textContent=`사례 적용 · 업무지원팀 ${c.teamCount}명`;
   renderEditTable();showScreen('screen-edit');
-  toast('사례가 적용되었습니다. 수정 후 저장하세요.');
+  toast('사례가 적용되었습니다. 💾 저장 버튼으로 저장하세요.');
 };
 
 // ══ 사례 등록 ══
