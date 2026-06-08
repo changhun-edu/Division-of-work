@@ -1106,6 +1106,14 @@ const SPLIT_OPTIONS={
 
 // ══ 유틸 ══
 function toast(msg,d=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function fbErrMsg(e){
+  if(!e||!e.message)return '알 수 없는 오류가 발생했습니다.';
+  if(e.message.toLowerCase().includes('permission'))
+    return 'Firebase 보안 규칙 오류입니다. Firebase 콘솔 → Firestore → 규칙을 확인하세요.';
+  if(e.message.toLowerCase().includes('network')||e.message.toLowerCase().includes('offline'))
+    return '네트워크 연결을 확인하세요.';
+  return e.message;
+}
 window.closeModal=id=>{document.getElementById(id).classList.remove('open');}
 window.openModal=id=>{document.getElementById(id).classList.add('open');}
 function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
@@ -1274,7 +1282,24 @@ window.createSim=async()=>{
     btn.disabled=false;
     const label=setupTeam===0?'없음(직접 구성)':`업무지원팀 ${setupTeam}명`;
     btn.textContent=`✅ ${label} 구성으로 업무분장 만들기 →`;
-    errMsg.textContent=e.message||'알 수 없는 오류가 발생했습니다.';
+    const isPerm=e.message&&(e.message.includes('permission')||e.message.includes('Permission'));
+    errMsg.innerHTML=isPerm
+      ? `<b>Firebase 보안 규칙이 쓰기를 차단하고 있습니다.</b><br>
+         Firebase 콘솔 → Firestore → <b>규칙</b> 탭에서 아래 규칙으로 교체 후 게시하세요.<br><br>
+         <code style="display:block;background:#fff;border:1px solid #fca5a5;border-radius:6px;padding:10px;font-size:11px;line-height:1.8;white-space:pre-wrap;">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /simulations/{code} {
+      allow read, create, update: if true;
+      allow delete: if request.auth != null;
+    }
+    match /cases/{id} {
+      allow read, create: if true;
+      allow delete: if request.auth != null;
+    }
+  }
+}</code>`
+      : `오류: ${e.message||'알 수 없는 오류'}`;
     errBox.style.display='block';
     errBox.scrollIntoView({behavior:'smooth',block:'center'});
   }
@@ -1292,7 +1317,7 @@ window.loadSim=async()=>{
     if(p===null)return;
     if(p&&p!==simData.password){toast('비밀번호가 다릅니다. 열람 모드로 진행합니다.');simPwd='';}
     else simPwd=p||'';
-  }catch(e){toast('오류: '+e.message);return;}
+  }catch(e){toast('오류: '+fbErrMsg(e));return;}
   enterEditOrView();
 };
 function enterEditOrView(){
@@ -1509,7 +1534,7 @@ window.doSave=async()=>{
       document.getElementById('save-code-result').style.display='block';
       document.getElementById('save-form-area').style.display='none';
       saveSession();toast('저장 완료! 코드: '+simId);
-    }catch(e){toast('저장 실패: '+e.message);}
+    }catch(e){toast('저장 실패: '+fbErrMsg(e));}
     return;
   }
   // 기존 저장
@@ -1519,7 +1544,7 @@ window.doSave=async()=>{
     document.getElementById('save-code-result').style.display='block';
     document.getElementById('save-form-area').style.display='none';
     toast('저장 완료!');
-  }catch(e){toast('저장 실패: '+e.message);}
+  }catch(e){toast('저장 실패: '+fbErrMsg(e));}
 };
 window.copyCode=async()=>{
   try{await navigator.clipboard.writeText(simId);toast('코드 복사됨: '+simId);}
@@ -1594,7 +1619,7 @@ window.refreshSurvey=async()=>{
       renderSurveyPanel();
       toast('최신 의견을 불러왔습니다.');
     }
-  }catch(e){toast('새로고침 실패: '+e.message);}
+  }catch(e){toast('새로고침 실패: '+fbErrMsg(e));}
 };
 function renderSurveyPanel(){
   const opinions=simData.opinions||{};
@@ -1716,7 +1741,7 @@ window.submitOpinion=async()=>{
     if(simId&&!simId.startsWith('local_')){
       await updateDoc(doc(db,'simulations',simId),{[`opinions.${voter}_${opinionDeptId}`]:opinion,status:'reviewing'});
     }
-  }catch(e){toast('제출 실패: '+e.message);return;}
+  }catch(e){toast('제출 실패: '+fbErrMsg(e));return;}
   document.getElementById('view-submit-area').style.display='none';
   toast('의견이 제출되었습니다. 감사합니다!');
 };
@@ -1750,7 +1775,7 @@ window.submitWish=async()=>{
   simData.wishes[voter]=wish;
   try{
     if(simId&&!simId.startsWith('local_'))await updateDoc(doc(db,'simulations',simId),{[`wishes.${voter}`]:wish});
-  }catch(e){toast('제출 실패: '+e.message);return;}
+  }catch(e){toast('제출 실패: '+fbErrMsg(e));return;}
   toast('희망 조사 제출 완료!');
   showScreen('screen-view');
 };
@@ -1810,7 +1835,7 @@ window.doRegisterCase=async()=>{
   try{
     await addDoc(collection(db,'cases'),{teamCount:simData.teamCount,bojeokCount:simData.bojeokCount||9,size,region:region||'광주',departments:anonDepts,deptCount:anonDepts.length,deptNames:anonDepts.map(d=>d.name),createdAt:new Date().toISOString()});
     closeModal('modal-case-reg');toast('사례가 등록되었습니다. 감사합니다!');
-  }catch(e){toast('등록 실패: '+e.message);}
+  }catch(e){toast('등록 실패: '+fbErrMsg(e));}
 };
 
 // ══ 엑셀 출력 ══
@@ -1905,7 +1930,7 @@ window.superDelete=async id=>{
     await updateDoc(doc(db,'simulations',id),{password:pwd,_del:true});
     await deleteDoc(doc(db,'simulations',id));
     toast('삭제됨');loadSuperAdmin();
-  }catch(e){toast('실패: '+e.message);}
+  }catch(e){toast('실패: '+fbErrMsg(e));}
 };
 
 // ══════════════════════════════════════
@@ -2326,7 +2351,7 @@ loadCases();
         else { renderViewTable(); history.replaceState({screen:'screen-view'},'','#view'); applyScreen('screen-view'); }
         saveSession();
       }
-    }catch(e){ toast('오류: '+e.message); }
+    }catch(e){ toast('오류: '+fbErrMsg(e)); }
     return;
   }
 
