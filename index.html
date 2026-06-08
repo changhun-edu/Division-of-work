@@ -223,6 +223,20 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
 .admin-fixed-alert{background:#faf5ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:none;}
 .sa-item:last-child{border-bottom:none;}
 
+/* ── screen-setup 전용 ── */
+.setup-team-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px;}
+.setup-team-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 8px;border:2.5px solid var(--border);border-radius:14px;background:#fff;cursor:pointer;transition:all .2s;font-family:inherit;gap:2px;min-height:80px;}
+.setup-team-btn:hover{border-color:var(--primary);background:var(--primary-light);transform:translateY(-2px);box-shadow:0 4px 12px rgba(29,78,216,.15);}
+.setup-team-btn.active{border-color:var(--primary);background:var(--primary);color:#fff;box-shadow:0 4px 16px rgba(29,78,216,.35);transform:translateY(-2px);}
+.setup-team-num{font-size:var(--fs-xl);font-weight:900;line-height:1;}
+.setup-team-label{font-size:var(--fs-xs);font-weight:700;opacity:.7;}
+.setup-team-btn.active .setup-team-label{opacity:.85;}
+.setup-team-pdf{font-size:11px;background:rgba(124,58,237,.12);color:var(--purple);padding:1px 6px;border-radius:6px;font-weight:700;margin-top:2px;}
+.setup-team-btn.active .setup-team-pdf{background:rgba(255,255,255,.2);color:#fff;}
+.save-mode-label{display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 16px;border:2px solid var(--border);border-radius:10px;font-size:var(--fs-sm);font-weight:700;transition:all .15s;}
+.save-mode-label.sel{border-color:var(--primary);background:var(--primary-light);}
+@media(max-width:500px){.setup-team-grid{grid-template-columns:repeat(3,1fr);}}
+
 /* 반응형 */
 @media(max-width:600px){
   .process-steps{grid-template-columns:1fr;}
@@ -418,7 +432,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
       <h2 class="hero-title"><em>실질적인 업무분장</em>,<br>공문 배정까지</h2>
       <p class="hero-desc">업무지원팀 인원만 선택하면 PDF 기반 템플릿이 완성됩니다.<br>드래그로 조정하고, 링크로 공유해 교직원 의견을 모으세요.<br>기존 업무분장의 누락 공문 키워드도 바로 확인할 수 있습니다.</p>
       <div class="hero-btns">
-        <button class="hero-btn-main" onclick="showSection('sec-make')">📋 업무분장 만들기</button>
+        <button class="hero-btn-main" onclick="showScreen('screen-setup')">📋 업무분장 만들기</button>
         <button class="hero-btn-accent" onclick="showScreen('screen-pdf-check')">📄 누락 키워드 검사</button>
       </div>
       <div class="hero-stats">
@@ -437,7 +451,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
       <div class="entry-grid">
 
         <!-- 새로 만들기 -->
-        <div class="entry-card entry-card-new" onclick="showSection('sec-make')">
+        <div class="entry-card entry-card-new" onclick="showScreen('screen-setup')">
           <div class="entry-icon">📋</div>
           <div class="entry-title">업무분장 새로 만들기</div>
           <div class="entry-steps">
@@ -503,78 +517,6 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
     </div>
   </section>
 
-  <!-- ④ 업무분장 만들기 + 사례 -->
-  <section class="make-section" id="sec-make">
-    <div class="container">
-      <div class="section-title">업무분장 만들기</div>
-      <div class="section-sub">업무지원팀 인원을 선택하면 미리보기가 표시됩니다</div>
-      <div class="team-selector">
-        <button class="team-btn" data-n="0" onclick="selectTeam(0)">
-          <span class="team-btn-num" style="font-size:var(--fs-md);">없음</span>
-          <span class="team-btn-label">0명</span>
-        </button>
-        <button class="team-btn" data-n="1" onclick="selectTeam(1)">
-          <span class="team-btn-num">1</span>
-          <span class="team-btn-label">명</span>
-        </button>
-        <button class="team-btn" data-n="2" onclick="selectTeam(2)">
-          <span class="team-btn-num">2</span>
-          <span class="team-btn-label">명</span>
-        </button>
-        <button class="team-btn" data-n="3" onclick="selectTeam(3)">
-          <span class="team-btn-num">3</span>
-          <span class="team-btn-label">명</span>
-          <span class="team-btn-pdf">PDF기반</span>
-        </button>
-        <button class="team-btn" data-n="4" onclick="selectTeam(4)">
-          <span class="team-btn-num">4</span>
-          <span class="team-btn-label">명</span>
-          <span class="team-btn-pdf">PDF기반</span>
-        </button>
-        <button class="team-btn" data-n="5" onclick="selectTeam(5)">
-          <span class="team-btn-num">5</span>
-          <span class="team-btn-label">명</span>
-          <span class="team-btn-pdf">PDF기반</span>
-        </button>
-      </div>
-
-      <!-- 미리보기 -->
-      <div class="preview-wrap" id="home-preview">
-        <div class="preview-header">
-          <span id="preview-title-label">📋 미리보기</span>
-          <button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3);" onclick="startWithSelected()">이 구성으로 시작 →</button>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="preview-table" id="preview-table">
-            <thead><tr><th>부서</th><th style="width:80px;">비고</th><th>주요 업무</th></tr></thead>
-            <tbody id="preview-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div id="home-start-btn" style="display:none;text-align:center;margin-bottom:32px;">
-        <button class="btn btn-primary" style="padding:14px 36px;font-size:var(--fs-md);" onclick="startWithSelected()">이 구성으로 시작 →</button>
-      </div>
-
-      <!-- 구분선 -->
-      <div style="display:flex;align-items:center;gap:14px;margin:32px 0;">
-        <div style="flex:1;height:1.5px;background:var(--border);"></div>
-        <span style="font-size:var(--fs-xs);color:var(--muted);font-weight:700;">또는 다른 학교 사례 참고</span>
-        <div style="flex:1;height:1.5px;background:var(--border);"></div>
-      </div>
-
-      <!-- 사례 DB -->
-      <div class="filter-row">
-        <button class="filter-btn active" onclick="filterCases('all',this)">전체</button>
-        <button class="filter-btn" onclick="filterCases('3',this)">업무지원팀 3명</button>
-        <button class="filter-btn" onclick="filterCases('4',this)">4명</button>
-        <button class="filter-btn" onclick="filterCases('5',this)">5명</button>
-      </div>
-      <div class="cases-grid" id="cases-grid">
-        <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);">사례를 불러오는 중...</div>
-      </div>
-    </div>
-  </section>
-
   <!-- 푸터 -->
   <footer class="footer">
     <div>초등학교 업무분장 시뮬레이터 · 초등학교 전용 · 무료</div>
@@ -584,42 +526,130 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
 <!-- ────────────────────────────────
      시작 설정 화면
 ──────────────────────────────── -->
+<!-- ────────────────────────────────
+     시작 설정 화면 (전면 재설계)
+──────────────────────────────── -->
 <div id="screen-setup" class="screen">
-  <div class="container" style="padding-top:24px;">
-    <div class="card">
-      <div class="card-title">📋 업무분장 시작</div>
-      <label>업무지원팀 인원</label>
-      <div class="team-selector" style="justify-content:flex-start;margin-bottom:16px;">
-        <button class="team-btn" data-n="0" onclick="setupSelectTeam(0)">없음</button>
-        <button class="team-btn" data-n="1" onclick="setupSelectTeam(1)">1</button>
-        <button class="team-btn" data-n="2" onclick="setupSelectTeam(2)">2</button>
-        <button class="team-btn active" data-n="3" onclick="setupSelectTeam(3)">3</button>
-        <button class="team-btn" data-n="4" onclick="setupSelectTeam(4)">4</button>
-        <button class="team-btn" data-n="5" onclick="setupSelectTeam(5)">5</button>
+  <div style="max-width:860px;margin:0 auto;padding:24px 16px 48px;">
+
+    <!-- 페이지 타이틀 -->
+    <div style="margin-bottom:28px;">
+      <h2 style="font-size:var(--fs-xl);font-weight:900;letter-spacing:-.5px;margin-bottom:6px;">📋 업무분장 새로 만들기</h2>
+      <p style="font-size:var(--fs-sm);color:var(--muted);">업무지원팀 인원을 선택하면 부서 구성 미리보기가 바로 표시됩니다</p>
+    </div>
+
+    <!-- ① 인원 선택 카드 -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">① 업무지원팀 인원 선택</div>
+      <div class="setup-team-grid">
+        <button class="setup-team-btn" data-n="0" onclick="setupSelectTeam(0)">
+          <span class="setup-team-num">없음</span>
+          <span class="setup-team-label">0명</span>
+        </button>
+        <button class="setup-team-btn" data-n="1" onclick="setupSelectTeam(1)">
+          <span class="setup-team-num">1</span>
+          <span class="setup-team-label">명</span>
+        </button>
+        <button class="setup-team-btn" data-n="2" onclick="setupSelectTeam(2)">
+          <span class="setup-team-num">2</span>
+          <span class="setup-team-label">명</span>
+        </button>
+        <button class="setup-team-btn" data-n="3" onclick="setupSelectTeam(3)">
+          <span class="setup-team-num">3</span>
+          <span class="setup-team-label">명</span>
+          <span class="setup-team-pdf">PDF 기반</span>
+        </button>
+        <button class="setup-team-btn" data-n="4" onclick="setupSelectTeam(4)">
+          <span class="setup-team-num">4</span>
+          <span class="setup-team-label">명</span>
+          <span class="setup-team-pdf">PDF 기반</span>
+        </button>
+        <button class="setup-team-btn" data-n="5" onclick="setupSelectTeam(5)">
+          <span class="setup-team-num">5</span>
+          <span class="setup-team-label">명</span>
+          <span class="setup-team-pdf">PDF 기반</span>
+        </button>
       </div>
+      <!-- 선택 안내 (선택 전) -->
+      <div id="setup-hint" style="text-align:center;padding:20px 0 4px;color:var(--muted);font-size:var(--fs-sm);">
+        👆 인원 수를 선택하면 부서 구성 미리보기가 표시됩니다
+      </div>
+    </div>
+
+    <!-- ② 미리보기 (선택 후 표시) -->
+    <div class="card" id="setup-preview-card" style="display:none;margin-bottom:16px;">
+      <div class="card-title" id="setup-preview-title">📋 미리보기</div>
+      <div style="overflow-x:auto;margin-bottom:16px;">
+        <table class="preview-table" id="setup-preview-table">
+          <thead><tr><th>부서</th><th>보직</th><th>주요 업무 (일부)</th></tr></thead>
+          <tbody id="setup-preview-tbody"></tbody>
+        </table>
+      </div>
+      <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:12px 14px;font-size:var(--fs-xs);color:#0369a1;">
+        💡 드래그로 업무 이동, 부서 분리·병합은 다음 화면에서 가능합니다
+      </div>
+    </div>
+
+    <!-- ③ 세부 설정 (선택 후 표시) -->
+    <div class="card" id="setup-options-card" style="display:none;margin-bottom:16px;">
+      <div class="card-title">② 세부 설정</div>
+
       <label>보직교사 수 <span style="font-weight:400;color:var(--muted);">(업무지원팀 포함)</span></label>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <input type="number" id="setup-bojeok" value="9" min="1" max="20" style="width:100px;margin-bottom:0;text-align:center;font-size:var(--fs-lg);font-weight:700;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <input type="number" id="setup-bojeok" value="9" min="1" max="20"
+          style="width:100px;margin-bottom:0;text-align:center;font-size:var(--fs-lg);font-weight:700;">
         <span style="color:var(--muted);font-size:var(--fs-sm);">명</span>
       </div>
+
       <label>저장 방식</label>
       <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 16px;border:2px solid var(--primary);border-radius:10px;background:var(--primary-light);font-size:var(--fs-sm);font-weight:700;" id="save-cloud-btn">
-          <input type="radio" name="save-mode" value="cloud" checked style="width:16px;height:16px;margin-bottom:0;accent-color:var(--primary);">☁️ 클라우드 저장 (코드 발급)
+        <label class="save-mode-label sel" id="save-cloud-btn">
+          <input type="radio" name="save-mode" value="cloud" checked
+            style="width:16px;height:16px;margin-bottom:0;accent-color:var(--primary);">
+          ☁️ 클라우드 저장 (코드 발급)
         </label>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 16px;border:2px solid var(--border);border-radius:10px;font-size:var(--fs-sm);font-weight:700;" id="save-local-btn">
-          <input type="radio" name="save-mode" value="local" style="width:16px;height:16px;margin-bottom:0;accent-color:var(--primary);">💻 이 기기에만 저장
+        <label class="save-mode-label" id="save-local-btn">
+          <input type="radio" name="save-mode" value="local"
+            style="width:16px;height:16px;margin-bottom:0;accent-color:var(--primary);">
+          💻 이 기기에만 저장
         </label>
       </div>
+
       <div id="setup-pwd-wrap">
         <label>저장 비밀번호 <span style="font-weight:400;color:var(--muted);">(수정 시 필요)</span></label>
         <input type="password" id="setup-pwd" placeholder="비밀번호 설정">
       </div>
-      <button class="btn btn-primary btn-full" style="margin-top:6px;" onclick="createSim()">업무분장표 만들기 →</button>
-      <button class="btn btn-ghost btn-full" onclick="goHome()">← 홈으로</button>
+
+      <button class="btn btn-primary btn-full" style="margin-top:4px;padding:14px;font-size:var(--fs-md);" onclick="createSim()">
+        ✅ 이 구성으로 업무분장 만들기 →
+      </button>
+    </div>
+
+    <!-- ④ 사례 참고 (선택 후 표시) -->
+    <div id="setup-cases-card" style="display:none;">
+      <div style="display:flex;align-items:center;gap:14px;margin:8px 0 20px;">
+        <div style="flex:1;height:1.5px;background:var(--border);"></div>
+        <span style="font-size:var(--fs-xs);color:var(--muted);font-weight:700;white-space:nowrap;">또는 다른 학교 사례를 템플릿으로 사용</span>
+        <div style="flex:1;height:1.5px;background:var(--border);"></div>
+      </div>
+      <div class="filter-row" id="setup-filter-row">
+        <button class="filter-btn active" onclick="setupFilterCases('all',this)">전체</button>
+        <button class="filter-btn" onclick="setupFilterCases('3',this)">업무지원팀 3명</button>
+        <button class="filter-btn" onclick="setupFilterCases('4',this)">4명</button>
+        <button class="filter-btn" onclick="setupFilterCases('5',this)">5명</button>
+      </div>
+      <div class="cases-grid" id="cases-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);">사례를 불러오는 중...</div>
+      </div>
+    </div>
+
+    <!-- 홈으로 -->
+    <div style="text-align:center;margin-top:24px;">
+      <button class="btn btn-ghost" onclick="goHome()">← 홈으로</button>
     </div>
   </div>
 </div>
+
 
 <!-- ────────────────────────────────
      편집 화면
@@ -1069,37 +1099,60 @@ function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i
 function deepClone(o){return JSON.parse(JSON.stringify(o));}
 function genDeptId(){return 'd'+Date.now()+Math.random().toString(36).slice(2,5);}
 
-window.showScreen=id=>{
+// ── 해시 → 화면ID 매핑 ──
+const HASH_MAP={
+  '':          'screen-home',
+  'home':      'screen-home',
+  'setup':     'screen-setup',
+  'edit':      'screen-edit',
+  'view':      'screen-view',
+  'wish':      'screen-wish',
+  'pdf-check': 'screen-pdf-check',
+};
+const SCREEN_HASH={
+  'screen-home':      'home',
+  'screen-setup':     'setup',
+  'screen-edit':      'edit',
+  'screen-view':      'view',
+  'screen-wish':      'wish',
+  'screen-pdf-check': 'pdf-check',
+};
+// 상태가 필요한 화면들 (simId 없으면 홈으로)
+const NEEDS_SIM=['screen-edit','screen-view','screen-wish'];
+
+// 실제 DOM 전환만 수행 (히스토리 조작 없음)
+function applyScreen(id){
   document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
   const el=document.getElementById(id);
-  if(el)el.classList.add('active');
-  const isHome=id==='screen-home';
-  document.getElementById('app-header').style.display=isHome?'none':'flex';
+  if(el) el.classList.add('active');
+  document.getElementById('app-header').style.display=(id==='screen-home')?'none':'flex';
   window.scrollTo(0,0);
-};
-window.goHome=()=>{
-  simId='';simPwd='';simData={};
-  showScreen('screen-home');
+}
+
+// 화면 전환 + 해시 업데이트 + sessionStorage 저장
+window.showScreen=id=>{
+  const hash=SCREEN_HASH[id]||'home';
+  const cur=(location.hash||'#home').replace('#','');
+  if(cur===hash){
+    history.replaceState({screen:id},'','#'+hash);
+  }else{
+    history.pushState({screen:id},'','#'+hash);
+  }
+  applyScreen(id);
+  if(id==='screen-setup') initSetupScreen();
+  saveSession();
 };
 
-// ══ 홈: 미리보기 ══
-window.selectTeam=n=>{
-  selectedTeamN=n;
-  document.querySelectorAll('.team-btn[data-n]').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.n)===n));
-  renderHomePreview(n);
+window.goHome=()=>{
+  simId='';simPwd='';simData={};
+  clearSession();
+  history.pushState({screen:'screen-home'},'','#home');
+  applyScreen('screen-home');
 };
-function renderHomePreview(n){
-  const tpl=TEMPLATES[n]||TEMPLATES[3];
-  const tbl=document.getElementById('preview-table');
-  tbl.innerHTML=`<thead><tr><th>부서</th><th>담당자</th><th>업무 (일부)</th></tr></thead><tbody>`+
-    tpl.map(d=>`<tr><td><div class="preview-dept">${d.name}</div>${d.bojeok?'<span class="badge badge-green" style="font-size:11px;">보직교사</span>':''}</td><td style="color:#9ca3af;font-size:12px;">이름 입력</td><td><div class="preview-tasks">${d.tasks.slice(0,4).map(t=>`<span class="preview-tag">${t}</span>`).join('')}${d.tasks.length>4?`<span class="preview-tag">+${d.tasks.length-4}</span>`:''}</div></td></tr>`).join('')+`</tbody>`;
-  document.getElementById('home-preview').style.display='block';
-  document.getElementById('home-start-btn').style.display='block';
-}
-window.startWithSelected=()=>{
-  setupSelectTeam(selectedTeamN);
-  showScreen('screen-setup');
-};
+
+// ══ 홈: 미리보기 (제거됨 - screen-setup으로 통합) ══
+window.selectTeam=n=>{ setupSelectTeam(n); showScreen('screen-setup'); };
+window.startWithSelected=()=>showScreen('screen-setup');
 window.focusLoadCode=()=>{
   document.getElementById('load-section').scrollIntoView({behavior:'smooth'});
   setTimeout(()=>document.getElementById('load-code-input').focus(),400);
@@ -1109,16 +1162,70 @@ window.focusLoadCode=()=>{
 let setupTeam=3;
 window.setupSelectTeam=n=>{
   setupTeam=n;
-  document.querySelectorAll('#screen-setup .team-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.n)===n));
+  // 버튼 활성화
+  document.querySelectorAll('#screen-setup .setup-team-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.n)===n));
+  // 힌트 숨기기
+  document.getElementById('setup-hint').style.display='none';
+  // 미리보기 생성
+  const tpl=TEMPLATES[n]||[];
+  const tbody=document.getElementById('setup-preview-tbody');
+  if(tpl.length){
+    tbody.innerHTML=tpl.map(d=>`
+      <tr>
+        <td><div class="preview-dept">${d.name}</div></td>
+        <td style="text-align:center;">${d.bojeok?'<span class="badge badge-green" style="font-size:11px;">보직교사</span>':''}</td>
+        <td><div class="preview-tasks">${d.tasks.slice(0,5).map(t=>`<span class="preview-tag">${t}</span>`).join('')}${d.tasks.length>5?`<span class="preview-tag" style="background:#e0e7ff;color:#3730a3;">+${d.tasks.length-5}개</span>`:''}</div></td>
+      </tr>`).join('');
+    const label = n===0 ? '없음 (교감+비보직 부서만)' : `업무지원팀 ${n}명 · 부서 ${tpl.length}개`;
+    document.getElementById('setup-preview-title').textContent=`📋 미리보기 — ${label}`;
+  }else{
+    tbody.innerHTML=`<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px;">직접 부서를 추가해서 구성하세요</td></tr>`;
+    document.getElementById('setup-preview-title').textContent='📋 미리보기 — 직접 구성';
+  }
+  // 카드 표시 (애니메이션)
+  ['setup-preview-card','setup-options-card','setup-cases-card'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    setTimeout(()=>{
+      el.style.display='block';
+      el.style.opacity='0';el.style.transform='translateY(12px)';
+      el.style.transition='opacity .3s,transform .3s';
+      requestAnimationFrame(()=>{el.style.opacity='1';el.style.transform='translateY(0)';});
+    },i*80);
+  });
+  // 저장모드 연동
   const saveMode=document.querySelector('input[name="save-mode"]:checked')?.value;
   document.getElementById('setup-pwd-wrap').style.display=saveMode==='local'?'none':'block';
 };
 // 저장모드 라디오 동기화
 document.querySelectorAll('input[name="save-mode"]').forEach(r=>r.addEventListener('change',()=>{
   document.getElementById('setup-pwd-wrap').style.display=r.value==='local'?'none':'block';
+  document.getElementById('save-cloud-btn').classList.toggle('sel',r.value==='cloud');
+  document.getElementById('save-local-btn').classList.toggle('sel',r.value==='local');
 }));
 
-window.createSim=async()=>{
+// setup 화면 진입 시 초기화
+function initSetupScreen(){
+  setupTeam=3;
+  document.querySelectorAll('#screen-setup .setup-team-btn').forEach(b=>b.classList.remove('active'));
+  ['setup-preview-card','setup-options-card','setup-cases-card'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.display='none';el.style.opacity='';el.style.transform='';}
+  });
+  document.getElementById('setup-hint').style.display='block';
+  document.getElementById('setup-pwd').value='';
+  // 사례 그리드 필터 초기화
+  document.querySelectorAll('#setup-filter-row .filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  renderCases(allCases);
+}
+
+// setup 화면의 사례 필터
+window.setupFilterCases=(filter,btn)=>{
+  document.querySelectorAll('#setup-filter-row .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered=filter==='all'?allCases:allCases.filter(c=>String(c.teamCount)===filter);
+  renderCases(filtered);
+};
   const saveMode=document.querySelector('input[name="save-mode"]:checked')?.value||'cloud';
   const pwd=document.getElementById('setup-pwd').value;
   const bojeok=parseInt(document.getElementById('setup-bojeok').value)||9;
@@ -1141,6 +1248,7 @@ window.createSim=async()=>{
   document.getElementById('edit-title').textContent=`업무지원팀 ${setupTeam}명 · 보직교사 ${bojeok}명`;
   renderEditTable();
   showScreen('screen-edit');
+  saveSession();
 };
 
 // ══ 불러오기 ══
@@ -1169,6 +1277,7 @@ function enterEditOrView(){
   document.getElementById('edit-title').textContent=`업무지원팀 ${simData.teamCount}명 · 보직교사 ${simData.bojeokCount||'?'}명`;
   if(canEdit){renderEditTable();showScreen('screen-edit');}
   else{renderViewTable();showScreen('screen-view');}
+  saveSession();
 }
 
 // ══ 편집 테이블 렌더링 ══
@@ -1346,6 +1455,7 @@ async function autoSave(){
   }else if(simId){
     localStorage.setItem('sim_'+simId,JSON.stringify(simData));
   }
+  saveSession();
 }
 window.showSaveModal=()=>{
   document.getElementById('save-code-result').style.display='none';
@@ -1651,24 +1761,9 @@ window.exportExcel=async()=>{
   a.click();URL.revokeObjectURL(url);toast('엑셀 다운로드 완료!');
 };
 
-// ══ URL 파라미터 처리 ══
+// ══ URL 파라미터 ══
 const urlP=new URLSearchParams(location.search);
 const simParam=urlP.get('s');const modeParam=urlP.get('m');
-if(simParam){
-  (async()=>{
-    try{
-      const snap=await getDoc(doc(db,'simulations',simParam));
-      if(!snap.exists()){toast('존재하지 않는 링크입니다.');}
-      else{
-        simId=simParam;simData=snap.data();simPwd='';
-        const canEdit=modeParam==='edit';
-        document.getElementById('view-title').textContent=simData.name||'업무분장표';
-        if(canEdit){renderEditTable();showScreen('screen-edit');}
-        else{renderViewTable();showScreen('screen-view');}
-      }
-    }catch(e){toast('오류: '+e.message);}
-  })();
-}
 
 // ══ 총괄 관리자 ══
 const SA_HASH='9b64bb23134022a06f0c269c146ac64e5a98b0eb96c0b9b654abf8397a8da32f';
@@ -1732,37 +1827,12 @@ window.superDelete=async id=>{
 };
 
 // ══════════════════════════════════════
-// 홈 화면 JS (신규)
+// ══════════════════════════════════════
+// 홈 화면 JS
 // ══════════════════════════════════════
 window.showSection = id => {
   const el = document.getElementById(id);
   if(el){ el.scrollIntoView({behavior:'smooth'}); }
-};
-window.focusResume = () => {
-  document.getElementById('resume-bar').scrollIntoView({behavior:'smooth'});
-  setTimeout(()=>document.getElementById('load-code-input').focus(), 400);
-};
-
-// 팀 선택 미리보기 (새 버전)
-window.selectTeam = n => {
-  selectedTeamN = n;
-  document.querySelectorAll('.team-btn[data-n]').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.n)===n));
-  const tpl = TEMPLATES[n] || TEMPLATES[3];
-  const tbody = document.getElementById('preview-tbody');
-  if(!tbody) return;
-  tbody.innerHTML = tpl.map(d=>`
-    <tr>
-      <td><div class="preview-dept-name">${d.name}</div>${d.bojeok?'<div class="preview-bojeok">✅ 보직교사</div>':''}</td>
-      <td style="color:var(--muted);font-size:12px;">이름 입력</td>
-      <td><div class="preview-tags">${d.tasks.slice(0,5).map(t=>`<span class="preview-tag">${t}</span>`).join('')}${d.tasks.length>5?`<span class="preview-tag more">+${d.tasks.length-5}개</span>`:''}</div></td>
-    </tr>`).join('');
-  document.getElementById('preview-title-label').textContent = `📋 업무지원팀 ${n}명 · ${tpl.length}개 부서`;
-  document.getElementById('home-preview').style.display = 'block';
-  document.getElementById('home-start-btn').style.display = 'block';
-};
-window.startWithSelected = () => {
-  setupSelectTeam(selectedTeamN);
-  showScreen('screen-setup');
 };
 
 // ══════════════════════════════════════
@@ -2098,15 +2168,95 @@ window.resetPdfCheck = () => {
   kwResults=[];
 };
 
+// ══ sessionStorage 헬퍼 ══
+const SS_KEY='wknam_session';
+function saveSession(){
+  if(!simId) return;
+  try{
+    sessionStorage.setItem(SS_KEY, JSON.stringify({
+      simId, simPwd,
+      simDataSnap: simId.startsWith('local_') ? simData : null,
+      screen: SCREEN_HASH[document.querySelector('.screen.active')?.id] || 'home'
+    }));
+  }catch{}
+}
+function loadSession(){
+  try{ return JSON.parse(sessionStorage.getItem(SS_KEY)||'null'); }catch{ return null; }
+}
+function clearSession(){
+  sessionStorage.removeItem(SS_KEY);
+}
+
+// ══ hashchange 핸들러 (뒤로 가기 / 앞으로 가기) ══
+async function handleHash(isPopstate){
+  const hash=(location.hash||'').replace('#','').toLowerCase();
+  const targetScreen=HASH_MAP[hash]||'screen-home';
+
+  // 상태 필요한 화면인데 simId가 없으면 → sessionStorage 복원 시도
+  if(NEEDS_SIM.includes(targetScreen) && !simId){
+    const sess=loadSession();
+    if(sess && sess.simId){
+      simId=sess.simId; simPwd=sess.simPwd||'';
+      if(sess.simDataSnap){
+        // 로컬 저장본
+        simData=sess.simDataSnap;
+        if(targetScreen==='screen-edit'){ renderEditTable(); applyScreen('screen-edit'); }
+        else if(targetScreen==='screen-view'){ renderViewTable(); applyScreen('screen-view'); }
+        else applyScreen(targetScreen);
+        return;
+      }else{
+        // 클라우드 → 재조회
+        try{
+          const snap=await getDoc(doc(db,'simulations',simId));
+          if(snap.exists()){
+            simData=snap.data();
+            const canEdit=simPwd&&simPwd===simData.password||simData.shareMode==='edit';
+            if(canEdit){ renderEditTable(); applyScreen('screen-edit'); }
+            else { renderViewTable(); applyScreen('screen-view'); }
+            return;
+          }
+        }catch{}
+      }
+    }
+    // 복원 실패 → 홈으로
+    history.replaceState({screen:'screen-home'},'','#home');
+    applyScreen('screen-home');
+    return;
+  }
+  applyScreen(targetScreen);
+}
+
+window.addEventListener('popstate', ()=>handleHash(true));
+
 // ══ 초기화 ══
 loadCases();
-history.replaceState({screen:'screen-home'},'',location.pathname+(simParam?location.search:''));
-window.addEventListener('popstate',e=>{
-  const s=e.state?.screen||'screen-home';
-  if(['screen-edit','screen-view','screen-wish'].includes(s)&&!simId){showScreen('screen-home',false);return;}
-  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
-  document.getElementById(s)?.classList.add('active');
-});
+
+// URL 파라미터 ?s= 처리 (기존 공유 링크 호환)
+(async()=>{
+  if(simParam){
+    try{
+      const snap=await getDoc(doc(db,'simulations',simParam));
+      if(!snap.exists()){ toast('존재하지 않는 링크입니다.'); }
+      else{
+        simId=simParam; simData=snap.data(); simPwd='';
+        const canEdit=modeParam==='edit';
+        if(canEdit){ renderEditTable(); history.replaceState({screen:'screen-edit'},'','#edit'); applyScreen('screen-edit'); }
+        else { renderViewTable(); history.replaceState({screen:'screen-view'},'','#view'); applyScreen('screen-view'); }
+        saveSession();
+      }
+    }catch(e){ toast('오류: '+e.message); }
+    return;
+  }
+
+  // 해시로 초기 화면 결정
+  const initHash=(location.hash||'').replace('#','').toLowerCase();
+  if(initHash && initHash!=='home'){
+    await handleHash(false);
+  }else{
+    history.replaceState({screen:'screen-home'},'','#home');
+    applyScreen('screen-home');
+  }
+})();
 </script>
 </body>
 </html>
