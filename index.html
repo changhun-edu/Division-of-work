@@ -831,8 +831,16 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
       </div>
       <div id="split-persons-list"></div>
     </div>
-    <button class="btn btn-primary btn-full" onclick="doSplit()">분리 적용</button>
-    <button class="btn btn-ghost btn-full" onclick="closeModal('modal-split')">취소</button>
+    <!-- 템플릿 있을 때 버튼 -->
+    <div id="split-btn-has-tpl">
+      <button class="btn btn-primary btn-full" onclick="doSplit()">✂️ 분리 적용</button>
+      <button class="btn btn-ghost btn-full" onclick="closeModal('modal-split')">취소</button>
+    </div>
+    <!-- 템플릿 없을 때 버튼 -->
+    <div id="split-btn-no-tpl" style="display:none;">
+      <button class="btn btn-success btn-full" onclick="closeModal('modal-split');addDept()">＋ 새 부서 추가하기</button>
+      <button class="btn btn-ghost btn-full" onclick="closeModal('modal-split')">닫기</button>
+    </div>
   </div>
 </div>
 
@@ -1402,13 +1410,29 @@ window.renderSplitOptions=()=>{
   const el=document.getElementById('split-options');
   const personsArea=document.getElementById('split-persons-area');
   const personsList=document.getElementById('split-persons-list');
+  const btnHas=document.getElementById('split-btn-has-tpl');
+  const btnNo=document.getElementById('split-btn-no-tpl');
 
   if(!opts.length){
-    el.innerHTML=`<div style="padding:12px;background:#f8fafc;border-radius:10px;font-size:var(--fs-xs);color:var(--muted);">이 부서에 대한 분리 템플릿이 없습니다.<br>직접 나누려면 업무를 드래그하거나 + 부서 추가를 이용하세요.</div>`;
+    el.innerHTML=`
+      <div style="padding:14px 16px;background:#f8fafc;border-radius:10px;border:1.5px solid var(--border);margin-bottom:14px;">
+        <div style="font-weight:700;font-size:var(--fs-sm);margin-bottom:6px;">📋 분리 템플릿이 없는 부서입니다</div>
+        <div style="font-size:var(--fs-xs);color:var(--muted);line-height:1.7;">
+          <b>방법 1.</b> 아래 버튼으로 새 부서를 추가한 뒤, 업무 태그를 드래그해서 이동하세요.<br>
+          <b>방법 2.</b> 편집 화면의 <b>＋ 부서 추가</b> 버튼을 이용하세요.
+        </div>
+      </div>`;
     splitSelOpt='';
     personsArea.style.display='none';
+    btnHas.style.display='none';
+    btnNo.style.display='block';
     return;
   }
+
+  // 템플릿 있음 → 정상 버튼
+  btnHas.style.display='block';
+  btnNo.style.display='none';
+
   el.innerHTML=opts.map((o,i)=>`
     <div class="split-option${splitSelOpt===String(i)?' sel':''}" onclick="selectSplitOpt(${i})">
       <div>
@@ -1421,7 +1445,6 @@ window.renderSplitOptions=()=>{
   if(splitSelOpt!==''){
     const selOpt=opts[parseInt(splitSelOpt)];
     if(selOpt){
-      // 기존 입력값 보존
       const prevVals={};
       personsList.querySelectorAll('input[data-dept-name]').forEach(inp=>{
         prevVals[inp.dataset.deptName]=inp.value;
