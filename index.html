@@ -668,13 +668,20 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
   </div>
   <!-- 툴바 -->
   <div class="edit-toolbar">
-    <button class="btn btn-ghost btn-sm" onclick="showSplitModal()">✂️ 부서 분리</button>
+    <button class="btn btn-ghost btn-sm" onclick="toggleSplitBar()">✂️ 부서 분리</button>
     <button class="btn btn-ghost btn-sm" onclick="showMergeModal()">🔗 부서 병합</button>
     <button class="btn btn-ghost btn-sm" onclick="addDept()">＋ 부서 추가</button>
     <button class="btn btn-ghost btn-sm" onclick="toggleSurveyPanel()">💬 의견수렴</button>
     <button class="btn btn-ghost btn-sm" onclick="showWishSurvey()" id="wish-btn" style="display:none;">📊 희망조사</button>
     <button class="btn btn-purple btn-sm" onclick="finalizeWork()" id="finalize-btn">✅ 최종확정</button>
     <button class="btn btn-ghost btn-sm" onclick="showCaseRegModal()" id="reg-case-btn" style="display:none;">🗄️ 사례등록</button>
+  </div>
+  <!-- 부서 분리 인라인 바 -->
+  <div id="split-bar" style="display:none;background:#eff6ff;border-bottom:1.5px solid #bfdbfe;padding:10px 20px;display:none;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span style="font-size:var(--fs-xs);font-weight:700;color:var(--primary);">✂️ 분리할 부서 선택</span>
+    <select id="split-bar-sel" style="margin-bottom:0;padding:7px 11px;font-size:var(--fs-sm);flex:1;max-width:220px;"></select>
+    <button class="btn btn-primary btn-sm" onclick="doSplitInline()">분리 실행</button>
+    <button class="btn btn-ghost btn-sm" onclick="hideSplitBar()">✕ 닫기</button>
   </div>
   <!-- 업무분장 테이블 -->
   <div style="overflow-x:auto;padding:16px 20px;">
@@ -812,35 +819,6 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
     </div>
     <button class="btn btn-success btn-full" onclick="genShareLink()">링크 생성</button>
     <button class="btn btn-ghost btn-full" onclick="closeModal('modal-share')">닫기</button>
-  </div>
-</div>
-
-<!-- 부서 분리 모달 -->
-<div class="modal-overlay" id="modal-split">
-  <div class="modal">
-    <div class="modal-title">✂️ 부서 분리</div>
-    <label>분리할 부서 선택</label>
-    <select id="split-dept-sel" onchange="renderSplitOptions()" style="margin-bottom:14px;"></select>
-    <div id="split-options"></div>
-    <!-- 담당자 입력란 (분리 방식 선택 후 표시) -->
-    <div id="split-persons-area" style="display:none;margin-top:4px;margin-bottom:4px;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-        <div style="flex:1;height:1.5px;background:var(--border);"></div>
-        <span style="font-size:var(--fs-xs);color:var(--muted);font-weight:700;white-space:nowrap;">담당자 지정 (선택)</span>
-        <div style="flex:1;height:1.5px;background:var(--border);"></div>
-      </div>
-      <div id="split-persons-list"></div>
-    </div>
-    <!-- 템플릿 있을 때 버튼 -->
-    <div id="split-btn-has-tpl">
-      <button class="btn btn-primary btn-full" onclick="doSplit()">✂️ 분리 적용</button>
-      <button class="btn btn-ghost btn-full" onclick="closeModal('modal-split')">취소</button>
-    </div>
-    <!-- 템플릿 없을 때 버튼 -->
-    <div id="split-btn-no-tpl" style="display:none;">
-      <button class="btn btn-success btn-full" onclick="closeModal('modal-split');addDept()">＋ 새 부서 추가하기</button>
-      <button class="btn btn-ghost btn-full" onclick="closeModal('modal-split')">닫기</button>
-    </div>
   </div>
 </div>
 
@@ -1396,119 +1374,50 @@ window.doAddTask=()=>{
   closeModal('modal-add-task');
 };
 
-// ══ 부서 분리 ══
-window.showSplitModal=()=>{
-  const sel=document.getElementById('split-dept-sel');
+// ══ 부서 분리 (인라인 바) ══
+window.toggleSplitBar=()=>{
+  const bar=document.getElementById('split-bar');
+  const isOpen=bar.style.display==='flex';
+  if(isOpen){ hideSplitBar(); return; }
+  // 드롭다운 부서 목록 채우기
+  const sel=document.getElementById('split-bar-sel');
   sel.innerHTML=simData.departments.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
-  renderSplitOptions();openModal('modal-split');
+  bar.style.display='flex';
 };
-window.renderSplitOptions=()=>{
-  const deptId=document.getElementById('split-dept-sel').value;
-  const dept=simData.departments.find(d=>d.id===deptId);
-  if(!dept)return;
-  const opts=SPLIT_OPTIONS[dept.name]||[];
-  const el=document.getElementById('split-options');
-  const personsArea=document.getElementById('split-persons-area');
-  const personsList=document.getElementById('split-persons-list');
-  const btnHas=document.getElementById('split-btn-has-tpl');
-  const btnNo=document.getElementById('split-btn-no-tpl');
-
-  if(!opts.length){
-    el.innerHTML=`
-      <div style="padding:14px 16px;background:#f8fafc;border-radius:10px;border:1.5px solid var(--border);margin-bottom:14px;">
-        <div style="font-weight:700;font-size:var(--fs-sm);margin-bottom:6px;">📋 분리 템플릿이 없는 부서입니다</div>
-        <div style="font-size:var(--fs-xs);color:var(--muted);line-height:1.7;">
-          <b>방법 1.</b> 아래 버튼으로 새 부서를 추가한 뒤, 업무 태그를 드래그해서 이동하세요.<br>
-          <b>방법 2.</b> 편집 화면의 <b>＋ 부서 추가</b> 버튼을 이용하세요.
-        </div>
-      </div>`;
-    splitSelOpt='';
-    personsArea.style.display='none';
-    btnHas.style.display='none';
-    btnNo.style.display='block';
-    return;
-  }
-
-  // 템플릿 있음 → 정상 버튼
-  btnHas.style.display='block';
-  btnNo.style.display='none';
-
-  el.innerHTML=opts.map((o,i)=>`
-    <div class="split-option${splitSelOpt===String(i)?' sel':''}" onclick="selectSplitOpt(${i})">
-      <div>
-        <div class="split-option-title">${o.name}</div>
-        <div class="split-option-desc">${o.depts.map(d=>`${d.name} (${d.tasks.length}개)`).join(' + ')}</div>
-      </div>
-    </div>`).join('');
-
-  // 분리 방식이 선택된 경우 담당자 입력란 표시
-  if(splitSelOpt!==''){
-    const selOpt=opts[parseInt(splitSelOpt)];
-    if(selOpt){
-      const prevVals={};
-      personsList.querySelectorAll('input[data-dept-name]').forEach(inp=>{
-        prevVals[inp.dataset.deptName]=inp.value;
-      });
-      personsList.innerHTML=selOpt.depts.map((d,i)=>`
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="min-width:90px;font-size:var(--fs-sm);font-weight:700;color:var(--text);">${d.name}</div>
-          <input type="text" data-dept-name="${d.name}" data-dept-idx="${i}"
-            placeholder="담당자 이름 입력"
-            value="${prevVals[d.name]||''}"
-            style="flex:1;margin-bottom:0;padding:8px 11px;font-size:var(--fs-sm);">
-        </div>`).join('');
-      personsArea.style.display='block';
-    }
-  }else{
-    personsArea.style.display='none';
-  }
+window.hideSplitBar=()=>{
+  document.getElementById('split-bar').style.display='none';
 };
-window.selectSplitOpt=i=>{
-  splitSelOpt=String(i);
-  renderSplitOptions();
-};
-window.doSplit=()=>{
-  const deptId=document.getElementById('split-dept-sel').value;
+window.doSplitInline=()=>{
+  const deptId=document.getElementById('split-bar-sel').value;
   const deptIdx=simData.departments.findIndex(d=>d.id===deptId);
-  const dept=simData.departments[deptIdx];
-  const opts=SPLIT_OPTIONS[dept?.name]||[];
-  const opt=opts[parseInt(splitSelOpt)];
-  if(!opt){toast('분리 방식을 선택하세요.');return;}
-
-  // 담당자 입력값 수집
-  const personInputs=document.querySelectorAll('#split-persons-list input[data-dept-idx]');
-  const persons={};
-  personInputs.forEach(inp=>{ persons[inp.dataset.deptIdx]=inp.value.trim(); });
-
-  const newDepts=opt.depts.map((d,i)=>({
-    id:genDeptId(),
-    name:d.name,
-    person:persons[String(i)]||'',
-    bojeok:false,
-    tasks:d.tasks
-  }));
-  // 기존 부서의 남은 업무 첫 번째 새 부서에 추가
-  const coveredTasks=newDepts.flatMap(d=>d.tasks);
-  const remaining=dept.tasks.filter(t=>!coveredTasks.includes(t));
-  if(remaining.length)newDepts[0].tasks=[...newDepts[0].tasks,...remaining];
-  simData.departments.splice(deptIdx,1,...newDepts);
-  renderEditTable();autoSave();closeModal('modal-split');
-
-  // 분리된 부서 행 하이라이트
+  if(deptIdx===-1){toast('부서를 선택하세요.');return;}
+  // 선택 부서 바로 아래에 빈 부서 삽입
+  const newDept={id:genDeptId(),name:'새 부서',person:'',bojeok:false,tasks:[]};
+  simData.departments.splice(deptIdx+1,0,newDept);
+  hideSplitBar();
+  renderEditTable();
+  autoSave();
+  // 새 행의 부서명 contenteditable에 자동 포커스
   setTimeout(()=>{
-    newDepts.forEach(nd=>{
-      const row=document.querySelector(`tr[data-dept-id="${nd.id}"]`);
-      if(row){
-        row.style.transition='background .3s';
-        row.style.background='#fefce8';
-        setTimeout(()=>{row.style.background='';},2000);
-        row.scrollIntoView({behavior:'smooth',block:'center'});
+    const row=document.querySelector(`tr[data-dept-id="${newDept.id}"]`);
+    if(row){
+      row.style.transition='background .3s';
+      row.style.background='#eff6ff';
+      setTimeout(()=>{row.style.background='';},2000);
+      const nameEl=row.querySelector('.dept-name');
+      if(nameEl){
+        nameEl.focus();
+        // 전체 선택
+        const range=document.createRange();
+        range.selectNodeContents(nameEl);
+        const sel=window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
       }
-    });
+      row.scrollIntoView({behavior:'smooth',block:'center'});
+    }
   },100);
-
-  const assigned=newDepts.filter(d=>d.person).map(d=>`${d.name}(${d.person})`).join(', ');
-  toast(`'${dept.name}' 분리 완료${assigned?' · '+assigned:''}`);
+  toast('새 부서가 추가되었습니다. 부서명을 입력하고 업무를 드래그해서 이동하세요.');
 };
 
 // ══ 부서 병합 ══
