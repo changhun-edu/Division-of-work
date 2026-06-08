@@ -822,6 +822,15 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
     <label>분리할 부서 선택</label>
     <select id="split-dept-sel" onchange="renderSplitOptions()" style="margin-bottom:14px;"></select>
     <div id="split-options"></div>
+    <!-- 담당자 입력란 (분리 방식 선택 후 표시) -->
+    <div id="split-persons-area" style="display:none;margin-top:4px;margin-bottom:4px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+        <div style="flex:1;height:1.5px;background:var(--border);"></div>
+        <span style="font-size:var(--fs-xs);color:var(--muted);font-weight:700;white-space:nowrap;">담당자 지정 (선택)</span>
+        <div style="flex:1;height:1.5px;background:var(--border);"></div>
+      </div>
+      <div id="split-persons-list"></div>
+    </div>
     <button class="btn btn-primary btn-full" onclick="doSplit()">분리 적용</button>
     <button class="btn btn-ghost btn-full" onclick="closeModal('modal-split')">취소</button>
   </div>
@@ -1008,16 +1017,15 @@ let allSimsCache=[];
 const TEMPLATES={
 5:[
   {id:'d0',name:'교감',person:'',bojeok:false,tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원포상','교원업적평가(근무평정·다면평가·학폭가산점)','교원역량개발지원','교권보호위원회','학교방문예약시스템','업무지원팀협의회','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
-  {id:'d1',name:'교무부',person:'',bojeok:true,tasks:['업무지원팀대응업무','각종행사지원','학교문화혁신(업무)','학사일정','주간·월간·방학교육계획수립','수능(출근시간)','학교일지','다문화교육','학교규칙','학부모회 운영','교직원회 운영(교직원 간식)','학부모관련업무','계기교육(독도교육·한글날 등)','사무인계인수','제반감사대비','보결업무','취학업무','의무교육관리위원회','학적유예(정원외관리)','학급편성','개별체험학습','교사안심번호서비스','학교설명회','새학년 준비기','학교장 상호컨설팅','학교홍보단','시청각기록물 등록','5.18·통일·4.19·세월호 공직자 안보교육','경제교육·시민교육(민주&세계)','마을교육공동체','일반학생 장학생&장학금','학부모자원봉사·교육기부','신입생 입학준비금','국제교류·글로벌리더','학적관리']},
-  {id:'d2',name:'연구부',person:'',bojeok:true,tasks:['학교문화혁신(수업)','학교교육과정편성운영','학교설명회 지원','전체시간표 관리(학급·특별실·교담)','수능(등교시간)','작은학교 운영','교육과정 돌아보기','광주교육종합만족도조사','학생놀권리보장','전문적학습공동체(수업나눔·교원연구회)','교원자율연수비','현장맞춤형연수','지역화 교육과정 운영','교직원동아리','학생성장평가','검정교과서(디지털교과서) 선정','학생동아리조직운영','채택제안','대학생멘토링','두드림학교','책임학년제','학습 코칭','기초학력 전담 강사','독서교육(교원)','온라인클래스','광주교육·창의적체험활동','융합교육','역사동아리(일과후)','e학습터','디지털교과서','민주인권평화동아리']},
+  {id:'d1',name:'교무부',person:'',bojeok:true,tasks:['업무지원팀대응업무','업무지원팀협의회','각종행사지원','학교문화혁신(업무)','학사일정','주간·월간·방학교육계획수립','수능(출근시간)','학교일지','다문화교육','학교규칙','학부모회 운영','교직원회 운영(교직원 간식)','학부모관련업무','계기교육(독도교육·한글날 등)','사무인계인수','제반감사대비','보결업무','취학업무','의무교육관리위원회','학적유예(정원외관리)','학급편성','개별체험학습','교사안심번호서비스','학교설명회','새학년 준비기','학교장 상호컨설팅','학교홍보단','시청각기록물 등록','5.18·통일·4.19·세월호 공직자 안보교육','경제교육·시민교육(민주&세계)','마을교육공동체','일반학생 장학생&장학금','학부모자원봉사·교육기부','신입생 입학준비금','국제교류·글로벌리더','학적관리']},
+  {id:'d2',name:'연구부',person:'',bojeok:true,tasks:['학교문화혁신(수업)','학교교육과정편성운영','학교설명회 지원','전체시간표 관리(학급·특별실·교담)','수능(등교시간)','작은학교 운영','교육과정 돌아보기','광주교육종합만족도조사','학생놀권리보장','전문적학습공동체(수업나눔·교원연구회)','교원자율연수비','현장맞춤형연수','지역화 교육과정 운영','교직원동아리','학생성장평가','검정교과서(디지털교과서) 선정','학생동아리조직운영','채택제안','대학생멘토링','기초학력향상지원(두드림학교)','책임학년제','학습 코칭','기초학력 전담 강사','독서교육(교원)','온라인클래스','광주교육·창의적체험활동','융합교육','역사동아리(일과후)','e학습터','디지털교과서','민주인권평화동아리']},
   {id:'d3',name:'생활혁신부',person:'',bojeok:true,tasks:['학교문화혁신(생활·자치)','학생자치회','학생생활규정','학생참여예산제','자랑스러운 광주학생','사회정서(자살예방·생명존중)교육','교권보호위원회지원','선도위원회','학교폭력전담기구','위기관리위원회','학생대피훈련(민방위·재난대응·소방훈련)','학생안전교육','교직원안전교육','안심알리미·안전점검','수능(생활지도관련)','안전성진단위원회','학교안전사고예방계획수립','배움터지킴이','교통봉사(녹색어머니회·시니어교통봉사)','혁신학교 관련 업무','혁신학교공개','공간혁신','양성평등','학생봉사','인성교육','교육환경보호구역']},
   {id:'d4',name:'정보과학부',person:'',bojeok:true,tasks:['NEIS운영','NEIS학교생활기록부','학교정보공시','네트워크관리','정보보안·개인정보보호','통지표','학업성적관리위원회','시청각기자재 관리','정보화기자재·소모품구입관리','PC유지보수업체관리','CCTV운영(정보공개·확충)','SW교육','AIDT연수','피지컬컴퓨팅','저소득층 정보화지원사업','인터넷·스마트폰 이용습관 조사','학교홈페이지','학교앨범관리','하이클래스','민참관련','정보화역기능','과학의날(장관표창·장관상)','발명교육','저작권교육','Gen메신저관리','과학교육','영재업무','진로교육','학교방문예약시스템','학교방송','디지털튜터(정보교육)','구글클래스룸','SW구입·계정관리(네이버웨일·G-suite 등)','지능형 과학실']},
-  {id:'d5',name:'체육행사부',person:'',bojeok:false,tasks:['PAPS','건강체육교실','학교스포츠클럽','생존수영','어린이놀이시설 신청','체육시설 안전점검','신나는 주말 생활체육','특별실·교구관리(강당)','기타 체육 행사 관련']},
+  {id:'d5',name:'문화예술체육부',person:'',bojeok:false,tasks:['문화예술강사수업','문화예술체험활동','기타 문화예술 관련','축제(학예회)','어울림마당 및 교외체육대회','PAPS','건강체육교실','학교스포츠클럽','생존수영','어린이놀이시설 신청','체육시설 안전점검','신나는 주말 생활체육','특별실·교구관리(강당)','기타 체육 행사 관련']},
   {id:'d6',name:'현장체험부',person:'',bojeok:false,tasks:['현장체험학습','기타 현장체험학습 관련']},
   {id:'d7',name:'환경교육부',person:'',bojeok:false,tasks:['환경교육','교내환경','청소구역','텃밭','특별실관리(문화체험실·미술실·음악실)','교구·자료실관리(음악·미술)','기타 환경교육 관련']},
   {id:'d8',name:'복지부',person:'',bojeok:false,tasks:['교육급여','학생복지위원회','학생맞춤통합지원사업','여성청소년생리용품지원','크리스마스씰']},
-  {id:'d9',name:'문화예술부',person:'',bojeok:false,tasks:['문화예술강사수업','문화예술체험활동','기타 문화예술 관련','축제(학예회)','어울림마당 및 교외체육대회']},
-  {id:'d10',name:'6학년부',person:'',bojeok:false,tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
+  {id:'d9',name:'6학년부',person:'',bojeok:false,tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
 ],
 4:[
   {id:'d0',name:'교감',person:'',bojeok:false,tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원포상','교원업적평가(근무평정·다면평가·학폭가산점)','교원역량개발지원','교권보호위원회','학교방문예약시스템','업무지원팀협의회','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
@@ -1395,9 +1403,14 @@ window.renderSplitOptions=()=>{
   if(!dept)return;
   const opts=SPLIT_OPTIONS[dept.name]||[];
   const el=document.getElementById('split-options');
+  const personsArea=document.getElementById('split-persons-area');
+  const personsList=document.getElementById('split-persons-list');
+
   if(!opts.length){
     el.innerHTML=`<div style="padding:12px;background:#f8fafc;border-radius:10px;font-size:var(--fs-xs);color:var(--muted);">이 부서에 대한 분리 템플릿이 없습니다.<br>직접 나누려면 업무를 드래그하거나 + 부서 추가를 이용하세요.</div>`;
-    splitSelOpt='';return;
+    splitSelOpt='';
+    personsArea.style.display='none';
+    return;
   }
   el.innerHTML=opts.map((o,i)=>`
     <div class="split-option${splitSelOpt===String(i)?' sel':''}" onclick="selectSplitOpt(${i})">
@@ -1406,8 +1419,34 @@ window.renderSplitOptions=()=>{
         <div class="split-option-desc">${o.depts.map(d=>`${d.name} (${d.tasks.length}개)`).join(' + ')}</div>
       </div>
     </div>`).join('');
+
+  // 분리 방식이 선택된 경우 담당자 입력란 표시
+  if(splitSelOpt!==''){
+    const selOpt=opts[parseInt(splitSelOpt)];
+    if(selOpt){
+      // 기존 입력값 보존
+      const prevVals={};
+      personsList.querySelectorAll('input[data-dept-name]').forEach(inp=>{
+        prevVals[inp.dataset.deptName]=inp.value;
+      });
+      personsList.innerHTML=selOpt.depts.map((d,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="min-width:90px;font-size:var(--fs-sm);font-weight:700;color:var(--text);">${d.name}</div>
+          <input type="text" data-dept-name="${d.name}" data-dept-idx="${i}"
+            placeholder="담당자 이름 입력"
+            value="${prevVals[d.name]||''}"
+            style="flex:1;margin-bottom:0;padding:8px 11px;font-size:var(--fs-sm);">
+        </div>`).join('');
+      personsArea.style.display='block';
+    }
+  }else{
+    personsArea.style.display='none';
+  }
 };
-window.selectSplitOpt=i=>{splitSelOpt=String(i);renderSplitOptions();};
+window.selectSplitOpt=i=>{
+  splitSelOpt=String(i);
+  renderSplitOptions();
+};
 window.doSplit=()=>{
   const deptId=document.getElementById('split-dept-sel').value;
   const deptIdx=simData.departments.findIndex(d=>d.id===deptId);
@@ -1415,14 +1454,41 @@ window.doSplit=()=>{
   const opts=SPLIT_OPTIONS[dept?.name]||[];
   const opt=opts[parseInt(splitSelOpt)];
   if(!opt){toast('분리 방식을 선택하세요.');return;}
-  const newDepts=opt.depts.map(d=>({id:genDeptId(),name:d.name,person:'',bojeok:false,tasks:d.tasks}));
+
+  // 담당자 입력값 수집
+  const personInputs=document.querySelectorAll('#split-persons-list input[data-dept-idx]');
+  const persons={};
+  personInputs.forEach(inp=>{ persons[inp.dataset.deptIdx]=inp.value.trim(); });
+
+  const newDepts=opt.depts.map((d,i)=>({
+    id:genDeptId(),
+    name:d.name,
+    person:persons[String(i)]||'',
+    bojeok:false,
+    tasks:d.tasks
+  }));
   // 기존 부서의 남은 업무 첫 번째 새 부서에 추가
   const coveredTasks=newDepts.flatMap(d=>d.tasks);
   const remaining=dept.tasks.filter(t=>!coveredTasks.includes(t));
   if(remaining.length)newDepts[0].tasks=[...newDepts[0].tasks,...remaining];
   simData.departments.splice(deptIdx,1,...newDepts);
   renderEditTable();autoSave();closeModal('modal-split');
-  toast(`'${dept.name}' 분리 완료`);
+
+  // 분리된 부서 행 하이라이트
+  setTimeout(()=>{
+    newDepts.forEach(nd=>{
+      const row=document.querySelector(`tr[data-dept-id="${nd.id}"]`);
+      if(row){
+        row.style.transition='background .3s';
+        row.style.background='#fefce8';
+        setTimeout(()=>{row.style.background='';},2000);
+        row.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    });
+  },100);
+
+  const assigned=newDepts.filter(d=>d.person).map(d=>`${d.name}(${d.person})`).join(', ');
+  toast(`'${dept.name}' 분리 완료${assigned?' · '+assigned:''}`);
 };
 
 // ══ 부서 병합 ══
