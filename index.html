@@ -159,13 +159,16 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
 .dept-person{margin-top:6px;}
 .dept-person input{margin-bottom:0;padding:6px 9px;font-size:var(--fs-xs);border-radius:8px;}
 .dept-bojeok{margin-top:5px;}
-.dept-bojeok-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;background:#dbeafe;color:#1d4ed8;font-weight:700;cursor:pointer;transition:all .15s;}
-.dept-bojeok-badge.is-bojeok{background:#dcfce7;color:#15803d;}
+.dept-bojeok-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;font-weight:700;cursor:pointer;transition:all .15s;background:#f0f4f8;color:var(--muted);}
+.dept-bojeok-badge.role-team{background:#dcfce7;color:#15803d;}
+.dept-bojeok-badge.role-bojeok{background:#dbeafe;color:#1d4ed8;}
+.dept-bojeok-badge.role-bongsa{background:#fef9c3;color:#92400e;}
+.dept-bojeok-badge.role-teacher{background:#f0f4f8;color:var(--muted);}
 .task-area{display:flex;flex-wrap:wrap;gap:5px;min-height:40px;padding:4px;}
 .task-tag{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:14px;font-size:var(--fs-xs);font-weight:600;background:#f0f4f8;border:1.5px solid var(--border);cursor:grab;user-select:none;transition:all .15s;}
 .task-tag:hover{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
 .task-tag.dragging{opacity:.4;}
-.task-tag.drag-over{border-color:var(--success);}
+.task-tag.drag-over{border-color:var(--primary);background:var(--primary-light);color:var(--primary);outline:2px solid var(--primary);}
 .task-tag .t-del{font-size:14px;opacity:.4;cursor:pointer;margin-left:2px;}
 .task-tag .t-del:hover{opacity:1;color:var(--danger);}
 .task-drop-zone{border:2px dashed transparent;border-radius:10px;min-height:44px;transition:all .2s;padding:4px;}
@@ -236,6 +239,34 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
 .save-mode-label{display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 16px;border:2px solid var(--border);border-radius:10px;font-size:var(--fs-sm);font-weight:700;transition:all .15s;}
 .save-mode-label.sel{border-color:var(--primary);background:var(--primary-light);}
 @media(max-width:500px){.setup-team-grid{grid-template-columns:repeat(3,1fr);}}
+
+/* ── 검색 하이라이트 ── */
+.task-tag.search-hit{border-color:var(--warning);background:#fff7ed;color:#c2410c;font-weight:700;}
+.task-tag.search-dim{opacity:.25;}
+/* ── 업무 메모 뱃지 ── */
+.task-tag.has-memo{border-color:var(--purple);position:relative;}
+.task-tag.has-memo::after{content:'📝';font-size:9px;position:absolute;top:-5px;right:-5px;}
+/* ── 균형 바 ── */
+.balance-bar-wrap{margin-bottom:14px;}
+.balance-dept-name{font-size:var(--fs-sm);font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+.balance-bar-bg{height:10px;background:#e4e9f0;border-radius:5px;overflow:hidden;}
+.balance-bar-fill{height:100%;border-radius:5px;transition:width .4s;}
+/* ── 변경이력 ── */
+.history-item{padding:10px 14px;border-bottom:1px solid var(--border);font-size:var(--fs-xs);}
+.history-item:last-child{border-bottom:none;}
+.history-time{color:var(--muted);font-size:11px;margin-top:2px;}
+/* ── 인쇄 ── */
+@media print{
+  body>*:not(#print-area){display:none!important;}
+  #print-area{display:block!important;padding:20px;}
+  .print-title{font-size:18px;font-weight:900;text-align:center;margin-bottom:8px;}
+  .print-meta{font-size:11px;color:#666;text-align:center;margin-bottom:20px;}
+  .print-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .print-table th{background:#1e3a8a!important;color:#fff!important;padding:8px 10px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .print-table td{padding:7px 10px;border:1px solid #ccc;vertical-align:top;}
+  .print-table tr:nth-child(even) td{background:#f8fafc!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .print-role{font-size:9px;padding:1px 5px;border-radius:4px;display:inline-block;margin-top:2px;}
+}
 
 /* 반응형 */
 @media(max-width:600px){
@@ -661,9 +692,16 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
   <div class="edit-header">
     <div class="edit-title" id="edit-title">업무분장표</div>
     <span class="edit-status status-draft" id="edit-status-badge">초안 작성</span>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <!-- 검색창 -->
+      <div style="position:relative;">
+        <input type="text" id="task-search" placeholder="🔍 업무 검색..." oninput="searchTasks(this.value)"
+          style="width:160px;margin-bottom:0;padding:7px 30px 7px 10px;font-size:var(--fs-xs);border-radius:8px;">
+        <span id="task-search-clear" onclick="clearSearch()" style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);font-size:14px;">✕</span>
+      </div>
       <button class="btn btn-ghost btn-sm" onclick="showSaveModal()">💾 저장</button>
       <button class="btn btn-ghost btn-sm" onclick="showShareModal()">🔗 공유</button>
+      <button class="btn btn-ghost btn-sm" onclick="printView()">🖨️ 인쇄</button>
       <button class="btn btn-success btn-sm" onclick="exportExcel()">📥 엑셀</button>
       <button class="btn btn-ghost btn-sm" onclick="goHome()">🏠 홈</button>
     </div>
@@ -674,6 +712,8 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
     <button class="btn btn-ghost btn-sm" onclick="showMergeModal()">🔗 부서 병합</button>
     <button class="btn btn-ghost btn-sm" onclick="addDept()">＋ 부서 추가</button>
     <button class="btn btn-ghost btn-sm" onclick="toggleSurveyPanel()">💬 의견수렴</button>
+    <button class="btn btn-ghost btn-sm" onclick="showBalanceModal()">📊 업무 균형</button>
+    <button class="btn btn-ghost btn-sm" onclick="showHistoryModal()">📋 변경이력</button>
     <button class="btn btn-ghost btn-sm" onclick="showWishSurvey()" id="wish-btn" style="display:none;">📊 희망조사</button>
     <button class="btn btn-purple btn-sm" onclick="finalizeWork()" id="finalize-btn">✅ 최종확정</button>
     <button class="btn btn-ghost btn-sm" onclick="showCaseRegModal()" id="reg-case-btn" style="display:none;">🗄️ 사례등록</button>
@@ -892,6 +932,39 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
   </div>
 </div>
 
+<!-- 업무 균형 모달 -->
+<div class="modal-overlay" id="modal-balance">
+  <div class="modal" style="max-width:540px;max-height:88vh;overflow-y:auto;">
+    <div class="modal-title">📊 부서별 업무 균형</div>
+    <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:16px;">업무 수가 많은 부서를 확인하고 드래그로 이동하세요</div>
+    <div id="balance-content"></div>
+    <button class="btn btn-ghost btn-full" style="margin-top:16px;" onclick="closeModal('modal-balance')">닫기</button>
+  </div>
+</div>
+
+<!-- 변경이력 모달 -->
+<div class="modal-overlay" id="modal-history">
+  <div class="modal" style="max-width:500px;max-height:88vh;overflow-y:auto;">
+    <div class="modal-title">📋 변경이력</div>
+    <div id="history-content"></div>
+    <button class="btn btn-ghost btn-full" style="margin-top:16px;" onclick="closeModal('modal-history')">닫기</button>
+  </div>
+</div>
+
+<!-- 업무 댓글 모달 -->
+<div class="modal-overlay" id="modal-task-memo">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">📝 업무 메모</div>
+    <div id="task-memo-name" style="font-size:var(--fs-sm);font-weight:700;color:var(--primary);margin-bottom:12px;"></div>
+    <textarea id="task-memo-input" placeholder="이 업무에 대한 메모를 입력하세요" style="min-height:100px;margin-bottom:12px;"></textarea>
+    <button class="btn btn-primary btn-full" onclick="saveTaskMemo()">저장</button>
+    <button class="btn btn-ghost btn-full" onclick="closeModal('modal-task-memo')">취소</button>
+  </div>
+</div>
+
+<!-- 인쇄용 화면 -->
+<div id="print-area" style="display:none;"></div>
+
 <!-- 업무 추가 모달 -->
 <div class="modal-overlay" id="modal-add-task">
   <div class="modal">
@@ -1056,60 +1129,60 @@ let allSimsCache=[];
 // ══ 템플릿 데이터 (PDF 기반) ══
 const TEMPLATES={
 5:[
-  {id:'d0',name:'교감',person:'',bojeok:false,tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원포상','교원업적평가(근무평정·다면평가·학폭가산점)','교원역량개발지원','교권보호위원회','학교방문예약시스템','업무지원팀협의회','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
-  {id:'d1',name:'교무부',person:'',bojeok:true,tasks:['업무지원팀대응업무','업무지원팀협의회','각종행사지원','학교문화혁신(업무)','학사일정','주간·월간·방학교육계획수립','수능(출근시간)','학교일지','다문화교육','학교규칙','학부모회 운영','교직원회 운영(교직원 간식)','학부모관련업무','계기교육(독도교육·한글날 등)','사무인계인수','제반감사대비','보결업무','취학업무','의무교육관리위원회','학적유예(정원외관리)','학급편성','개별체험학습','교사안심번호서비스','학교설명회','새학년 준비기','학교장 상호컨설팅','학교홍보단','시청각기록물 등록','5.18·통일·4.19·세월호 공직자 안보교육','경제교육·시민교육(민주&세계)','마을교육공동체','일반학생 장학생&장학금','학부모자원봉사·교육기부','신입생 입학준비금','국제교류·글로벌리더','학적관리']},
-  {id:'d2',name:'연구부',person:'',bojeok:true,tasks:['학교문화혁신(수업)','학교교육과정편성운영','학교설명회 지원','전체시간표 관리(학급·특별실·교담)','수능(등교시간)','작은학교 운영','교육과정 돌아보기','광주교육종합만족도조사','학생놀권리보장','전문적학습공동체(수업나눔·교원연구회)','교원자율연수비','현장맞춤형연수','지역화 교육과정 운영','교직원동아리','학생성장평가','검정교과서(디지털교과서) 선정','학생동아리조직운영','채택제안','대학생멘토링','기초학력향상지원(두드림학교)','책임학년제','학습 코칭','기초학력 전담 강사','독서교육(교원)','온라인클래스','광주교육·창의적체험활동','융합교육','역사동아리(일과후)','e학습터','디지털교과서','민주인권평화동아리']},
-  {id:'d3',name:'생활혁신부',person:'',bojeok:true,tasks:['학교문화혁신(생활·자치)','학생자치회','학생생활규정','학생참여예산제','자랑스러운 광주학생','사회정서(자살예방·생명존중)교육','교권보호위원회지원','선도위원회','학교폭력전담기구','위기관리위원회','학생대피훈련(민방위·재난대응·소방훈련)','학생안전교육','교직원안전교육','안심알리미·안전점검','수능(생활지도관련)','안전성진단위원회','학교안전사고예방계획수립','배움터지킴이','교통봉사(녹색어머니회·시니어교통봉사)','혁신학교 관련 업무','혁신학교공개','공간혁신','양성평등','학생봉사','인성교육','교육환경보호구역']},
-  {id:'d4',name:'정보과학부',person:'',bojeok:true,tasks:['NEIS운영','NEIS학교생활기록부','학교정보공시','네트워크관리','정보보안·개인정보보호','통지표','학업성적관리위원회','시청각기자재 관리','정보화기자재·소모품구입관리','PC유지보수업체관리','CCTV운영(정보공개·확충)','SW교육','AIDT연수','피지컬컴퓨팅','저소득층 정보화지원사업','인터넷·스마트폰 이용습관 조사','학교홈페이지','학교앨범관리','하이클래스','민참관련','정보화역기능','과학의날(장관표창·장관상)','발명교육','저작권교육','Gen메신저관리','과학교육','영재업무','진로교육','학교방문예약시스템','학교방송','디지털튜터(정보교육)','구글클래스룸','SW구입·계정관리(네이버웨일·G-suite 등)','지능형 과학실']},
-  {id:'d5',name:'문화예술체육부',person:'',bojeok:true,tasks:['PAPS','건강체육교실','학교스포츠클럽','생존수영','어린이놀이시설 신청','체육시설 안전점검','현장체험학습','기타 현장체험학습 관련','환경교육','교내환경','청소구역','텃밭','특별실관리(문화체험실·미술실·음악실)','교구·자료실관리(음악·미술)','기타 환경교육 관련','교육급여','학생복지위원회','학생맞춤통합지원사업','여성청소년생리용품지원','크리스마스씰','문화예술강사수업','문화예술체험활동','기타 문화예술 관련','축제(학예회)','어울림마당 및 교외체육대회','신나는 주말 생활체육','특별실·교구관리(강당)','기타 체육 행사 관련']},
-  {id:'d6',name:'6학년부',person:'',bojeok:false,tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
+  {id:'d0',name:'교감',person:'',bojeok:false,role:'teacher',tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원포상','교원업적평가(근무평정·다면평가·학폭가산점)','교원역량개발지원','교권보호위원회','학교방문예약시스템','업무지원팀협의회','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
+  {id:'d1',name:'교무부',person:'',bojeok:true,role:'team',tasks:['업무지원팀대응업무','업무지원팀협의회','각종행사지원','학교문화혁신(업무)','학사일정','주간·월간·방학교육계획수립','수능(출근시간)','학교일지','다문화교육','학교규칙','학부모회 운영','교직원회 운영(교직원 간식)','학부모관련업무','계기교육(독도교육·한글날 등)','사무인계인수','제반감사대비','보결업무','취학업무','의무교육관리위원회','학적유예(정원외관리)','학급편성','개별체험학습','교사안심번호서비스','학교설명회','새학년 준비기','학교장 상호컨설팅','학교홍보단','시청각기록물 등록','5.18·통일·4.19·세월호 공직자 안보교육','경제교육·시민교육(민주&세계)','마을교육공동체','일반학생 장학생&장학금','학부모자원봉사·교육기부','신입생 입학준비금','국제교류·글로벌리더','학적관리']},
+  {id:'d2',name:'연구부',person:'',bojeok:true,role:'team',tasks:['학교문화혁신(수업)','학교교육과정편성운영','학교설명회 지원','전체시간표 관리(학급·특별실·교담)','수능(등교시간)','작은학교 운영','교육과정 돌아보기','광주교육종합만족도조사','학생놀권리보장','전문적학습공동체(수업나눔·교원연구회)','교원자율연수비','현장맞춤형연수','지역화 교육과정 운영','교직원동아리','학생성장평가','검정교과서(디지털교과서) 선정','학생동아리조직운영','채택제안','대학생멘토링','기초학력향상지원(두드림학교)','책임학년제','학습 코칭','기초학력 전담 강사','독서교육(교원)','온라인클래스','광주교육·창의적체험활동','융합교육','역사동아리(일과후)','e학습터','디지털교과서','민주인권평화동아리']},
+  {id:'d3',name:'생활혁신부',person:'',bojeok:true,role:'team',tasks:['학교문화혁신(생활·자치)','학생자치회','학생생활규정','학생참여예산제','자랑스러운 광주학생','사회정서(자살예방·생명존중)교육','교권보호위원회지원','선도위원회','학교폭력전담기구','위기관리위원회','학생대피훈련(민방위·재난대응·소방훈련)','학생안전교육','교직원안전교육','안심알리미·안전점검','수능(생활지도관련)','안전성진단위원회','학교안전사고예방계획수립','배움터지킴이','교통봉사(녹색어머니회·시니어교통봉사)','혁신학교 관련 업무','혁신학교공개','공간혁신','양성평등','학생봉사','인성교육','교육환경보호구역']},
+  {id:'d4',name:'정보과학부',person:'',bojeok:true,role:'team',tasks:['NEIS운영','NEIS학교생활기록부','학교정보공시','네트워크관리','정보보안·개인정보보호','통지표','학업성적관리위원회','시청각기자재 관리','정보화기자재·소모품구입관리','PC유지보수업체관리','CCTV운영(정보공개·확충)','SW교육','AIDT연수','피지컬컴퓨팅','저소득층 정보화지원사업','인터넷·스마트폰 이용습관 조사','학교홈페이지','학교앨범관리','하이클래스','민참관련','정보화역기능','과학의날(장관표창·장관상)','발명교육','저작권교육','Gen메신저관리','과학교육','영재업무','진로교육','학교방문예약시스템','학교방송','디지털튜터(정보교육)','구글클래스룸','SW구입·계정관리(네이버웨일·G-suite 등)','지능형 과학실']},
+  {id:'d5',name:'문화예술체육부',person:'',bojeok:true,role:'team',tasks:['PAPS','건강체육교실','학교스포츠클럽','생존수영','어린이놀이시설 신청','체육시설 안전점검','현장체험학습','기타 현장체험학습 관련','환경교육','교내환경','청소구역','텃밭','특별실관리(문화체험실·미술실·음악실)','교구·자료실관리(음악·미술)','기타 환경교육 관련','교육급여','학생복지위원회','학생맞춤통합지원사업','여성청소년생리용품지원','크리스마스씰','문화예술강사수업','문화예술체험활동','기타 문화예술 관련','축제(학예회)','어울림마당 및 교외체육대회','신나는 주말 생활체육','특별실·교구관리(강당)','기타 체육 행사 관련']},
+  {id:'d6',name:'6학년부',person:'',bojeok:false,role:'teacher',tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
 ],
 4:[
-  {id:'d0',name:'교감',person:'',bojeok:false,tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원포상','교원업적평가(근무평정·다면평가·학폭가산점)','교원역량개발지원','교권보호위원회','학교방문예약시스템','업무지원팀협의회','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
-  {id:'d1',name:'교무부',person:'',bojeok:true,tasks:['업무지원팀대응업무','각종행사지원','학교문화혁신(업무)','학사일정','주간·월간·방학교육계획수립','수능(출근시간)','학교일지','다문화교육','학교규칙','학부모회 운영','교직원회 운영(교직원 간식)','학부모관련업무','계기교육(독도교육·한글날 등)','사무인계인수','제반감사대비','보결업무','취학업무','의무교육관리위원회','학적유예(정원외관리)','학급편성','개별체험학습','교사안심번호서비스','학교설명회','새학년 준비기','학교장 상호컨설팅','학교홍보단','시청각기록물 등록','5.18·통일·4.19·세월호 공직자 안보교육','경제교육·시민교육(민주&세계)','마을교육공동체','일반학생 장학생&장학금','학부모자원봉사·교육기부','신입생 입학준비금','국제교류·글로벌리더','학적관리']},
-  {id:'d2',name:'연구부',person:'',bojeok:true,tasks:['학교문화혁신(수업)','학교교육과정편성운영','학교설명회 지원','전체시간표 관리(학급·특별실·교담)','수능(등교시간)','작은학교 운영','교육과정 돌아보기','광주교육종합만족도조사','학생놀권리보장','전문적학습공동체(수업나눔·교원연구회)','교원자율연수비','현장맞춤형연수','지역화 교육과정 운영','교직원동아리','학생성장평가','검정교과서(디지털교과서) 선정','학생동아리조직운영','채택제안','대학생멘토링','두드림학교','책임학년제','학습 코칭','기초학력 전담 강사','독서교육(교원)','온라인클래스','광주교육·창의적체험활동','융합교육·수학교육·인구교육','역사동아리','연구회·연구동아리','학교자율교육회복','선도학교 공문접수','e학습터','디지털교과서','민주인권평화동아리']},
-  {id:'d3',name:'생활혁신부',person:'',bojeok:true,tasks:['학교문화혁신(생활·자치)','학생자치회','학생생활규정','학생참여예산제','자랑스러운 광주학생','사회정서(자살예방·생명존중)교육','교권보호위원회지원','선도위원회','학교폭력전담기구','위기관리위원회','학생대피훈련(민방위·재난대응·소방훈련)','학생안전교육','교직원안전교육','안심알리미·안전점검','수능(생활지도관련)','안전성진단위원회','학교안전사고예방계획수립','배움터지킴이','교통봉사(녹색어머니회·시니어교통봉사)','혁신학교 관련 업무','혁신학교공개','공간혁신','양성평등','학생봉사','인성교육','교육환경보호구역']},
-  {id:'d4',name:'정보과학부',person:'',bojeok:true,tasks:['NEIS운영','NEIS학교생활기록부','학교정보공시','네트워크관리','정보보안·개인정보보호','통지표','학업성적관리위원회','시청각기자재 관리','정보화기자재·소모품구입관리','PC유지보수업체관리','CCTV운영(정보공개·확충)','SW교육','AIDT연수','피지컬컴퓨팅','저소득층 정보화지원사업','인터넷·스마트폰 이용습관 조사','학교홈페이지','학교앨범관리','하이클래스','민참관련','정보화역기능','과학의날(장관표창·장관상)','발명교육','저작권교육','Gen메신저관리','과학교육','영재업무','진로교육','학교방문예약시스템','학교방송','디지털튜터(정보교육)','구글클래스룸','SW구입·계정관리(네이버웨일·G-suite 등)','지능형 과학실']},
-  {id:'d5',name:'체육행사부',person:'',bojeok:false,tasks:['PAPS','건강체육교실','학교스포츠클럽','생존수영','어린이놀이시설 신청','체육시설 안전점검','어울림마당 및 교외체육대회','신나는 주말 생활체육','특별실·교구관리(강당)','기타 체육 행사 관련']},
-  {id:'d6',name:'현장체험부',person:'',bojeok:false,tasks:['현장체험학습','기타 현장체험학습 관련']},
-  {id:'d7',name:'환경복지부',person:'',bojeok:false,tasks:['환경교육','교내환경','청소구역','텃밭','특별실관리(문화체험실·미술실·음악실)','교구·자료실관리(음악·미술)','기타 환경교육 관련','교육급여','학생복지위원회','학생맞춤통합지원사업','여성청소년생리용품지원','크리스마스씰']},
-  {id:'d8',name:'문화예술부',person:'',bojeok:false,tasks:['문화예술강사수업','문화예술체험활동','기타 문화예술 관련','축제(학예회)']},
-  {id:'d9',name:'6학년부',person:'',bojeok:false,tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
+  {id:'d0',name:'교감',person:'',bojeok:false,role:'teacher',tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원포상','교원업적평가(근무평정·다면평가·학폭가산점)','교원역량개발지원','교권보호위원회','학교방문예약시스템','업무지원팀협의회','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
+  {id:'d1',name:'교무부',person:'',bojeok:true,role:'team',tasks:['업무지원팀대응업무','각종행사지원','학교문화혁신(업무)','학사일정','주간·월간·방학교육계획수립','수능(출근시간)','학교일지','다문화교육','학교규칙','학부모회 운영','교직원회 운영(교직원 간식)','학부모관련업무','계기교육(독도교육·한글날 등)','사무인계인수','제반감사대비','보결업무','취학업무','의무교육관리위원회','학적유예(정원외관리)','학급편성','개별체험학습','교사안심번호서비스','학교설명회','새학년 준비기','학교장 상호컨설팅','학교홍보단','시청각기록물 등록','5.18·통일·4.19·세월호 공직자 안보교육','경제교육·시민교육(민주&세계)','마을교육공동체','일반학생 장학생&장학금','학부모자원봉사·교육기부','신입생 입학준비금','국제교류·글로벌리더','학적관리']},
+  {id:'d2',name:'연구부',person:'',bojeok:true,role:'team',tasks:['학교문화혁신(수업)','학교교육과정편성운영','학교설명회 지원','전체시간표 관리(학급·특별실·교담)','수능(등교시간)','작은학교 운영','교육과정 돌아보기','광주교육종합만족도조사','학생놀권리보장','전문적학습공동체(수업나눔·교원연구회)','교원자율연수비','현장맞춤형연수','지역화 교육과정 운영','교직원동아리','학생성장평가','검정교과서(디지털교과서) 선정','학생동아리조직운영','채택제안','대학생멘토링','두드림학교','책임학년제','학습 코칭','기초학력 전담 강사','독서교육(교원)','온라인클래스','광주교육·창의적체험활동','융합교육·수학교육·인구교육','역사동아리','연구회·연구동아리','학교자율교육회복','선도학교 공문접수','e학습터','디지털교과서','민주인권평화동아리']},
+  {id:'d3',name:'생활혁신부',person:'',bojeok:true,role:'team',tasks:['학교문화혁신(생활·자치)','학생자치회','학생생활규정','학생참여예산제','자랑스러운 광주학생','사회정서(자살예방·생명존중)교육','교권보호위원회지원','선도위원회','학교폭력전담기구','위기관리위원회','학생대피훈련(민방위·재난대응·소방훈련)','학생안전교육','교직원안전교육','안심알리미·안전점검','수능(생활지도관련)','안전성진단위원회','학교안전사고예방계획수립','배움터지킴이','교통봉사(녹색어머니회·시니어교통봉사)','혁신학교 관련 업무','혁신학교공개','공간혁신','양성평등','학생봉사','인성교육','교육환경보호구역']},
+  {id:'d4',name:'정보과학부',person:'',bojeok:true,role:'team',tasks:['NEIS운영','NEIS학교생활기록부','학교정보공시','네트워크관리','정보보안·개인정보보호','통지표','학업성적관리위원회','시청각기자재 관리','정보화기자재·소모품구입관리','PC유지보수업체관리','CCTV운영(정보공개·확충)','SW교육','AIDT연수','피지컬컴퓨팅','저소득층 정보화지원사업','인터넷·스마트폰 이용습관 조사','학교홈페이지','학교앨범관리','하이클래스','민참관련','정보화역기능','과학의날(장관표창·장관상)','발명교육','저작권교육','Gen메신저관리','과학교육','영재업무','진로교육','학교방문예약시스템','학교방송','디지털튜터(정보교육)','구글클래스룸','SW구입·계정관리(네이버웨일·G-suite 등)','지능형 과학실']},
+  {id:'d5',name:'체육행사부',person:'',bojeok:false,role:'teacher',tasks:['PAPS','건강체육교실','학교스포츠클럽','생존수영','어린이놀이시설 신청','체육시설 안전점검','어울림마당 및 교외체육대회','신나는 주말 생활체육','특별실·교구관리(강당)','기타 체육 행사 관련']},
+  {id:'d6',name:'현장체험부',person:'',bojeok:false,role:'teacher',tasks:['현장체험학습','기타 현장체험학습 관련']},
+  {id:'d7',name:'환경복지부',person:'',bojeok:false,role:'teacher',tasks:['환경교육','교내환경','청소구역','텃밭','특별실관리(문화체험실·미술실·음악실)','교구·자료실관리(음악·미술)','기타 환경교육 관련','교육급여','학생복지위원회','학생맞춤통합지원사업','여성청소년생리용품지원','크리스마스씰']},
+  {id:'d8',name:'문화예술부',person:'',bojeok:false,role:'teacher',tasks:['문화예술강사수업','문화예술체험활동','기타 문화예술 관련','축제(학예회)']},
+  {id:'d9',name:'6학년부',person:'',bojeok:false,role:'teacher',tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
 ],
 3:[
-  {id:'d0',name:'교감',person:'',bojeok:false,tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원포상','교원업적평가(근무평정·다면평가·학폭가산점)','교원역량개발지원','교권보호위원회','학교방문예약시스템','업무지원팀협의회','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
-  {id:'d1',name:'교무부',person:'',bojeok:true,tasks:['업무지원팀대응업무','업무지원팀협의회','각종행사지원','학교문화혁신(업무)','학사일정','주간·월간·방학교육계획수립','수능(출근시간)','학교일지','다문화교육','학교규칙','학부모회 운영','교직원회 운영(교직원 간식)','학부모관련업무','계기교육(독도교육·한글날 등)','사무인계인수','제반감사대비','보결업무','취학업무','의무교육관리위원회','학적유예(정원외관리)','학급편성','개별체험학습','교사안심번호서비스','학교설명회','새학년 준비기','학교장 상호컨설팅','학교홍보단','시청각기록물 등록','5.18·통일·4.19·세월호 공직자 안보교육','경제교육·시민교육(민주&세계)','마을교육공동체','일반학생 장학생&장학금','학부모자원봉사·교육기부','신입생 입학준비금','국제교류·글로벌리더','학적관리']},
-  {id:'d2',name:'연구부',person:'',bojeok:true,tasks:['학교문화혁신(수업)','학교교육과정편성운영','학교설명회 지원','전체시간표 관리(학급·특별실·교담)','수능(등교시간)','작은학교 운영','교육과정 돌아보기','광주교육종합만족도조사','학생놀권리보장','전문적학습공동체(수업나눔·교원연구회)','교원자율연수비','현장맞춤형연수','지역화 교육과정 운영','교직원동아리','학생성장평가','검정교과서(디지털교과서) 선정','학생동아리조직운영','채택제안','대학생멘토링','두드림학교','책임학년제','학습 코칭','기초학력 전담 강사']},
-  {id:'d3',name:'생활혁신부',person:'',bojeok:true,tasks:['학교문화혁신(생활·자치)','학생자치회','학생생활규정','학생참여예산제','자랑스러운 광주학생','사회정서(자살예방·생명존중)교육','교권보호위원회지원','선도위원회','학교폭력전담기구','위기관리위원회','학생대피훈련(민방위·재난대응·소방훈련)','학생안전교육','교직원안전교육','안심알리미·안전점검','수능(생활지도관련)','안전성진단위원회','학교안전사고예방계획수립','배움터지킴이','교통봉사(녹색어머니회·시니어교통봉사)','혁신학교 관련 업무','혁신학교공개','공간혁신','양성평등','학생봉사','인성교육','교육환경보호구역']},
-  {id:'d4',name:'정보과학부',person:'',bojeok:true,tasks:['NEIS운영','NEIS학교생활기록부','학교정보공시','통지표','학업성적관리위원회','SW교육','AIDT연수','피지컬컴퓨팅','인터넷·스마트폰 이용습관 조사','정보화역기능','과학의날(장관표창·장관상)','발명교육','저작권교육','과학교육','영재업무','진로교육','학교방송','디지털튜터(정보교육)','지능형 과학실']},
-  {id:'d5',name:'기자재관리부',person:'',bojeok:false,tasks:['네트워크관리','정보보안·개인정보보호','민참관련','Gen메신저관리','하이클래스','저소득층 정보화지원사업','학교홈페이지','학교앨범관리','시청각기자재 관리','정보화기자재·소모품구입관리','PC유지보수업체관리','CCTV운영(정보공개·확충)','구글클래스룸','SW구입·계정관리(네이버웨일·G-suite 등)']},
-  {id:'d6',name:'체육행사부',person:'',bojeok:false,tasks:['PAPS','건강체육교실','학교스포츠클럽','생존수영','어린이놀이시설 신청','체육시설 안전점검','어울림마당 및 교외체육대회','신나는 주말 생활체육','특별실·교구관리(강당)','기타 체육 행사 관련']},
-  {id:'d7',name:'환경복지부',person:'',bojeok:false,tasks:['환경교육','교내환경','청소구역','텃밭','특별실관리(문화체험실·미술실·음악실)','교구·자료실관리(음악·미술)','기타 환경교육 관련','교육급여','학생복지위원회','학생맞춤통합지원사업','여성청소년생리용품지원','크리스마스씰']},
-  {id:'d8',name:'문화예술복지부',person:'',bojeok:false,tasks:['문화예술강사수업','문화예술체험활동','기타 문화예술 관련','축제(학예회)','현장체험학습','기타 현장체험학습 관련']},
-  {id:'d9',name:'6학년부',person:'',bojeok:false,tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
+  {id:'d0',name:'교감',person:'',bojeok:false,role:'teacher',tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원포상','교원업적평가(근무평정·다면평가·학폭가산점)','교원역량개발지원','교권보호위원회','학교방문예약시스템','업무지원팀협의회','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
+  {id:'d1',name:'교무부',person:'',bojeok:true,role:'team',tasks:['업무지원팀대응업무','업무지원팀협의회','각종행사지원','학교문화혁신(업무)','학사일정','주간·월간·방학교육계획수립','수능(출근시간)','학교일지','다문화교육','학교규칙','학부모회 운영','교직원회 운영(교직원 간식)','학부모관련업무','계기교육(독도교육·한글날 등)','사무인계인수','제반감사대비','보결업무','취학업무','의무교육관리위원회','학적유예(정원외관리)','학급편성','개별체험학습','교사안심번호서비스','학교설명회','새학년 준비기','학교장 상호컨설팅','학교홍보단','시청각기록물 등록','5.18·통일·4.19·세월호 공직자 안보교육','경제교육·시민교육(민주&세계)','마을교육공동체','일반학생 장학생&장학금','학부모자원봉사·교육기부','신입생 입학준비금','국제교류·글로벌리더','학적관리']},
+  {id:'d2',name:'연구부',person:'',bojeok:true,role:'team',tasks:['학교문화혁신(수업)','학교교육과정편성운영','학교설명회 지원','전체시간표 관리(학급·특별실·교담)','수능(등교시간)','작은학교 운영','교육과정 돌아보기','광주교육종합만족도조사','학생놀권리보장','전문적학습공동체(수업나눔·교원연구회)','교원자율연수비','현장맞춤형연수','지역화 교육과정 운영','교직원동아리','학생성장평가','검정교과서(디지털교과서) 선정','학생동아리조직운영','채택제안','대학생멘토링','두드림학교','책임학년제','학습 코칭','기초학력 전담 강사']},
+  {id:'d3',name:'생활혁신부',person:'',bojeok:true,role:'team',tasks:['학교문화혁신(생활·자치)','학생자치회','학생생활규정','학생참여예산제','자랑스러운 광주학생','사회정서(자살예방·생명존중)교육','교권보호위원회지원','선도위원회','학교폭력전담기구','위기관리위원회','학생대피훈련(민방위·재난대응·소방훈련)','학생안전교육','교직원안전교육','안심알리미·안전점검','수능(생활지도관련)','안전성진단위원회','학교안전사고예방계획수립','배움터지킴이','교통봉사(녹색어머니회·시니어교통봉사)','혁신학교 관련 업무','혁신학교공개','공간혁신','양성평등','학생봉사','인성교육','교육환경보호구역']},
+  {id:'d4',name:'정보과학부',person:'',bojeok:true,role:'team',tasks:['NEIS운영','NEIS학교생활기록부','학교정보공시','통지표','학업성적관리위원회','SW교육','AIDT연수','피지컬컴퓨팅','인터넷·스마트폰 이용습관 조사','정보화역기능','과학의날(장관표창·장관상)','발명교육','저작권교육','과학교육','영재업무','진로교육','학교방송','디지털튜터(정보교육)','지능형 과학실']},
+  {id:'d5',name:'기자재관리부',person:'',bojeok:false,role:'teacher',tasks:['네트워크관리','정보보안·개인정보보호','민참관련','Gen메신저관리','하이클래스','저소득층 정보화지원사업','학교홈페이지','학교앨범관리','시청각기자재 관리','정보화기자재·소모품구입관리','PC유지보수업체관리','CCTV운영(정보공개·확충)','구글클래스룸','SW구입·계정관리(네이버웨일·G-suite 등)']},
+  {id:'d6',name:'체육행사부',person:'',bojeok:false,role:'teacher',tasks:['PAPS','건강체육교실','학교스포츠클럽','생존수영','어린이놀이시설 신청','체육시설 안전점검','어울림마당 및 교외체육대회','신나는 주말 생활체육','특별실·교구관리(강당)','기타 체육 행사 관련']},
+  {id:'d7',name:'환경복지부',person:'',bojeok:false,role:'teacher',tasks:['환경교육','교내환경','청소구역','텃밭','특별실관리(문화체험실·미술실·음악실)','교구·자료실관리(음악·미술)','기타 환경교육 관련','교육급여','학생복지위원회','학생맞춤통합지원사업','여성청소년생리용품지원','크리스마스씰']},
+  {id:'d8',name:'문화예술복지부',person:'',bojeok:false,role:'teacher',tasks:['문화예술강사수업','문화예술체험활동','기타 문화예술 관련','축제(학예회)','현장체험학습','기타 현장체험학습 관련']},
+  {id:'d9',name:'6학년부',person:'',bojeok:false,role:'teacher',tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
 ],
 2:[
-  {id:'d0',name:'교감',person:'',bojeok:false,tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원업적평가','교원역량개발지원','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
-  {id:'d1',name:'교무·연구부',person:'',bojeok:true,tasks:['학사일정','주간·월간·방학교육계획수립','학교일지','학부모회 운영','교직원회 운영','보결업무','취학업무','학급편성','새학년 준비기','학교교육과정편성운영','전체시간표 관리','전문적학습공동체','두드림학교','학생성장평가','학생동아리조직운영','독서교육(교원)']},
-  {id:'d2',name:'생활·정보부',person:'',bojeok:true,tasks:['학교폭력전담기구','학생자치회','학생생활규정','선도위원회','위기관리위원회','학생안전교육','배움터지킴이','교통봉사','혁신학교 관련 업무','공간혁신','NEIS운영','NEIS학교생활기록부','학교정보공시','통지표','정보보안·개인정보보호','SW교육','학교홈페이지']},
-  {id:'d3',name:'체육환경부',person:'',bojeok:false,tasks:['PAPS','학교스포츠클럽','생존수영','신나는 주말 생활체육','강당 관리','환경교육','청소구역','텃밭','어울림마당·교외체육대회']},
-  {id:'d4',name:'복지문화부',person:'',bojeok:false,tasks:['교육급여','학생복지위원회','학생맞춤통합지원사업','장학생·장학금','문화예술강사수업','문화예술체험활동','축제(학예회)','현장체험학습','마을교육공동체']},
-  {id:'d5',name:'6학년부',person:'',bojeok:false,tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
+  {id:'d0',name:'교감',person:'',bojeok:false,role:'teacher',tasks:['교무행정업무 총괄','교원인사(전보내신·교내인사·휴복직)','기간제 교원채용','교원복무관리','청렴교육','교원업적평가','교원역량개발지원','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
+  {id:'d1',name:'교무·연구부',person:'',bojeok:true,role:'team',tasks:['학사일정','주간·월간·방학교육계획수립','학교일지','학부모회 운영','교직원회 운영','보결업무','취학업무','학급편성','새학년 준비기','학교교육과정편성운영','전체시간표 관리','전문적학습공동체','두드림학교','학생성장평가','학생동아리조직운영','독서교육(교원)']},
+  {id:'d2',name:'생활·정보부',person:'',bojeok:true,role:'team',tasks:['학교폭력전담기구','학생자치회','학생생활규정','선도위원회','위기관리위원회','학생안전교육','배움터지킴이','교통봉사','혁신학교 관련 업무','공간혁신','NEIS운영','NEIS학교생활기록부','학교정보공시','통지표','정보보안·개인정보보호','SW교육','학교홈페이지']},
+  {id:'d3',name:'체육환경부',person:'',bojeok:false,role:'teacher',tasks:['PAPS','학교스포츠클럽','생존수영','신나는 주말 생활체육','강당 관리','환경교육','청소구역','텃밭','어울림마당·교외체육대회']},
+  {id:'d4',name:'복지문화부',person:'',bojeok:false,role:'teacher',tasks:['교육급여','학생복지위원회','학생맞춤통합지원사업','장학생·장학금','문화예술강사수업','문화예술체험활동','축제(학예회)','현장체험학습','마을교육공동체']},
+  {id:'d5',name:'6학년부',person:'',bojeok:false,role:'teacher',tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
 ],
 1:[
-  {id:'d0',name:'교감',person:'',bojeok:false,tasks:['교무행정업무 총괄','교원인사','교원복무관리','청렴교육','교원업적평가','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
-  {id:'d1',name:'교무·연구·생활부',person:'',bojeok:true,tasks:['학사일정','주간·월간·방학교육계획수립','학교일지','학부모회 운영','교직원회 운영','보결업무','취학업무','학급편성','학교교육과정편성운영','전체시간표 관리','전문적학습공동체','두드림학교','학생자치회','학교폭력전담기구','학생안전교육']},
-  {id:'d2',name:'정보·기자재부',person:'',bojeok:false,tasks:['NEIS운영','학교정보공시','통지표','정보보안','SW교육','학교홈페이지','기자재 관리']},
-  {id:'d3',name:'체육환경복지부',person:'',bojeok:false,tasks:['PAPS','학교스포츠클럽','생존수영','환경교육','청소구역','교육급여','학생맞춤통합지원','문화예술강사수업','현장체험학습','축제(학예회)','어울림마당']},
-  {id:'d4',name:'6학년부',person:'',bojeok:false,tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
+  {id:'d0',name:'교감',person:'',bojeok:false,role:'teacher',tasks:['교무행정업무 총괄','교원인사','교원복무관리','청렴교육','교원업적평가','산업재해예방(교직원)','학교자치회 운영','업무최적화','공무직 복무 관리']},
+  {id:'d1',name:'교무·연구·생활부',person:'',bojeok:true,role:'team',tasks:['학사일정','주간·월간·방학교육계획수립','학교일지','학부모회 운영','교직원회 운영','보결업무','취학업무','학급편성','학교교육과정편성운영','전체시간표 관리','전문적학습공동체','두드림학교','학생자치회','학교폭력전담기구','학생안전교육']},
+  {id:'d2',name:'정보·기자재부',person:'',bojeok:false,role:'teacher',tasks:['NEIS운영','학교정보공시','통지표','정보보안','SW교육','학교홈페이지','기자재 관리']},
+  {id:'d3',name:'체육환경복지부',person:'',bojeok:false,role:'teacher',tasks:['PAPS','학교스포츠클럽','생존수영','환경교육','청소구역','교육급여','학생맞춤통합지원','문화예술강사수업','현장체험학습','축제(학예회)','어울림마당']},
+  {id:'d4',name:'6학년부',person:'',bojeok:false,role:'teacher',tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
 ],
 0:[
-  {id:'d1',name:'교무 담당',person:'',bojeok:false,tasks:['학사일정','주간·월간교육계획','학교일지','학부모회 운영','교직원회 운영','보결업무','취학업무','학급편성','새학년 준비기','학교설명회']},
-  {id:'d2',name:'연구 담당',person:'',bojeok:false,tasks:['학교교육과정편성운영','전체시간표 관리','전문적학습공동체','두드림학교','학생성장평가','검정교과서 선정']},
-  {id:'d3',name:'생활 담당',person:'',bojeok:false,tasks:['학교폭력전담기구','학생자치회','학생생활규정','선도위원회','위기관리위원회','학생안전교육','배움터지킴이','교통봉사','혁신학교']},
-  {id:'d4',name:'정보 담당',person:'',bojeok:false,tasks:['NEIS운영','학교정보공시','통지표','정보보안','SW교육','학교홈페이지','기자재관리']},
-  {id:'d5',name:'체육·환경·복지 담당',person:'',bojeok:false,tasks:['PAPS','학교스포츠클럽','생존수영','환경교육','청소구역','텃밭','교육급여','학생복지','문화예술강사수업','현장체험학습','축제']},
-  {id:'d6',name:'6학년 담당',person:'',bojeok:false,tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
+  {id:'d1',name:'교무 담당',person:'',bojeok:false,role:'teacher',tasks:['학사일정','주간·월간교육계획','학교일지','학부모회 운영','교직원회 운영','보결업무','취학업무','학급편성','새학년 준비기','학교설명회']},
+  {id:'d2',name:'연구 담당',person:'',bojeok:false,role:'teacher',tasks:['학교교육과정편성운영','전체시간표 관리','전문적학습공동체','두드림학교','학생성장평가','검정교과서 선정']},
+  {id:'d3',name:'생활 담당',person:'',bojeok:false,role:'teacher',tasks:['학교폭력전담기구','학생자치회','학생생활규정','선도위원회','위기관리위원회','학생안전교육','배움터지킴이','교통봉사','혁신학교']},
+  {id:'d4',name:'정보 담당',person:'',bojeok:false,role:'teacher',tasks:['NEIS운영','학교정보공시','통지표','정보보안','SW교육','학교홈페이지','기자재관리']},
+  {id:'d5',name:'체육·환경·복지 담당',person:'',bojeok:false,role:'teacher',tasks:['PAPS','학교스포츠클럽','생존수영','환경교육','청소구역','텃밭','교육급여','학생복지','문화예술강사수업','현장체험학습','축제']},
+  {id:'d6',name:'6학년 담당',person:'',bojeok:false,role:'teacher',tasks:['졸업앨범','수학여행','중학교 입학 배정','졸업식']},
 ],
 };
 
@@ -1137,6 +1210,20 @@ const SPLIT_OPTIONS={
 };
 
 // ══ 유틸 ══
+// ── 역할(Role) 정의 ──
+const ROLES=[
+  {key:'team',   label:'보직교사(업무지원팀)', cls:'role-team',    badge:'✅ 보직(업무지원팀)'},
+  {key:'bojeok', label:'보직교사',             cls:'role-bojeok',  badge:'☑ 보직교사'},
+  {key:'bongsa', label:'봉사부장',             cls:'role-bongsa',  badge:'◈ 봉사부장'},
+  {key:'teacher',label:'교사',                 cls:'role-teacher', badge:'○ 교사'},
+];
+function getRoleKey(dept){
+  if(dept.role) return dept.role;
+  return dept.bojeok===true ? 'team' : 'teacher';
+}
+function getRoleInfo(key){ return ROLES.find(r=>r.key===key)||ROLES[3]; }
+function nextRole(key){ const idx=ROLES.findIndex(r=>r.key===key); return ROLES[(idx+1)%ROLES.length].key; }
+
 function toast(msg,d=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function fbErrMsg(e){
   if(!e||!e.message)return '알 수 없는 오류가 발생했습니다.';
@@ -1227,7 +1314,7 @@ window.setupSelectTeam=n=>{
     tbody.innerHTML=tpl.map(d=>`
       <tr>
         <td><div class="preview-dept">${d.name}</div></td>
-        <td style="text-align:center;">${d.bojeok?'<span class="badge badge-green" style="font-size:11px;">보직교사</span>':''}</td>
+        <td style="text-align:center;"><span class="dept-bojeok-badge ${getRoleInfo(d.bojeok===true?'team':'teacher').cls}" style="cursor:default;font-size:10px;">${getRoleInfo(d.bojeok===true?'team':'teacher').badge}</span></td>
         <td><div class="preview-tasks">${d.tasks.slice(0,5).map(t=>`<span class="preview-tag">${t}</span>`).join('')}${d.tasks.length>5?`<span class="preview-tag" style="background:#e0e7ff;color:#3730a3;">+${d.tasks.length-5}개</span>`:''}</div></td>
       </tr>`).join('');
     const label = n===0 ? '없음 (교감+비보직 부서만)' : `업무지원팀 ${n}명 · 부서 ${tpl.length}개`;
@@ -1376,8 +1463,8 @@ function renderEditTable(){
       <div class="dept-name-wrap">
         <span class="dept-name" contenteditable="true" onblur="renameDept('${dept.id}',this.textContent.trim())">${dept.name}</span>
       </div>
-      <div class="dept-bojeok" onclick="toggleBojeok('${dept.id}')">
-        <span class="dept-bojeok-badge${dept.bojeok?' is-bojeok':''}">${dept.bojeok?'✅ 보직교사':'○ 일반'}</span>
+      <div class="dept-bojeok" onclick="cycleRole('${dept.id}')">
+        <span class="dept-bojeok-badge ${getRoleInfo(getRoleKey(dept)).cls}">${getRoleInfo(getRoleKey(dept)).badge}</span>
       </div>
       <div class="dept-person" style="margin-top:6px;">
         <input type="text" placeholder="담당자 이름" value="${dept.person||''}" style="margin-bottom:0;padding:5px 8px;font-size:12px;border-radius:7px;"
@@ -1403,30 +1490,85 @@ function renderEditTable(){
   });
 }
 function taskTagHTML(taskName,deptId){
-  return `<span class="task-tag" draggable="true" data-task="${taskName}" data-dept="${deptId}"
+  const memoKey=deptId+'::'+taskName;
+  const hasMemo=!!(simData.memos&&simData.memos[memoKey]);
+  return `<span class="task-tag${hasMemo?' has-memo':''}" draggable="true" data-task="${taskName}" data-dept="${deptId}"
     ondragstart="onTaskDragStart(event,'${taskName}','${deptId}')"
-    ondragend="onTaskDragEnd(event)">${taskName}<span class="t-del" onclick="removeTask('${deptId}','${taskName}')">×</span></span>`;
+    ondragend="onTaskDragEnd(event)"
+    ondragover="onTaskDragOver(event)"
+    ondrop="onTaskDrop(event,'${taskName}','${deptId}')"
+    ondblclick="openTaskMemo('${deptId}','${taskName.replace(/'/g,"\\'")}',event)"
+    title="${hasMemo?'메모 있음 (더블클릭으로 보기)':'더블클릭으로 메모 추가'}"
+    >${taskName}<span class="t-del" onclick="removeTask('${deptId}','${taskName}')">×</span></span>`;
 }
 function setupDropZone(zone,deptId){
   zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('over');});
   zone.addEventListener('dragleave',()=>zone.classList.remove('over'));
   zone.addEventListener('drop',e=>{
     e.preventDefault();zone.classList.remove('over');
-    if(!dragTask||dragFromDept===deptId)return;
-    const fromDept=simData.departments.find(d=>d.id===dragFromDept);
-    const toDept=simData.departments.find(d=>d.id===deptId);
-    if(!fromDept||!toDept)return;
-    fromDept.tasks=fromDept.tasks.filter(t=>t!==dragTask);
-    if(!toDept.tasks.includes(dragTask))toDept.tasks.push(dragTask);
-    dragTask=null;dragFromDept=null;
-    renderEditTable();autoSave();
+    if(!dragTask)return;
+    // 다른 부서 → 이동
+    if(dragFromDept!==deptId){
+      const fromDept=simData.departments.find(d=>d.id===dragFromDept);
+      const toDept=simData.departments.find(d=>d.id===deptId);
+      if(!fromDept||!toDept)return;
+      fromDept.tasks=fromDept.tasks.filter(t=>t!==dragTask);
+      if(!toDept.tasks.includes(dragTask))toDept.tasks.push(dragTask);
+      dragTask=null;dragFromDept=null;
+      renderEditTable();autoSave();
+    }
+    // 같은 부서 내 → 맨 뒤로 이동 (태그 위 drop이 아닌 빈 공간 drop)
   });
 }
-window.onTaskDragStart=(e,task,deptId)=>{dragTask=task;dragFromDept=deptId;e.target.classList.add('dragging');};
-window.onTaskDragEnd=e=>{e.target.classList.remove('dragging');};
+window.onTaskDragStart=(e,task,deptId)=>{
+  dragTask=task;dragFromDept=deptId;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+};
+window.onTaskDragEnd=e=>{
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.task-tag.drag-over').forEach(el=>el.classList.remove('drag-over'));
+};
+window.onTaskDragOver=(e)=>{
+  e.preventDefault();
+  e.stopPropagation(); // 드롭존 dragover 방지
+  e.dataTransfer.dropEffect='move';
+  const tag=e.currentTarget;
+  tag.classList.add('drag-over');
+};
+window.onTaskDrop=(e,targetTask,targetDeptId)=>{
+  e.preventDefault();
+  e.stopPropagation(); // 드롭존 drop 방지
+  e.currentTarget.classList.remove('drag-over');
+  if(!dragTask||dragTask===targetTask)return;
+  if(dragFromDept===targetDeptId){
+    // 같은 부서 내 순서 변경
+    const dept=simData.departments.find(d=>d.id===targetDeptId);
+    if(!dept)return;
+    const tasks=[...dept.tasks];
+    const fromIdx=tasks.indexOf(dragTask);
+    const toIdx=tasks.indexOf(targetTask);
+    if(fromIdx===-1||toIdx===-1)return;
+    tasks.splice(fromIdx,1);
+    tasks.splice(toIdx,0,dragTask);
+    dept.tasks=tasks;
+    addHistory('↕️ 순서 변경',`${dept.name}: "${dragTask}"`);
+  }else{
+    // 다른 부서 → 타겟 태그 위치에 삽입
+    const fromDept=simData.departments.find(d=>d.id===dragFromDept);
+    const toDept=simData.departments.find(d=>d.id===targetDeptId);
+    if(!fromDept||!toDept)return;
+    fromDept.tasks=fromDept.tasks.filter(t=>t!==dragTask);
+    const toIdx=toDept.tasks.indexOf(targetTask);
+    toDept.tasks.splice(toIdx,0,dragTask);
+    addHistory('↔️ 업무 이동',`"${dragTask}" ${fromDept.name}→${toDept.name}`);
+  }
+  dragTask=null;dragFromDept=null;
+  renderEditTable();autoSave();
+};
 window.removeTask=(deptId,task)=>{
   const d=simData.departments.find(d=>d.id===deptId);
-  if(d)d.tasks=d.tasks.filter(t=>t!==task);
+  if(d){d.tasks=d.tasks.filter(t=>t!==task);addHistory('🗑️ 업무 삭제',`${d.name} → "${task}"`);}
   renderEditTable();autoSave();
 };
 window.renameDept=(id,name)=>{
@@ -1435,17 +1577,25 @@ window.renameDept=(id,name)=>{
 window.setDeptPerson=(id,val)=>{
   const d=simData.departments.find(d=>d.id===id);if(d)d.person=val;autoSave();
 };
-window.toggleBojeok=id=>{
-  const d=simData.departments.find(d=>d.id===id);if(d)d.bojeok=!d.bojeok;renderEditTable();autoSave();
+window.cycleRole=id=>{
+  const d=simData.departments.find(d=>d.id===id);
+  if(!d) return;
+  const cur=getRoleKey(d);
+  d.role=nextRole(cur);
+  d.bojeok=(d.role==='team'||d.role==='bojeok'); // 하위 호환
+  renderEditTable();autoSave();
 };
 window.deleteDept=id=>{
+  const d=simData.departments.find(d=>d.id===id);
   if(!confirm('이 부서를 삭제할까요?'))return;
+  addHistory('🗑️ 부서 삭제',d?.name||id);
   simData.departments=simData.departments.filter(d=>d.id!==id);
   renderEditTable();autoSave();
 };
 window.addDept=()=>{
   const name=prompt('새 부서명:');if(!name)return;
-  simData.departments.push({id:genDeptId(),name,person:'',bojeok:false,tasks:[]});
+  simData.departments.push({id:genDeptId(),name,person:'',bojeok:false,role:'teacher',tasks:[]});
+  addHistory('➕ 부서 추가',name);
   renderEditTable();autoSave();
 };
 window.addTaskModal=(deptId)=>{
@@ -1459,7 +1609,7 @@ window.addTaskModal=(deptId)=>{
 window.doAddTask=()=>{
   const v=document.getElementById('add-task-input').value.trim();if(!v)return;
   const d=simData.departments.find(d=>d.id===addTaskDeptId);
-  if(d&&!d.tasks.includes(v)){d.tasks.push(v);renderEditTable();autoSave();}
+  if(d&&!d.tasks.includes(v)){d.tasks.push(v);addHistory('➕ 업무 추가',`${d.name}: "${v}"`);renderEditTable();autoSave();}
   closeModal('modal-add-task');
 };
 
@@ -1481,7 +1631,7 @@ window.doSplitInline=()=>{
   const deptIdx=simData.departments.findIndex(d=>d.id===deptId);
   if(deptIdx===-1){toast('부서를 선택하세요.');return;}
   // 선택 부서 바로 아래에 빈 부서 삽입
-  const newDept={id:genDeptId(),name:'새 부서',person:'',bojeok:false,tasks:[]};
+  const newDept={id:genDeptId(),name:'새 부서',person:'',bojeok:false,role:'teacher',tasks:[]};
   simData.departments.splice(deptIdx+1,0,newDept);
   hideSplitBar();
   renderEditTable();
@@ -1799,7 +1949,9 @@ function renderViewTable(){
   const tbody=document.getElementById('view-tbody');
   tbody.innerHTML=(d.departments||[]).map(dept=>`
     <tr>
-      <td><div style="font-weight:700;font-size:var(--fs-sm);">${dept.name}</div>${dept.bojeok?'<span class="badge badge-green" style="font-size:11px;margin-top:4px;">보직교사</span>':''}</td>
+      <td><div style="font-weight:700;font-size:var(--fs-sm);">${dept.name}</div>
+        <span class="dept-bojeok-badge ${getRoleInfo(getRoleKey(dept)).cls}" style="margin-top:4px;cursor:default;">${getRoleInfo(getRoleKey(dept)).badge}</span>
+      </td>
       <td style="font-weight:700;font-size:var(--fs-sm);">${dept.person||'<span style="color:#9ca3af;">미정</span>'}</td>
       <td><div class="task-area">${(dept.tasks||[]).map(t=>`<span class="task-tag" style="cursor:default;">${t}</span>`).join('')}</div></td>
       <td>${canComment?`<button class="btn btn-ghost btn-sm" onclick="openOpinionForm('${dept.id}')">💬 의견</button>`:'<span style="font-size:var(--fs-xs);color:var(--muted);">열람</span>'}</td>
@@ -2367,7 +2519,226 @@ window.resetPdfCheck = () => {
   kwResults=[];
 };
 
-// ══ 최근 작업 (localStorage) ══
+// ══════════════════════════════════════
+// ① 업무 검색
+// ══════════════════════════════════════
+window.searchTasks=q=>{
+  const kw=q.trim();
+  document.getElementById('task-search-clear').style.display=kw?'block':'none';
+  document.querySelectorAll('.task-tag').forEach(tag=>{
+    const name=tag.dataset.task||'';
+    if(!kw){tag.classList.remove('search-hit','search-dim');return;}
+    if(name.includes(kw)){tag.classList.add('search-hit');tag.classList.remove('search-dim');}
+    else{tag.classList.add('search-dim');tag.classList.remove('search-hit');}
+  });
+};
+window.clearSearch=()=>{
+  document.getElementById('task-search').value='';
+  searchTasks('');
+};
+
+// ══════════════════════════════════════
+// ② 인쇄
+// ══════════════════════════════════════
+window.printView=()=>{
+  const pa=document.getElementById('print-area');
+  const roleColors={'team':'#dcfce7','bojeok':'#dbeafe','bongsa':'#fef9c3','teacher':'#f0f4f8'};
+  pa.innerHTML=`
+    <div class="print-title">${simData.name||'업무분장표'}</div>
+    <div class="print-meta">업무지원팀 ${simData.teamCount||''}명 · 보직교사 ${simData.bojeokCount||''}명 · 출력일: ${new Date().toLocaleDateString('ko-KR')}</div>
+    <table class="print-table">
+      <thead><tr><th style="width:100px;">부서</th><th style="width:80px;">담당자</th><th style="width:60px;">역할</th><th>업무 내용</th></tr></thead>
+      <tbody>${(simData.departments||[]).map(d=>{
+        const rk=getRoleKey(d);
+        const ri=getRoleInfo(rk);
+        const bg=roleColors[rk]||'#f0f4f8';
+        const memo=d.tasks.map(t=>{
+          const mk=d.id+'::'+t;
+          const m=simData.memos&&simData.memos[mk];
+          return t+(m?` (${m})`:'');
+        }).join(', ');
+        return `<tr><td style="font-weight:700;">${d.name}</td><td>${d.person||''}</td><td><span class="print-role" style="background:${bg};">${ri.label}</span></td><td>${memo}</td></tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  pa.style.display='block';
+  setTimeout(()=>{window.print();pa.style.display='none';},100);
+};
+
+// ══════════════════════════════════════
+// ③ 업무 균형 모달
+// ══════════════════════════════════════
+window.showBalanceModal=()=>{
+  const depts=simData.departments||[];
+  const counts=depts.map(d=>d.tasks.length);
+  const max=Math.max(...counts,1);
+  const total=counts.reduce((a,b)=>a+b,0);
+  const avg=total/Math.max(depts.length,1);
+  const colors=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
+  document.getElementById('balance-content').innerHTML=`
+    <div style="display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--muted);margin-bottom:16px;">
+      <span>전체 업무 ${total}개</span>
+      <span>부서 평균 ${avg.toFixed(1)}개</span>
+    </div>
+    ${depts.map((d,i)=>{
+      const cnt=d.tasks.length;
+      const pct=Math.round(cnt/max*100);
+      const isHigh=cnt>avg*1.4;
+      const isLow=cnt<avg*0.6&&cnt>0;
+      const color=colors[i%colors.length];
+      return `<div class="balance-bar-wrap">
+        <div class="balance-dept-name">
+          <span>${d.name}${isHigh?' ⚠️':isLow?' 💡':''}</span>
+          <span style="font-size:var(--fs-xs);color:${isHigh?'#dc2626':isLow?'#2563eb':'var(--muted)'};">${cnt}개${isHigh?' (많음)':isLow?' (적음)':''}</span>
+        </div>
+        <div class="balance-bar-bg"><div class="balance-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:14px;padding:10px 12px;background:#f8fafc;border-radius:8px;font-size:var(--fs-xs);color:var(--muted);">
+      ⚠️ 평균 대비 40% 초과 · 💡 평균 대비 40% 미만 부서
+    </div>`;
+  openModal('modal-balance');
+};
+
+// ══════════════════════════════════════
+// ④ 변경이력
+// ══════════════════════════════════════
+const HISTORY_KEY='wknam_history_';
+function addHistory(action,detail){
+  if(!simId)return;
+  try{
+    const key=HISTORY_KEY+simId;
+    const list=JSON.parse(localStorage.getItem(key)||'[]');
+    list.unshift({action,detail,time:new Date().toISOString()});
+    localStorage.setItem(key,JSON.stringify(list.slice(0,50)));
+  }catch{}
+}
+window.showHistoryModal=()=>{
+  if(!simId){toast('저장된 업무분장이 없습니다.');return;}
+  const key=HISTORY_KEY+simId;
+  const list=JSON.parse(localStorage.getItem(key)||'[]');
+  const el=document.getElementById('history-content');
+  if(!list.length){
+    el.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);">변경이력이 없습니다.</div>';
+  }else{
+    el.innerHTML=`<div style="border:1.5px solid var(--border);border-radius:10px;overflow:hidden;max-height:420px;overflow-y:auto;">${
+      list.map(h=>`<div class="history-item">
+        <div>${h.action} <span style="color:var(--text);font-weight:700;">${h.detail}</span></div>
+        <div class="history-time">🕐 ${new Date(h.time).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`).join('')
+    }</div>`;
+  }
+  openModal('modal-history');
+};
+
+// ══════════════════════════════════════
+// ⑤ 업무 메모 (더블클릭)
+// ══════════════════════════════════════
+let memoTargetKey='';
+window.openTaskMemo=(deptId,taskName,e)=>{
+  e.stopPropagation();
+  memoTargetKey=deptId+'::'+taskName;
+  document.getElementById('task-memo-name').textContent='📝 '+taskName;
+  const cur=simData.memos&&simData.memos[memoTargetKey]||'';
+  document.getElementById('task-memo-input').value=cur;
+  openModal('modal-task-memo');
+  setTimeout(()=>document.getElementById('task-memo-input').focus(),100);
+};
+window.saveTaskMemo=()=>{
+  const val=document.getElementById('task-memo-input').value.trim();
+  if(!simData.memos)simData.memos={};
+  if(val){simData.memos[memoTargetKey]=val;}
+  else{delete simData.memos[memoTargetKey];}
+  closeModal('modal-task-memo');
+  renderEditTable();
+  autoSave();
+  toast(val?'메모가 저장되었습니다.':'메모가 삭제되었습니다.');
+};
+
+// ══════════════════════════════════════
+// ⑥ 모바일 터치 드래그 지원
+// ══════════════════════════════════════
+(()=>{
+  let touchTask=null,touchDept=null,ghostEl=null,touchDropTarget=null;
+  function getTouchTarget(x,y){
+    const els=document.elementsFromPoint(x,y);
+    for(const el of els){
+      if(el.classList.contains('task-tag')&&el!==ghostEl) return el;
+      if(el.classList.contains('task-drop-zone')) return el;
+    }
+    return null;
+  }
+  document.addEventListener('touchstart',e=>{
+    const tag=e.target.closest('.task-tag');
+    if(!tag||!tag.dataset.task)return;
+    touchTask=tag.dataset.task;
+    touchDept=tag.dataset.dept;
+    // 고스트 생성
+    ghostEl=tag.cloneNode(true);
+    ghostEl.style.cssText='position:fixed;opacity:.7;pointer-events:none;z-index:9999;border:2px solid var(--primary);background:var(--primary-light);border-radius:14px;padding:5px 10px;font-size:14px;font-weight:600;white-space:nowrap;';
+    document.body.appendChild(ghostEl);
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!touchTask||!ghostEl)return;
+    e.preventDefault();
+    const t=e.touches[0];
+    ghostEl.style.left=(t.clientX-40)+'px';
+    ghostEl.style.top=(t.clientY-20)+'px';
+    // 드롭 대상 하이라이트
+    const target=getTouchTarget(t.clientX,t.clientY);
+    document.querySelectorAll('.task-tag.drag-over,.task-drop-zone.over').forEach(el=>{
+      el.classList.remove('drag-over','over');
+    });
+    if(target){
+      if(target.classList.contains('task-tag'))target.classList.add('drag-over');
+      else if(target.classList.contains('task-drop-zone'))target.classList.add('over');
+      touchDropTarget=target;
+    }else touchDropTarget=null;
+  },{passive:false});
+  document.addEventListener('touchend',e=>{
+    if(!touchTask){return;}
+    if(ghostEl){ghostEl.remove();ghostEl=null;}
+    document.querySelectorAll('.task-tag.drag-over,.task-drop-zone.over').forEach(el=>el.classList.remove('drag-over','over'));
+    if(!touchDropTarget){touchTask=null;touchDept=null;touchDropTarget=null;return;}
+    const target=touchDropTarget;
+    touchDropTarget=null;
+    // 드롭 처리
+    if(target.classList.contains('task-tag')&&target.dataset.task){
+      const targetTask=target.dataset.task;
+      const targetDept=target.dataset.dept;
+      if(touchTask===targetTask){touchTask=null;touchDept=null;return;}
+      if(touchDept===targetDept){
+        // 같은 부서 순서 변경
+        const dept=simData.departments.find(d=>d.id===targetDept);
+        if(dept){
+          const tasks=[...dept.tasks];
+          const fi=tasks.indexOf(touchTask),ti=tasks.indexOf(targetTask);
+          if(fi!==-1&&ti!==-1){tasks.splice(fi,1);tasks.splice(ti,0,touchTask);dept.tasks=tasks;}
+        }
+      }else{
+        // 다른 부서 이동
+        const from=simData.departments.find(d=>d.id===touchDept);
+        const to=simData.departments.find(d=>d.id===targetDept);
+        if(from&&to){
+          from.tasks=from.tasks.filter(t=>t!==touchTask);
+          const ti=to.tasks.indexOf(targetTask);
+          to.tasks.splice(ti,0,touchTask);
+        }
+      }
+    }else if(target.classList.contains('task-drop-zone')){
+      const targetDept=target.dataset.dept;
+      if(touchDept!==targetDept){
+        const from=simData.departments.find(d=>d.id===touchDept);
+        const to=simData.departments.find(d=>d.id===targetDept);
+        if(from&&to&&!to.tasks.includes(touchTask)){
+          from.tasks=from.tasks.filter(t=>t!==touchTask);
+          to.tasks.push(touchTask);
+        }
+      }
+    }
+    touchTask=null;touchDept=null;
+    renderEditTable();autoSave();
+  },{passive:true});
+})();
 const RECENT_KEY='wknam_recent';
 const RECENT_MAX=3;
 
