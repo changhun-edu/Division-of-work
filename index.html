@@ -607,9 +607,15 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0;}
         ☁️ 클라우드에 저장되며 <b>6자리 코드</b>가 발급됩니다. 코드로 어디서든 불러올 수 있습니다.
       </div>
 
-      <button class="btn btn-primary btn-full" style="margin-top:4px;padding:14px;font-size:var(--fs-md);" onclick="createSim()">
+      <button class="btn btn-primary btn-full" id="create-sim-btn" style="margin-top:4px;padding:14px;font-size:var(--fs-md);" onclick="createSim()">
         ✅ 이 구성으로 업무분장 만들기 →
       </button>
+      <div id="create-sim-error" style="display:none;margin-top:10px;background:#fee2e2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px;">
+        <div style="font-weight:700;color:#dc2626;font-size:var(--fs-sm);margin-bottom:4px;">❌ 저장에 실패했습니다</div>
+        <div id="create-sim-error-msg" style="font-size:var(--fs-xs);color:#b91c1c;margin-bottom:8px;"></div>
+        <div style="font-size:var(--fs-xs);color:#b91c1c;">인터넷 연결을 확인하거나 잠시 후 다시 시도하세요.</div>
+        <button class="btn btn-danger btn-sm" style="margin-top:8px;" onclick="createSim()">🔄 다시 시도</button>
+      </div>
     </div>
 
     <!-- ④ 사례 참고 (선택 후 표시) -->
@@ -1200,6 +1206,12 @@ window.setupSelectTeam=n=>{
       requestAnimationFrame(()=>{el.style.opacity='1';el.style.transform='translateY(0)';});
     },i*80);
   });
+  // 버튼 텍스트 동적 반영
+  const label = n===0 ? '없음(직접 구성)' : `업무지원팀 ${n}명`;
+  const btn=document.getElementById('create-sim-btn');
+  if(btn) btn.textContent=`✅ ${label} 구성으로 업무분장 만들기 →`;
+  // 오류 박스 초기화
+  document.getElementById('create-sim-error').style.display='none';
 };
 // 저장모드 라디오 이벤트 제거됨 (클라우드 전용)
 
@@ -1213,6 +1225,11 @@ function initSetupScreen(){
   });
   document.getElementById('setup-hint').style.display='block';
   document.getElementById('setup-pwd').value='';
+  // 버튼·오류 박스 초기화
+  const btn=document.getElementById('create-sim-btn');
+  if(btn){btn.disabled=false;btn.textContent='✅ 이 구성으로 업무분장 만들기 →';}
+  const errBox=document.getElementById('create-sim-error');
+  if(errBox) errBox.style.display='none';
   // 사례 그리드 필터 초기화
   document.querySelectorAll('#setup-filter-row .filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   renderCases(allCases);
@@ -1230,20 +1247,37 @@ window.createSim=async()=>{
   const pwd=document.getElementById('setup-pwd').value;
   const bojeok=parseInt(document.getElementById('setup-bojeok').value)||9;
   if(!pwd){toast('비밀번호를 입력해주세요.');return;}
-  const tpl=deepClone(TEMPLATES[setupTeam]||TEMPLATES[3]);
-  simData={teamCount:setupTeam,bojeokCount:bojeok,departments:tpl,status:'draft',shareMode:'view',opinions:{},wishes:{},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
-  simPwd=pwd;
-  let code,tries=0;
-  do{code=genCode();const s=await getDoc(doc(db,'simulations',code));if(!s.exists())break;tries++;}while(tries<10);
-  simId=code;
+
+  // 로딩 상태
+  const btn=document.getElementById('create-sim-btn');
+  const errBox=document.getElementById('create-sim-error');
+  const errMsg=document.getElementById('create-sim-error-msg');
+  btn.disabled=true;
+  btn.textContent='⏳ 저장 중...';
+  errBox.style.display='none';
+
   try{
+    const tpl=deepClone(TEMPLATES[setupTeam]||TEMPLATES[3]);
+    simData={teamCount:setupTeam,bojeokCount:bojeok,departments:tpl,status:'draft',shareMode:'view',opinions:{},wishes:{},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+    simPwd=pwd;
+    let code,tries=0;
+    do{code=genCode();const s=await getDoc(doc(db,'simulations',code));if(!s.exists())break;tries++;}while(tries<10);
+    simId=code;
     await setDoc(doc(db,'simulations',code),{...simData,password:pwd});
     toast(`저장 완료! 코드: ${code}`);
-  }catch(e){toast('저장 실패: '+e.message);return;}
-  document.getElementById('edit-title').textContent=`업무지원팀 ${setupTeam}명 · 보직교사 ${bojeok}명`;
-  renderEditTable();
-  showScreen('screen-edit');
-  saveSession();
+    document.getElementById('edit-title').textContent=`업무지원팀 ${setupTeam}명 · 보직교사 ${bojeok}명`;
+    renderEditTable();
+    showScreen('screen-edit');
+    saveSession();
+  }catch(e){
+    // 오류 표시
+    btn.disabled=false;
+    const label=setupTeam===0?'없음(직접 구성)':`업무지원팀 ${setupTeam}명`;
+    btn.textContent=`✅ ${label} 구성으로 업무분장 만들기 →`;
+    errMsg.textContent=e.message||'알 수 없는 오류가 발생했습니다.';
+    errBox.style.display='block';
+    errBox.scrollIntoView({behavior:'smooth',block:'center'});
+  }
 };
 
 // ══ 불러오기 ══
