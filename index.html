@@ -1226,6 +1226,8 @@ window.setupFilterCases=(filter,btn)=>{
   const filtered=filter==='all'?allCases:allCases.filter(c=>String(c.teamCount)===filter);
   renderCases(filtered);
 };
+
+window.createSim=async()=>{
   const saveMode=document.querySelector('input[name="save-mode"]:checked')?.value||'cloud';
   const pwd=document.getElementById('setup-pwd').value;
   const bojeok=parseInt(document.getElementById('setup-bojeok').value)||9;
