@@ -602,6 +602,9 @@ footer .off{display:block;font-style:normal;font-size:12.5px;color:var(--muted);
 .bd-f .ed-b{border:2px solid var(--edu);background:var(--edu);color:var(--paper)!important;padding:9px 20px;font-size:16px;font-weight:800;box-shadow:0 2px 0 rgba(0,0,0,.18),0 0 0 4px var(--edu-bg);transition:filter .15s,transform .15s}.bd-f .ed-b:hover{filter:brightness(1.1);transform:translateY(-1px)}.bd-f .ed-b[aria-pressed="true"]{background:var(--edu-bg);color:var(--edu)!important;box-shadow:none}
 .ag-lk{display:inline-flex;flex-wrap:wrap;gap:4px 14px;margin-left:2px}.ag-lk .tb{font-size:14px}
 .std-ex{margin-top:10px}.std-exr{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-top:1px dashed var(--line)}.std-exr:first-of-type{border-top:0}.std-exr .mg{flex:none}.std-exr span{font-size:14px;line-height:1.5}.std-exp{color:var(--edu)!important;font-weight:600}
+/* 학교 연장통 바로가기로 찾아온 자리 표시 */
+.qfind{animation:qfind 1.2s 3;border-radius:10px;scroll-margin-top:120px}
+@keyframes qfind{0%,40%{box-shadow:0 0 0 4px rgba(28,117,96,.45)}100%{box-shadow:0 0 0 0 rgba(28,117,96,0)}}
 </style>
 </head>
 <body>
@@ -1755,13 +1758,36 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</pre><p><b>Noto Sans KR</b> · SIL Open Font License 1.1 · Copyright The Noto Project Authors · Google Fonts로 제공</p></div><button class="btn" id="noB" type="button">닫기</button></div></div>`;$('#noB').onclick=closeLayer};
 const toTop=$('#toTop');toTop.onclick=()=>window.scrollTo(0,0);addEventListener('scroll',()=>{toTop.hidden=window.scrollY<500},{passive:true});
 /* 시작: 새로고침하면 보던 메뉴로, 첫 화면에서 뒤로 가도 사이트에 머뭅니다. 주소에 해시를 남기지 않습니다. */
-(()=>{const ok=['home','std','bnd','make','chk','cmp','adj'],ss=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}},h=(()=>{try{return history.state}catch(e){return null}})(),saved=ss('ub-view'),v=ok.includes(h?.v)&&!h.g?h.v:ok.includes(saved)?saved:'home',y=+ss('ub-y')||0;
+/* 학교 연장통 바로가기(?q=낱말): ① 협의 업무 이름이면 그 업무를 펼치고 ② 표준안 업무 이름·다른 이름이면 표준안 검색에 넣고
+   ③ 아니면 그 말이 있는 메뉴를 열어 그 자리를 표시합니다. 주소의 ?q= 는 지우고, 뒤로가기는 소개로 갑니다. */
+let findQ='';try{findQ=(new URLSearchParams(location.search).get('q')||'').trim();if(findQ)history.replaceState(history.state,'',location.pathname)}catch(e){}
+function findOnOpen(q){
+  const norm=t=>String(t).toLowerCase().replace(/\s+/g,''),words=q.split(/\s+/).filter(w=>w.length>=2).sort((a,b)=>b.length-a.length),raw=[q,...words].filter((w,i,a)=>w&&a.indexOf(w)===i);
+  const mark=el=>{if(!el)return;setTimeout(()=>{el.scrollIntoView({block:'center'});el.classList.add('qfind');setTimeout(()=>el.classList.remove('qfind'),4000)},120)};
+  for(const w of raw){const k=key(w),qn=norm(w);if(!k)continue;
+    /* ① 협의 업무 */
+    const b=BND().find(x=>key(x.name+(x.short||'')).includes(k));
+    if(b){BOPEN=b.task;go('bnd');mark($(`#bd-${b.task}`));return}
+    /* ② 표준안 업무 */
+    if(TASKS.some(t=>key(t.name+t.al.join('')+(t.inc||'')).includes(k)||t.re.test(k))){stdQ=w;stdD='전체';go('std');const r=$('#stdRes');mark($('#stdL mark')?.closest('article,li,.card,div')||r);return}
+    /* ③ 그 밖의 화면 */
+    for(const v of ['adj','bnd','std','home']){
+      go(v,false);let hit=null;const walk=document.createTreeWalker(main,NodeFilter.SHOW_ELEMENT);
+      for(let n;(n=walk.nextNode());)if(!/^(SCRIPT|STYLE|SELECT|OPTION|BUTTON|INPUT|TEXTAREA)$/.test(n.tagName)&&norm(n.textContent).includes(qn))hit=n;
+      if(!hit)continue;
+      for(let d=hit.closest('details');d;d=d.parentElement&&d.parentElement.closest('details'))d.open=true;
+      const t=hit.closest('li,tr,p,dd,details,article,section,div')||hit;if(!t.getClientRects().length)continue;
+      if(v!=='home')try{history.pushState({v,r:0},'')}catch(e){}
+      mark(t);return}
+  }
+  go('home',false)}
+(()=>{const ok=['home','std','bnd','make','chk','cmp','adj'],ss=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}},h=(()=>{try{return history.state}catch(e){return null}})(),saved=ss('ub-view'),v=findQ?'home':ok.includes(h?.v)&&!h.g?h.v:ok.includes(saved)?saved:'home',y=+ss('ub-y')||0;
   try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(e){}
   try{if(location.hash)history.replaceState(history.state,'',location.pathname+location.search)}catch(e){}
   const ckOn=v==='chk'&&(h?.r||ss('ub-ckon'))&&ckRestore();try{if(h?.v&&!h.g)history.replaceState({v,r:ckOn?1:0},'');else{history.replaceState({g:1},'');history.pushState({v,r:ckOn?1:0},'')}}catch(e){}
   addEventListener('pagehide',()=>{try{sessionStorage.setItem('ub-y',String(Math.round(scrollY)))}catch(e){}});
   ['dragover','drop'].forEach(n=>addEventListener(n,e=>{if(e.dataTransfer?.types?.includes?.('Files'))e.preventDefault()}));
-  go(v,false);if(y&&h?.v)requestAnimationFrame(()=>window.scrollTo(0,y))})();
+  go(v,false);if(findQ)setTimeout(()=>findOnOpen(findQ),30);else if(y&&h?.v)requestAnimationFrame(()=>window.scrollTo(0,y))})();
 
 </script>
 </body>
